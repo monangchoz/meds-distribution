@@ -64,7 +64,6 @@ def generate(cabang: str, num_customers: int):
     plt.show()
     '''    
 
-        
 
 if __name__=="__main__":
-    generate("JK2", 30)
+    generate("TGR", 30)
