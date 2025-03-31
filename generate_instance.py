@@ -5,6 +5,10 @@ from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 
+#Import Map Visualization
+import folium
+import webbrowser
+
 
 class Node:
     def __init__(self, idx: int, coord: np.ndarray):
@@ -40,11 +44,26 @@ def generate(cabang: str, num_customers: int):
         new_cust = Customer(i+1, c_coord, cust_id)
         customers += [new_cust]
     cust_coords = np.stack([customer.coord for customer in customers])
+
+    #Add maps display?
+    map = folium.Map((depot_coord[0],depot_coord[1]),zoom_start=12)
+
+    #print(cust_coords)
+
+    
+    for i in range (len(chosen_customers_idx)):
+        print(cust_coords[i])
+        folium.Marker(location=[cust_coords[i][0],cust_coords[i][1]]).add_to(map)   
+
+    map.save("map.html")
+    webbrowser.open("map.html")
+
+    '''
     plt.scatter(cust_coords[:, 0], cust_coords[:, 1])
     plt.scatter(depot_coord[0],depot_coord[1])
     plt.show()
+    '''    
 
-        
 
 if __name__=="__main__":
-    generate("JK2", 30)
+    generate("JK2", 433)
