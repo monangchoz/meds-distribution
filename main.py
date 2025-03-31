@@ -1,22 +1,22 @@
 import numpy as np
 
-from ep_heuristic.insertion import insert_items
+from ep_heuristic.insertion import random_slpack
 from utils import visualize_container
 
 
 def run():
-    num_items = 8
+    num_items = 10
     item_dims = np.random.randint(1, 5, size=(num_items, 3)).astype(float)
     item_weights = np.random.randint(1,5, size=(num_items,))
     item_volumes = np.prod(item_dims, axis=1)
     item_priorities = np.arange(num_items)
     
-    container_dim = np.asanyarray([5,6,6], dtype=float)
+    container_dim = np.asanyarray([8,6,6], dtype=float)
     container_weight_cap = 1000
     container_volume_cap = np.prod(container_dim)
     
     
-    positions, rotations, is_feasible = insert_items(item_dims, container_dim)
+    positions, rotations, is_feasible = random_slpack(item_dims, item_weights, item_volumes, item_priorities, container_dim, base_support_alpha=0.8, max_trial=100)
     if not is_feasible:
         exit()
     actual_dims = item_dims[np.arange(num_items)[:, None], rotations]

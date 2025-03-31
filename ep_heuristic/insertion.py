@@ -1,18 +1,10 @@
-# from dataclasses import dataclass
-# from typing import Optional
-from typing import List, Tuple, Optional
+import random
+from typing import Tuple, Optional
 
 import numpy as np
 
 from ep_heuristic.utils import is_intersect_nd, compute_intersection_nd
 from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
-
-
-# @dataclass
-# class InsertionResult:
-#     positions: Optional[np.ndarray] = None
-#     rotations: Optional[np.ndarray] = None
-#     is_feasible: bool
 
 
 def argsort_items(item_base_areas: np.ndarray,
@@ -30,6 +22,39 @@ def argsort_items(item_base_areas: np.ndarray,
     """
     sorted_idx = np.lexsort((item_volumes, item_base_areas, item_priorities))
     return sorted_idx
+
+
+def random_slpack(item_dims: np.ndarray,
+                    item_weights: np.ndarray,
+                    item_volumes: np.ndarray,
+                    item_priorities: np.ndarray,
+                    container_dim: np.ndarray,
+                    base_support_alpha: float, 
+                    max_trial:int,
+                  ) ->Tuple[Optional[np.ndarray],Optional[np.ndarray],bool]:
+    """
+        item_priorities: the order of visitation, actually
+    """
+    num_items: int = len(item_dims)
+    item_base_areas = np.prod(item_dims[:, :2], axis=1)
+    sorted_idx = argsort_items(item_base_areas, item_volumes, item_priorities)
+    is_feasible_insertion_found: bool = False
+    for i in range(max_trial):
+        if i>0:
+            # swap some orderings as a local search operator
+            j,k = random.randint(0, num_items-1), random.randint(0, num_items-1)
+            if item_priorities[j] == item_priorities[k]:
+                a = sorted_idx[j]
+                sorted_idx[j] = sorted_idx[k]
+                sorted_idx[k] = a
+        positions, rotations, is_feasible = insert_items(item_dims[sorted_idx], container_dim, base_support_alpha)
+        if not is_feasible:
+            continue
+        inverted_idx = np.argsort(sorted_idx)
+        positions = positions[inverted_idx]
+        rotations = rotations[inverted_idx]
+        return positions, rotations, True
+    return None, None, False
 
 def is_insertion_feasible(item_dim: np.ndarray,
                           insertion_position: np.ndarray,
@@ -76,7 +101,7 @@ def find_ep(item_dim: np.ndarray,
             return ei
     return -1
 
-DUMMY_DIM = np.asanyarray([0.005, 0.005, 0.005], dtype=float)
+DUMMY_DIM = np.asanyarray([0.0001, 0.0001, 0.0001], dtype=float)
 def filter_infeasible_extreme_points(ext_points: np.ndarray,
                                      inserted_item_dims: np.ndarray,
                                      filled_positions: np.ndarray)->np.ndarray:
@@ -115,13 +140,16 @@ def update_extreme_points_from_new_item(item_dim: np.ndarray,
                                         chosen_ep_idx: int,
                                         inserted_item_dims: np.ndarray,
                                         filled_positions: np.ndarray,
-                                        ext_points: np.ndarray)->np.ndarray:
+                                        ext_points: np.ndarray,
+                                        construction_mode: str="wall-building")->np.ndarray:
     new_item_position = ext_points[chosen_ep_idx]
     new_ext_points = new_item_position[None, :] + np.diag(item_dim)
     # TODO add projection
     ext_points = np.concatenate([ext_points, new_ext_points], axis=0)
     ext_points = filter_infeasible_extreme_points(ext_points, inserted_item_dims, filled_positions)
-    return ext_points
+    if construction_mode == "wall-building":
+        sorted_ep_idx = np.lexsort([ext_points[:, 1], ext_points[:, 0], ext_points[:, 2]])
+    return ext_points[sorted_ep_idx]
     
 def insert_items(item_dims: np.ndarray,
                  container_dim: np.ndarray,
