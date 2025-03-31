@@ -21,6 +21,7 @@ class Customer(Node):
         self.cust_id = cust_id
         
         
+        
 def generate(cabang: str, num_customers: int):
     filename = cabang+".json"
     filepath = pathlib.Path()/"raw_json"/filename
