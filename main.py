@@ -16,7 +16,7 @@ def run():
     container_volume_cap = np.prod(container_dim)
     
     
-    positions, rotations, is_feasible = random_slpack(item_dims, item_weights, item_volumes, item_priorities, container_dim, base_support_alpha=0.8, max_trial=100)
+    positions, rotations, is_feasible = random_slpack(item_dims, item_volumes, item_priorities, container_dim, base_support_alpha=0.8, max_trial=100)
     if not is_feasible:
         exit()
     actual_dims = item_dims[np.arange(num_items)[:, None], rotations]

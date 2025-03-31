@@ -25,7 +25,6 @@ def argsort_items(item_base_areas: np.ndarray,
 
 
 def random_slpack(item_dims: np.ndarray,
-                    item_weights: np.ndarray,
                     item_volumes: np.ndarray,
                     item_priorities: np.ndarray,
                     container_dim: np.ndarray,
@@ -38,7 +37,7 @@ def random_slpack(item_dims: np.ndarray,
     num_items: int = len(item_dims)
     item_base_areas = np.prod(item_dims[:, :2], axis=1)
     sorted_idx = argsort_items(item_base_areas, item_volumes, item_priorities)
-    is_feasible_insertion_found: bool = False
+    rotation_trial_idx = np.tile(np.arange(2), [num_items, 1])
     for i in range(max_trial):
         if i>0:
             # swap some orderings as a local search operator
@@ -47,7 +46,11 @@ def random_slpack(item_dims: np.ndarray,
                 a = sorted_idx[j]
                 sorted_idx[j] = sorted_idx[k]
                 sorted_idx[k] = a
-        positions, rotations, is_feasible = insert_items(item_dims[sorted_idx], container_dim, base_support_alpha)
+            
+            j = random.randint(0, num_items-1)
+            rotation_trial_idx[j, :] = rotation_trial_idx[j,[1,0]]
+            
+        positions, rotations, is_feasible = insert_items(item_dims[sorted_idx], container_dim, rotation_trial_idx, base_support_alpha)
         if not is_feasible:
             continue
         inverted_idx = np.argsort(sorted_idx)
@@ -153,19 +156,22 @@ def update_extreme_points_from_new_item(item_dim: np.ndarray,
     
 def insert_items(item_dims: np.ndarray,
                  container_dim: np.ndarray,
+                 rotation_trial_idx: Optional[np.ndarray] = None,
                  base_support_alpha: float = 0.6
     )->Tuple[Optional[np.ndarray],Optional[np.ndarray],bool]:
     num_items: int = len(item_dims)
     positions: np.ndarray = np.zeros([num_items, 3], dtype=float)
     rotations: np.ndarray = np.zeros([num_items, 3], dtype=int)
     actual_item_dims: np.ndarray = np.zeros_like(item_dims) #this can change if rotated.
-    
+    if rotation_trial_idx is None:
+        rotation_trial_idx = np.tile(np.arange(2), [num_items, 1])
     ext_points: np.ndarray = np.zeros([1,3], dtype=float)
     for i in range(num_items):
         found_feasible_ep: bool = False
         filled_positions = positions[:i]
         inserted_item_dims = actual_item_dims[:i]
-        for rotation in POSSIBLE_ROTATION_PERMUTATION_MATS:
+        for ri in rotation_trial_idx[i]:
+            rotation = POSSIBLE_ROTATION_PERMUTATION_MATS[ri]
             item_dim = item_dims[i][rotation]
             ei = find_ep(item_dim, inserted_item_dims, filled_positions, ext_points, container_dim, base_support_alpha)
             if ei != -1:
