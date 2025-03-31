@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional
 
 import numpy as np
 
-from ep_heuristic.utils import is_intersect_nd
+from ep_heuristic.utils import is_intersect_nd, compute_intersection_nd
 from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 
 
@@ -48,7 +48,16 @@ def is_insertion_feasible(item_dim: np.ndarray,
             return False
         
     # base support
-    
+    if insertion_position[2]>0:
+        supported_base_area = 0
+        base_area = item_dim[0]*item_dim[1]
+        for i in range(num_inserted_items):
+            if insertion_position[2] != filled_positions[i][2]+inserted_item_dims[i][2]:
+                continue
+            supported_base_area += compute_intersection_nd(insertion_position[:2], item_dim[:2], filled_positions[i][:2], inserted_item_dims[i][:2])
+        if supported_base_area/base_area < base_support_alpha:
+            return False
+
     # fragility
     
     # lifo? -> automatic from item ordering, later
@@ -63,7 +72,7 @@ def find_ep(item_dim: np.ndarray,
             container_dim: np.ndarray,
             base_support_alpha: float)-> int:
     for ei, ep in enumerate(ext_points):
-        if is_insertion_feasible(item_dim, inserted_item_dims, filled_positions, ep, container_dim, base_support_alpha):
+        if is_insertion_feasible(item_dim, ep, inserted_item_dims, filled_positions,  container_dim, base_support_alpha):
             return ei
     return -1
 
@@ -142,7 +151,7 @@ def insert_items(item_dims: np.ndarray,
                 break
         if found_feasible_ep:
             continue
-        print(i, item_dims[i])
+        # infeasible
         return None, None, False
     
     return positions, rotations, True
