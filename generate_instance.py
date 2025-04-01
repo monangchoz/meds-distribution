@@ -79,7 +79,8 @@ def generate_customers(cabang, num_customers)->List[Customer]:
         customers += [new_cust]
     return customers
      
-def generate(cabang: str, num_customers: int,
+def generate(cabang: str, 
+             num_customers: int,
              num_normal_trucks:int=10,
              num_reefer_trucks:int=10):
     filename = cabang+".json"

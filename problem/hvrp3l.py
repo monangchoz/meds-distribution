@@ -100,7 +100,8 @@ class HVRP3L:
             d = json.load(json_data)
         depot_coord = np.asanyarray(d["depot_coord"], dtype=float)
         customers: List[Customer] = []
-        for customer_dict in d["customers"]:
+        
+        for cust_id, customer_dict in d["customers"].items():
             new_customer: Customer = Customer.from_dict(customer_dict)
             customers.append(new_customer)
         customers = sorted(customers, key=lambda cust: cust.idx)
