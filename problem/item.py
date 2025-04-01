@@ -36,8 +36,27 @@ class Item:
         self.is_fragile: bool = is_fragile
         self.is_reefer_required: bool = is_reefer_required
         
+    def to_dict(self):
+        item_dict = {"idx": self.idx,
+            "product_code":self.item_type,
+            "dim": self.dim.tolist(),
+            "weight": self.weight,
+            "volume": self.volume,
+            "is_reefer_required": self.is_reefer_required,
+            "is_fragile": self.is_fragile}
+        return item_dict
     
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(data["idx"],
+                   data["product_code"],
+                   np.asanyarray(data["dim"], dtype=float),
+                   data["weight"],
+                   data["is_fragile"],
+                   data["is_reefer_required"])
         
         
         
-        
+    
+    
+    

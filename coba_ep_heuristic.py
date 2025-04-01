@@ -1,6 +1,6 @@
 import numpy as np
 
-from ep_heuristic.insertion import random_slpack
+from ep_heuristic.random_slpack import random_slpack
 from utils import visualize_container
 
 

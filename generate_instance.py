@@ -63,7 +63,7 @@ def get_customer_items_random_date(cust_id: str)->List[Item]:
 def generate_customers(cabang, num_customers)->List[Customer]:
     filename = cabang+".json"
     filepath = pathlib.Path()/"raw_json"/filename
-    customers: List[Node] = []
+    customers: List[Customer] = []
     with open(filepath.absolute(), "r") as json_data:
         d = json.load(json_data)
     
@@ -84,7 +84,6 @@ def generate(cabang: str, num_customers: int,
              num_reefer_trucks:int=10):
     filename = cabang+".json"
     filepath = pathlib.Path()/"raw_json"/filename
-    depot: Node
     customers: List[Node] = []
     with open(filepath.absolute(), "r") as json_data:
         d = json.load(json_data)
@@ -96,6 +95,7 @@ def generate(cabang: str, num_customers: int,
     customers = generate_customers(cabang, num_customers)    
     vehicles = generate_vehicles(num_normal_trucks, num_reefer_trucks)
     problem = HVRP3L(depot_coord, customers, vehicles)
+    problem.to_json(cabang)
     
 
 def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:

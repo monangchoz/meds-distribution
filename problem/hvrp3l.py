@@ -1,3 +1,6 @@
+import json 
+import os
+import pathlib
 from typing import List, Optional, Union
 
 import numpy as np
@@ -13,9 +16,9 @@ class HVRP3L:
                  customers: List[Customer],
                  vehicles: List[Vehicle],
                  distance_matrix: Optional[np.ndarray] = None):
-        depot: Node= Node(0, depot_coord)
+        self.depot: Node= Node(0, depot_coord)
         self.customers: List[Customer] = customers
-        self.nodes: List[Union[Node, Customer]] = [depot] + customers
+        self.nodes: List[Union[Node, Customer]] = [self.depot] + customers
         self.vehicles: List[Vehicle] = vehicles
         self.coords: np.ndarray = np.stack([node.coord for node in self.nodes], dtype=float)
         self.distance_matrix: np.ndarray
@@ -69,3 +72,45 @@ class HVRP3L:
             for item in customer.items:
                 self.customer_item_mask[ci, i] = True
                 i += 1
+                
+    def to_json(self, cabang:str): 
+        instance_dir = pathlib.Path()/"instances"
+        instance_dir.mkdir(parents=True, exist_ok=True)
+        filename = f"{cabang}_nc_{self.num_customers}_ni__{self.num_items}_nv_{self.num_vehicles}"
+        instance_filepath = ""
+        for i in range(100000):
+            instance_filepath = instance_dir/f"{filename}_{i}.json"
+            if not os.path.isfile(instance_filepath.absolute()):
+                break
+        instance_dict = {}
+        instance_dict["depot_coord"] = self.depot.coord.tolist()
+        instance_dict["customers"] = {}
+        for customer in self.customers:
+            instance_dict["customers"][customer.cust_id] = customer.to_dict()
+        instance_dict["vehicles"] = []
+        for vehicle in self.vehicles:
+            instance_dict["vehicles"] += [vehicle.to_diclt()]
+    
+        with open(instance_filepath.absolute(), "w") as f:
+            json.dump(instance_dict, f)
+            
+    @classmethod
+    def read_from_json(cls, json_filepath: pathlib.Path):
+        with open(json_filepath.absolute(), "r") as json_data:
+            d = json.load(json_data)
+        depot_coord = np.asanyarray(d["depot_coord"], dtype=float)
+        customers: List[Customer] = []
+        for customer_dict in d["customers"]:
+            new_customer: Customer = Customer.from_dict(customer_dict)
+            customers.append(new_customer)
+        customers = sorted(customers, key=lambda cust: cust.idx)
+        
+        vehicles: List[Vehicle] = []
+        for vehicle_dict in d["vehicles"]:
+            new_vehicle: Vehicle = Vehicle.from_dict(vehicle_dict)
+            vehicles.append(new_vehicle)
+        vehicles = sorted(vehicles, key=lambda vehicle: vehicle.idx)
+        
+        problem = cls(depot_coord, customers, vehicles)
+        return problem
+    
