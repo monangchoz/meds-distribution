@@ -89,7 +89,7 @@ class HVRP3L:
             instance_dict["customers"][customer.cust_id] = customer.to_dict()
         instance_dict["vehicles"] = []
         for vehicle in self.vehicles:
-            instance_dict["vehicles"] += [vehicle.to_diclt()]
+            instance_dict["vehicles"] += [vehicle.to_dict()]
     
         with open(instance_filepath.absolute(), "w") as f:
             json.dump(instance_dict, f)

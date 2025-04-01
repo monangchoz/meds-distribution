@@ -19,10 +19,10 @@ def get_customer_items_random_date(cust_id: str)->List[Item]:
     with open(med_spec_filepath.absolute(), "r") as json_data:
         med_spec_dict = json.load(json_data)
     
+    items: List[Item] = []
     try:
         historical_transaction_dict = trans_dict[cust_id]
         r_date = random.choice(list(historical_transaction_dict.keys()))
-        items: List[Item] = []
         raw_item_dict_list = historical_transaction_dict[r_date]
         i = 0
         for raw_item_dict in raw_item_dict_list:
