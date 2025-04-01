@@ -30,35 +30,42 @@ class HVRP3L:
         # okay from this on is information that are essential for solver
         self.total_demand_volumes: np.ndarray = np.zeros([self.num_customers,], dtype=float)
         self.total_demand_weights: np.ndarray = np.zeros([self.num_customers,], dtype=float)
-        for customer in self.customers:
+        for ci, customer in enumerate(self.customers):
             total_volume = sum(item.volume for item in customer.items)
-            self.total_demand_volumes[customer.idx] = total_volume
+            self.total_demand_volumes[ci] = total_volume
             total_weight = sum(item.weight for item in customer.items)
-            self.total_demand_weights[customer.idx] = total_weight
+            self.total_demand_weights[ci] = total_weight
             
         self.vehicle_volume_capacities: np.ndarray = np.asanyarray([vehicle.volume_capacity for vehicle in self.vehicles], dtype=float)
         self.vehicle_weight_capacities: np.ndarray = np.asanyarray([vehicle.weight_capacity for vehicle in self.vehicles], dtype=float)
         self.vehicle_container_dims: np.ndarray = np.zeros([self.num_vehicles, 3], dtype=float)
         for i, vehicle in enumerate(vehicles):
             self.vehicle_container_dims[i,:] = vehicle.container_dim
-        self.vehicle_costs: np.ndarray = np.asanyarray([vehicle.cost for vehicle in vehicles])
+        self.vehicle_fixed_costs: np.ndarray = np.asanyarray([vehicle.fixed_cost for vehicle in vehicles])
+        self.vehicle_variable_costs: np.ndarray = np.asanyarray([vehicle.variable_cost for vehicle in vehicles])
         
         # now for the items?
         # i dont know whether it is a good idea (enough merit) 
         # to flatten all of them here, or not.
         self.num_items: int = sum(customer.num_items for customer in customers)
-        self.item_weights: np.ndarray = []
-        self.item_volumes: np.ndarray = []
-        self.item_dims: np.ndarray = []
+        item_weights = []
+        item_volumes = []
+        item_dims = []
+        item_fragility_flags = []
         for customer in customers:
             for item in customer.items:
-                self.item_weights += [item.weight]
-                self.item_volumes += [item.volume]
-                self.item_dims += [item.dim]
-        self.item_weights = np.asanyarray(self.item_weights, dtype=float)
-        self.item_volumes = np.asanyarray(self.item_volumes, dtype=float)
-        self.item_dims = np.stack(self.item_dims)
-    
-        self.customer_item_idx_ranges: List[tuple[int]] = []    
-        for customer in customers:
-            
+                item_weights += [item.weight]
+                item_volumes += [item.volume]
+                item_dims += [item.dim]
+                item_fragility_flags += [item.is_fragile]
+        self.item_weights: np.ndarray = np.asanyarray(item_weights, dtype=float)
+        self.item_volumes: np.ndarray = np.asanyarray(item_volumes, dtype=float)
+        self.item_dims: np.ndarray = np.stack(item_dims)
+        self.item_fragility_flags: np.ndarray = np.asanyarray(item_fragility_flags, dtype=bool) 
+
+        self.customer_item_mask: np.ndarray = np.zeros([self.num_customers, self.num_items], dtype=bool)
+        i = 0
+        for ci, customer in enumerate(customers):
+            for item in customer.items:
+                self.customer_item_mask[ci, i] = True
+                i += 1
