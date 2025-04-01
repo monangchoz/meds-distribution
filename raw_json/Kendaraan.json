@@ -1,24 +1,26 @@
-[
-    {
+{   
+    "REEFER_TRUCK":{
         "SHIPPER_CODE":"EXTERNAL14",
         "VENDOR_ID":1402265,
         "SHIPMETHOD_CODE":"U-DR-30",
         "SERVICE":"CHARTER\/CDD",
         "RATE":3700000,
+        "VARIABLE_RATE":2800,
         "PANJANG":420,
         "LEBAR":200,
         "TINGGI":180,
         "KAPASITAS":5000000
     },
-    {
+    "NORMAL_TRUCK":{
         "SHIPPER_CODE":"EXTERNAL14",
         "VENDOR_ID":1402265,
         "SHIPMETHOD_CODE":"U-DR-23",
         "SERVICE":"CHARTER\/CDE",
         "RATE":1400000,
+        "VARIABLE_RATE":2000,
         "PANJANG":300,
         "LEBAR":170,
         "TINGGI":150,
         "KAPASITAS":2000000
     }
-]
+}
