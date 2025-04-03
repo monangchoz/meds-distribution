@@ -1,6 +1,7 @@
 import random
 from typing import Tuple, Optional
 
+import numba as nb
 import numpy as np
 
 from ep_heuristic.utils import is_intersect_nd, compute_intersection_nd
@@ -68,37 +69,85 @@ def find_ep(item_dim: np.ndarray,
             return ei
     return -1
 
+
+@nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def is_intersect_nd_any(ep: np.ndarray,
+                        dummy_dim: np.ndarray,
+                        inserted_item_dims: np.ndarray,
+                        filled_positions: np.ndarray)->bool:
+    for i, inserted_item_dim in enumerate(inserted_item_dims):
+        filled_position = filled_positions[i]
+        # check if placing a very very small item here intersect with other inserted items
+        if is_intersect_nd(ep, dummy_dim, filled_position, inserted_item_dim):
+            return True
+    return False
+
+@nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def is_ep_floating(ep: np.ndarray,
+                   dummy_dim: np.ndarray,
+                    inserted_item_dims: np.ndarray,
+                    filled_positions: np.ndarray)->bool:
+    if ep[2]==0:
+        return False
+    if is_intersect_nd_any(ep[:2], dummy_dim[:2], inserted_item_dims[:, :2], filled_positions[:, :2]):
+        return False
+    return True
+
+# @nb.njit(nb.bool(nb.float64[:,:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def are_eps_floating(ext_points: np.ndarray,
+                   dummy_dim: np.ndarray,
+                    inserted_item_dims: np.ndarray,
+                    filled_positions: np.ndarray)->np.bool:
+    ep_floating_mask: np.ndarray = ext_points[:, 2] > 0
+    ep_floating_mask[ep_floating_mask] = np.logical_not(are_intersect_nd_any(ext_points[ep_floating_mask, :2], dummy_dim[:2, inserted_item_dims[:2], filled_positions[:2]]))
+    return True
+
+@nb.njit(nb.bool[:](nb.bool[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def get_ep_feasibility_mask(ep_feasibility_mask: np.ndarray,
+                                     dummy_dim: np.ndarray,
+                                     ext_points: np.ndarray,
+                                     inserted_item_dims: np.ndarray,
+                                     filled_positions: np.ndarray)->np.ndarray:
+    num_ep = len(ext_points)
+    for ei in range(num_ep):
+        if is_intersect_nd_any(ext_points[ei], dummy_dim, inserted_item_dims, filled_positions):
+            ep_feasibility_mask[ei] = False
+            continue
+        
+        if is_ep_floating(ext_points[ei], dummy_dim, inserted_item_dims, filled_positions):
+            ep_feasibility_mask[ei] = False
+            continue
+        ep_feasibility_mask[ei] = True
+    return ep_feasibility_mask
+
+# @nb.njit(nb.bool[:](nb.bool[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def get_ep_feasibility_mask_v2(ep_feasibility_mask: np.ndarray,
+                                     dummy_dim: np.ndarray,
+                                     ext_points: np.ndarray,
+                                     inserted_item_dims: np.ndarray,
+                                     filled_positions: np.ndarray)->np.ndarray:
+    num_ep = len(ext_points)
+    for ei in range(num_ep):
+        if is_intersect_nd_any(ext_points[ei], dummy_dim, inserted_item_dims, filled_positions):
+            ep_feasibility_mask[ei] = False
+            continue
+        
+        if is_ep_floating(ext_points[ei], dummy_dim, inserted_item_dims, filled_positions):
+            ep_feasibility_mask[ei] = False
+            continue
+        ep_feasibility_mask[ei] = True
+    return ep_feasibility_mask
+
 DUMMY_DIM = np.asanyarray([0.0001, 0.0001, 0.0001], dtype=float)
 def filter_infeasible_extreme_points(ext_points: np.ndarray,
                                      inserted_item_dims: np.ndarray,
-                                     filled_positions: np.ndarray)->np.ndarray:
-    ep_feasibility_mask: np.ndarray = np.ones([len(ext_points),], dtype=bool)
-    num_inserted_items:int = len(inserted_item_dims)
-    for ei, ep in enumerate(ext_points):
-        for i in range(num_inserted_items):
-            inserted_item_dim, filled_position = inserted_item_dims[i], filled_positions[i]
-            # check if placing a very very small item here intersect with other inserted items
-            if is_intersect_nd(ep, DUMMY_DIM, filled_position, inserted_item_dim):
-                ep_feasibility_mask[ei] = False
-                break
-                
-        # check if its flying/floating
-        if ep[2] > 0:
-            is_floating: bool = True
-            for i in range(num_inserted_items):
-                inserted_item_dim, filled_position = inserted_item_dims[i], filled_positions[i]
-                if ep[2] != filled_position[2] + inserted_item_dim[2]:
-                    continue
-                if is_intersect_nd(ep[:2], DUMMY_DIM[:2], filled_position[:2], inserted_item_dim[:2]):
-                    is_floating = False
-                    break
-            ep_feasibility_mask[ei] = not is_floating
-            continue
-        # else:
-            # ep_feasibility_mask[ei] = True it's feasible
-    
-        # check if its on top of fragile items.
-    
+                                     filled_positions: np.ndarray)->np.ndarray:    
+    ep_feasibility_mask:np.ndarray = np.ones([len(ext_points),], dtype=bool)
+    ep_feasibility_mask = get_ep_feasibility_mask(ep_feasibility_mask, 
+                                                     DUMMY_DIM,
+                                                     ext_points,
+                                                     inserted_item_dims,
+                                                     filled_positions)
     # remove infeasible
     ext_points = ext_points[ep_feasibility_mask]
     return ext_points

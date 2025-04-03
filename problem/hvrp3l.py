@@ -19,7 +19,7 @@ class HVRP3L:
         self.depot: Node= Node(0, depot_coord)
         self.customers: List[Customer] = customers
         self.nodes: List[Union[Node, Customer]] = [self.depot] + customers
-        self.vehicles: List[Vehicle] = vehicles
+        
         self.coords: np.ndarray = np.stack([node.coord for node in self.nodes], dtype=float)
         self.distance_matrix: np.ndarray
         if distance_matrix is None:
@@ -29,16 +29,32 @@ class HVRP3L:
         
         self.num_nodes: int = len(self.nodes)
         self.num_customers: int = len(self.customers)
-        self.num_vehicles: int = len(self.vehicles)
+        self.num_vehicles: int = len(vehicles)
+        # re-arrange vehicles so that the reefer come first
+        
+        reefer_trucks: List[Vehicle] = []
+        normal_trucks: List[Vehicle] = []
+        for vehicle in vehicles:
+            if vehicle.is_reefer:
+                reefer_trucks += [vehicle]
+            else:
+                normal_trucks += [vehicle]
+        self.num_reefer_trucks:int = len(reefer_trucks)
+        self.num_normal_trucks:int = len(normal_trucks)
+        self.vehicles: List[Vehicle] = reefer_trucks + normal_trucks
+
+
         # okay from this on is information that are essential for solver
         self.total_demand_volumes: np.ndarray = np.zeros([self.num_customers,], dtype=float)
         self.total_demand_weights: np.ndarray = np.zeros([self.num_customers,], dtype=float)
+        self.customer_reefer_flags: np.ndarray = np.zeros([self.num_customers,], dtype=bool)
         for ci, customer in enumerate(self.customers):
             total_volume = sum(item.volume for item in customer.items)
             self.total_demand_volumes[ci] = total_volume
             total_weight = sum(item.weight for item in customer.items)
             self.total_demand_weights[ci] = total_weight
-            
+            self.customer_reefer_flags[ci] = customer.need_refer_truck
+
         self.vehicle_volume_capacities: np.ndarray = np.asanyarray([vehicle.volume_capacity for vehicle in self.vehicles], dtype=float)
         self.vehicle_weight_capacities: np.ndarray = np.asanyarray([vehicle.weight_capacity for vehicle in self.vehicles], dtype=float)
         self.vehicle_container_dims: np.ndarray = np.zeros([self.num_vehicles, 3], dtype=float)
@@ -72,6 +88,11 @@ class HVRP3L:
             for item in customer.items:
                 self.customer_item_mask[ci, i] = True
                 i += 1
+
+    def compute_route_total_distance(self, route: List[int])->float:
+        total_distance = np.sum(self.distance_matrix[route[:-1], route[1:]])
+        total_distance += self.distance_matrix[route[-1], 0]
+        return total_distance
                 
     def to_json(self, cabang:str): 
         instance_dir = pathlib.Path()/"instances"

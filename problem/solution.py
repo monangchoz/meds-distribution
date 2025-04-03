@@ -6,6 +6,7 @@ from problem.hvrp3l import HVRP3L
 
 NO_VEHICLE:int = 99999
 
+
 class Solution:
     def __init__(self,
                  hvrp3l_instance: HVRP3L):
@@ -33,4 +34,12 @@ class Solution:
         
         self.filled_volumes: np.ndarray = np.zeros([self.num_vehicles,], dtype=float)
         self.filled_weight_caps: np.ndarray = np.zeros([self.num_vehicles,], dtype=float)
-        
+        self.item_positions: np.ndarray = np.zeros_like(self.item_dims)
+        self.item_rotations: np.ndarray = np.zeros_like(self.item_dims, dtype=int)
+
+        self.total_vehicle_variable_cost:float = 0
+        self.total_vehicle_fixed_cost:float = 0
+
+    @property
+    def total_cost(self):
+        return self.total_vehicle_fixed_cost + self.total_vehicle_variable_cost
