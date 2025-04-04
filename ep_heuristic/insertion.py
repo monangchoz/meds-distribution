@@ -4,7 +4,7 @@ from typing import Tuple, Optional
 import numba as nb
 import numpy as np
 
-from ep_heuristic.utils import is_intersect_nd, compute_intersection_nd
+from ep_heuristic.utils import is_intersect_nd, compute_intersection_nd, is_intersect_nd_vectorized
 from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 
 
@@ -93,35 +93,9 @@ def is_ep_floating(ep: np.ndarray,
         return False
     return True
 
-# @nb.njit(nb.bool(nb.float64[:,:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
-def are_eps_floating(ext_points: np.ndarray,
-                   dummy_dim: np.ndarray,
-                    inserted_item_dims: np.ndarray,
-                    filled_positions: np.ndarray)->np.bool:
-    ep_floating_mask: np.ndarray = ext_points[:, 2] > 0
-    ep_floating_mask[ep_floating_mask] = np.logical_not(are_intersect_nd_any(ext_points[ep_floating_mask, :2], dummy_dim[:2, inserted_item_dims[:2], filled_positions[:2]]))
-    return True
 
 @nb.njit(nb.bool[:](nb.bool[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:]), cache=True)
 def get_ep_feasibility_mask(ep_feasibility_mask: np.ndarray,
-                                     dummy_dim: np.ndarray,
-                                     ext_points: np.ndarray,
-                                     inserted_item_dims: np.ndarray,
-                                     filled_positions: np.ndarray)->np.ndarray:
-    num_ep = len(ext_points)
-    for ei in range(num_ep):
-        if is_intersect_nd_any(ext_points[ei], dummy_dim, inserted_item_dims, filled_positions):
-            ep_feasibility_mask[ei] = False
-            continue
-        
-        if is_ep_floating(ext_points[ei], dummy_dim, inserted_item_dims, filled_positions):
-            ep_feasibility_mask[ei] = False
-            continue
-        ep_feasibility_mask[ei] = True
-    return ep_feasibility_mask
-
-# @nb.njit(nb.bool[:](nb.bool[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:]), cache=True)
-def get_ep_feasibility_mask_v2(ep_feasibility_mask: np.ndarray,
                                      dummy_dim: np.ndarray,
                                      ext_points: np.ndarray,
                                      inserted_item_dims: np.ndarray,
@@ -160,11 +134,12 @@ def update_extreme_points_from_new_item(item_dim: np.ndarray,
                                         construction_mode: str="wall-building")->np.ndarray:
     new_item_position = ext_points[chosen_ep_idx]
     new_ext_points = new_item_position[None, :] + np.diag(item_dim)
-    # TODO add projection
+    new_ext_points = filter_infeasible_extreme_points(new_ext_points, inserted_item_dims, filled_positions)
+    ep_feasibility_mask:np.ndarray = np.logical_not(is_intersect_nd_vectorized(ext_points, DUMMY_DIM[None, :], filled_positions[[-1]], inserted_item_dims[[-1]])).ravel()
+    ext_points = ext_points[ep_feasibility_mask]
     ext_points = np.concatenate([ext_points, new_ext_points], axis=0)
-    ext_points = filter_infeasible_extreme_points(ext_points, inserted_item_dims, filled_positions)
-    if construction_mode == "wall-building":
-        sorted_ep_idx = np.lexsort([ext_points[:, 1], ext_points[:, 0], ext_points[:, 2]])
+    ext_points = np.unique(ext_points, axis=0)
+    sorted_ep_idx = np.lexsort([ext_points[:, 1], ext_points[:, 0], ext_points[:, 2]])
     return ext_points[sorted_ep_idx]
     
 def insert_items(item_dims: np.ndarray,

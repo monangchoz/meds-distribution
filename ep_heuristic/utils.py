@@ -19,6 +19,22 @@ def is_intersect_nd(start_point_a: np.ndarray,
     is_intersect = np.logical_not(np.logical_or(end_a<=start_point_b, end_b<=start_point_a))
     is_intersect = np.all(is_intersect)
     return is_intersect
+
+@nb.njit(nb.bool[:,:](nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def is_intersect_nd_vectorized(start_point_a: np.ndarray,
+                    dim_a: np.ndarray,
+                    start_point_b: np.ndarray,
+                    dim_b: np.ndarray)->np.bool:
+    n_a, _ = start_point_a.shape
+    n_b, _ = start_point_b.shape
+    end_a, end_b = start_point_a+dim_a, start_point_b+dim_b
+    is_intersect_all_dim = np.logical_not(np.logical_or(end_a[:, None, :]<=start_point_b[None, :, :], start_point_a[:, None, :]>=end_b[None, :, :]))
+    is_intersect: np.ndarray = np.empty((n_a, n_b), dtype=np.bool_)
+    for i in range(len(start_point_a)):
+        for j in range(len(start_point_b)):
+            is_intersect[i,j] = np.all(is_intersect_all_dim[i,j,:])
+    # is_intersect = np.all(is_intersect, axis=-1)
+    return is_intersect
     
 
 
