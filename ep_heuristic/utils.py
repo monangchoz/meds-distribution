@@ -51,9 +51,27 @@ def compute_intersection_1d(start_point_a: float,
     # Compute intersection length without an explicit if-else
     return max(0.0, intersection_end - intersection_start)
 
+@nb.njit(nb.float64(nb.float64[:],nb.float64[:],nb.float64[:],nb.float64[:]), cache=True)
 def compute_intersection_nd(start_point_a: np.ndarray,
                             dim_a: np.ndarray,
                             start_point_b: np.ndarray,
                             dim_b: np.ndarray)->float:
-    # this can be turned into default numpy vectorized operations, later.
-    return np.prod(compute_intersection_1d(start_point_a, dim_a, start_point_b, dim_b))
+    end_a, end_b = start_point_a+dim_a, start_point_b+dim_b
+    intersection_start = np.maximum(start_point_a, start_point_b)
+    intersection_end = np.minimum(end_a, end_b)
+    intersection_length = intersection_end-intersection_start
+    intersection_length = np.maximum(intersection_length, 0.)
+    retv2 = np.prod(intersection_length)
+    return retv2
+
+@nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def is_intersect_nd_any(ep: np.ndarray,
+                        dummy_dim: np.ndarray,
+                        inserted_item_dims: np.ndarray,
+                        filled_positions: np.ndarray)->bool:
+    for i, inserted_item_dim in enumerate(inserted_item_dims):
+        filled_position = filled_positions[i]
+        # check if placing a very very small item here intersect with other inserted items
+        if is_intersect_nd(ep, dummy_dim, filled_position, inserted_item_dim):
+            return True
+    return False
