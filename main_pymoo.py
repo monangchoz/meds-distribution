@@ -15,15 +15,18 @@ from pymoo_interface.hvrp3l_opt import HVRP3L_OPT
 
 
 def run():
-    filename = "JK2_nc_30_ni__1363_nv_20_0.json"
+    filename = "JK2_nc_50_ni__2766_nv_4_0.json"
+    # filename = "JK2_nc_50_ni__2628_nv_10_0.json"
+    # filename = "JK2_nc_30_ni__1363_nv_20_0.json"
+    
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
-    n_threads = 4
-    pool = mp.Pool(n_threads)
-    runner = StarmapParallelization(pool.starmap)
+    # n_threads = 4
+    # pool = mp.Pool(n_threads)
+    # runner = StarmapParallelization(pool.starmap)
     start = time.time()
-    problem_intf = HVRP3L_OPT(problem, ARR1(), elementwise_runner=runner)
-    algo = DE(pop_size=100)
+    problem_intf = HVRP3L_OPT(problem, ARR1())
+    algo = DE(pop_size=3)
     termination = DefaultSingleObjectiveTermination(n_max_gen=1)
     res = minimize(problem_intf, algo, termination=termination, verbose=True)
     end = time.time()

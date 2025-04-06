@@ -1,5 +1,6 @@
 import math
 
+from line_profiler import profile
 import numpy as np
 from pymoo.core.problem import ElementwiseProblem
 
@@ -24,6 +25,7 @@ class HVRP3L_OPT(ElementwiseProblem):
         self.xu = np.ones([self.n_var, ], dtype=float)
         
     # this is the decoding method
+    @profile
     def _evaluate(self, x, out, *args, **kwargs):
         solution: Solution = Solution(self.hvrp3l_instance)
         problem = self.hvrp3l_instance

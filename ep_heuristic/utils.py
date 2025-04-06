@@ -1,3 +1,5 @@
+import math
+
 import numba as nb
 import numpy as np
 
@@ -73,5 +75,20 @@ def is_intersect_nd_any(ep: np.ndarray,
         filled_position = filled_positions[i]
         # check if placing a very very small item here intersect with other inserted items
         if is_intersect_nd(ep, dummy_dim, filled_position, inserted_item_dim):
+            return True
+    return False
+
+@nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def is_intersect_nd_any_v2(ep: np.ndarray,
+                        dummy_dim: np.ndarray,
+                        inserted_item_dims: np.ndarray,
+                        filled_positions: np.ndarray)->bool:
+    num_inserted_items, _ = inserted_item_dims.shape
+    batch_size: int = 64
+    num_batch: int = math.ceil(num_inserted_items/batch_size)
+    for i in range(num_batch):
+        ja:int = i*batch_size
+        jb:int = min((i+1)*batch_size, num_inserted_items)
+        if np.any(is_intersect_nd_vectorized(ep[None, :], dummy_dim[None, :], filled_positions[ja:jb], inserted_item_dims[ja:jb])):
             return True
     return False

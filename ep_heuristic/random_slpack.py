@@ -5,6 +5,7 @@ import numpy as np
 
 from ep_heuristic.insertion import argsort_items, insert_items
 
+@profile
 def random_slpack(item_dims: np.ndarray,
                     item_volumes: np.ndarray,
                     item_priorities: np.ndarray,

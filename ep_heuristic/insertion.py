@@ -1,10 +1,10 @@
-import random
+import math
 from typing import Tuple, Optional
 
 import numba as nb
 import numpy as np
 
-from ep_heuristic.utils import is_intersect_nd_any, compute_intersection_nd, is_intersect_nd_vectorized
+from ep_heuristic.utils import is_intersect_nd_any, is_intersect_nd_any_v2, compute_intersection_nd, is_intersect_nd_vectorized
 from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 
 
@@ -48,7 +48,7 @@ def is_insertion_feasible(item_dim: np.ndarray,
         return False
     
     # check intersect any other items
-    insertion_results_in_intersection = is_intersect_nd_any(insertion_position, item_dim, inserted_item_dims, filled_positions)
+    insertion_results_in_intersection = is_intersect_nd_any_v2(insertion_position, item_dim, inserted_item_dims, filled_positions)
     if insertion_results_in_intersection:
         return False
         
@@ -66,16 +66,67 @@ def is_insertion_feasible(item_dim: np.ndarray,
     
     return True
 
-@nb.njit(nb.int64(nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:],nb.float64), cache=True)
+# def is_insertion_feasible_vec(item_dim: np.ndarray,
+#                           insertion_positions: np.ndarray,
+#                           inserted_item_dims: np.ndarray,
+#                           filled_positions: np.ndarray,
+#                           container_dim: np.ndarray,
+#                           base_support_alpha: float)-> bool:
+#     is_out_of_container = np.any(item_dim[:, np.newaxis, :] + insertion_positions[] > container_dim)
+#     if is_out_of_container:
+#         return False
+    
+#     # check intersect any other items
+#     insertion_results_in_intersection = is_intersect_nd_any(insertion_positions, item_dim, inserted_item_dims, filled_positions)
+#     if insertion_results_in_intersection:
+#         return False
+        
+#     # base support
+    
+#     if insertion_position[2]>0:
+#         supported_base_area = compute_supported_base_area(item_dim, insertion_position, inserted_item_dims, filled_positions)
+#         base_area = item_dim[0]*item_dim[1]
+#         if supported_base_area/base_area < base_support_alpha:
+#             return False
+#     # fragility
+    
+#     # lifo? -> automatic from item ordering, later
+        
+    
+#     return True
+
+# @nb.njit(nb.int64(nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:],nb.float64), cache=True, parallel=True)
 def find_ep(item_dim: np.ndarray,
             inserted_item_dims: np.ndarray,
             filled_positions: np.ndarray,
             ext_points: np.ndarray,
             container_dim: np.ndarray,
             base_support_alpha: float)-> int:
+    # do it in batched
+    batch_size:int = 5
+    # total_size, _ = ext_points.shape
+    # num_batch = math.ceil(total_size/batch_size)
+    # if len(ext_points)>=batch_size:    
+    #     iff_v2 = is_insertion_feasible_vec(item_dim.reshape((1,3)), ext_points[:batch_size], inserted_item_dims, filled_positions,  container_dim, base_support_alpha)
+    #     is_insertion_feasible_flags = np.zeros((batch_size,), dtype=np.bool_)
+    #     for i in range(batch_size):
+    #         ep = ext_points[i]
+    #         is_insertion_feasible_flags[i] = is_insertion_feasible(item_dim, ep, inserted_item_dims, filled_positions,  container_dim, base_support_alpha)
+    
     for ei, ep in enumerate(ext_points):
         if is_insertion_feasible(item_dim, ep, inserted_item_dims, filled_positions,  container_dim, base_support_alpha):
             return ei
+    # for i in range(num_batch):
+    #     for ej in nb.prange(i*batch_size, min((i+1)*batch_size, total_size)):
+    #         ep = ext_points[ej]
+    #         j = ej - i*batch_size
+    #         is_insertion_feasible_flags[j] = is_insertion_feasible(item_dim, ep, inserted_item_dims, filled_positions,  container_dim, base_support_alpha)
+    #     for j in range(batch_size):
+    #         ej = i*batch_size + j
+    #         if ej >= total_size:
+    #             break
+    #         if is_insertion_feasible_flags[j] == True:
+    #             return ej
     return -1
 
 
@@ -86,7 +137,7 @@ def is_ep_floating(ep: np.ndarray,
                     filled_positions: np.ndarray)->bool:
     if ep[2]==0:
         return False
-    if is_intersect_nd_any(ep[:2], dummy_dim[:2], inserted_item_dims[:, :2], filled_positions[:, :2]):
+    if is_intersect_nd_any_v2(ep[:2], dummy_dim[:2], inserted_item_dims[:, :2], filled_positions[:, :2]):
         return False
     return True
 
@@ -190,6 +241,7 @@ def update_extreme_points_from_new_item(item_dim: np.ndarray,
     final_ext_points = merge_and_lexsort_and_unique(ext_points, new_ext_points)
     return final_ext_points
     
+@profile
 def insert_items(item_dims: np.ndarray,
                  container_dim: np.ndarray,
                  rotation_trial_idx: Optional[np.ndarray] = None,
