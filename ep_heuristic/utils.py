@@ -66,21 +66,21 @@ def compute_intersection_nd(start_point_a: np.ndarray,
     retv2 = np.prod(intersection_length)
     return retv2
 
-@nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
-def is_intersect_nd_any(ep: np.ndarray,
+# @nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+def is_intersect_nd_any_idx(ep: np.ndarray,
                         dummy_dim: np.ndarray,
                         inserted_item_dims: np.ndarray,
-                        filled_positions: np.ndarray)->bool:
+                        filled_positions: np.ndarray)->int:
     for i, inserted_item_dim in enumerate(inserted_item_dims):
         filled_position = filled_positions[i]
         # check if placing a very very small item here intersect with other inserted items
         if is_intersect_nd(ep, dummy_dim, filled_position, inserted_item_dim):
-            return True
-    return False
+            return i
+    return -1
 
 @nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
 def is_intersect_nd_any_v2(ep: np.ndarray,
-                        dummy_dim: np.ndarray,
+                        item_dim: np.ndarray,
                         inserted_item_dims: np.ndarray,
                         filled_positions: np.ndarray)->bool:
     num_inserted_items, _ = inserted_item_dims.shape
@@ -89,6 +89,55 @@ def is_intersect_nd_any_v2(ep: np.ndarray,
     for i in range(num_batch):
         ja:int = i*batch_size
         jb:int = min((i+1)*batch_size, num_inserted_items)
-        if np.any(is_intersect_nd_vectorized(ep[None, :], dummy_dim[None, :], filled_positions[ja:jb], inserted_item_dims[ja:jb])):
+        if np.any(is_intersect_nd_vectorized(ep[None, :], item_dim[None, :], filled_positions[ja:jb], inserted_item_dims[ja:jb])):
             return True
     return False
+
+@nb.njit(nb.int64(nb.int64,nb.int64,nb.float64,nb.float64), cache=True)
+def binary_search_zone(start: int,
+                       end: int,
+                       q: float, 
+                       zone_size: float)->int:
+    while start <= end:
+        mid: int = math.ceil((start+end)/2)
+        z_a = mid*zone_size
+        z_b = (mid+1)*zone_size
+        if z_a <= q < z_b:
+            return mid
+        if q < z_a:
+            end = mid-1
+        else:
+            start = mid+1
+    return -1
+
+@nb.njit(nb.int64[:](nb.float64[:],nb.float64[:],nb.float64[:],nb.float64), cache=True)
+def get_item_zones(position: np.ndarray,
+                   dim: np.ndarray,
+                   container_dim: np.ndarray,
+                   zone_size: float)->np.ndarray:
+    n_zones = np.floor(container_dim/zone_size).astype(np.int64)
+    # print(n_zones)
+    s1 = binary_search_zone(0, n_zones[0], position[0], zone_size)
+    e1 = binary_search_zone(s1, n_zones[0], position[0]+dim[0], zone_size)
+    s2 = binary_search_zone(0, n_zones[1], position[1], zone_size)
+    e2 = binary_search_zone(s2, n_zones[1], position[1]+dim[1], zone_size)
+    s3 = binary_search_zone(0, n_zones[2], position[2], zone_size)
+    e3 = binary_search_zone(s3, n_zones[2], position[2]+dim[2], zone_size)
+    e1 = min(e1, n_zones[0]-1) 
+    e2 = min(e2, n_zones[1]-1) 
+    e3 = min(e3, n_zones[2]-1)
+    # print(s1,s2,s3,e1,e2,e3)
+    dx,dy,dz= e1-s1+1, e2-s2+1, e3-s3+1
+    zones = np.arange(dx*dy*dz, dtype=np.int64)
+    # print(zones)
+    d2 = zones // (dy*dx)
+    m2 = zones % (dy*dx)
+    d1 = m2 // dx
+    m1 = m2 % dx
+    zones = d2*(n_zones[1]*n_zones[0]) + d1*n_zones[0] + m1
+    # print(zones)
+    zones += s1 + s2*n_zones[0] + s3*n_zones[0]*n_zones[1]
+    # print(zones)
+    # print("*********************")
+    return zones
+    

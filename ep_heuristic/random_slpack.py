@@ -1,3 +1,4 @@
+from line_profiler import profile
 import random
 from typing import Optional, Tuple
 
