@@ -120,11 +120,5 @@ def generate(cabang: str, num_customers: int):
     map.save("map.html")
     webbrowser.open("map.html")
 
-    '''
-    plt.scatter(cust_coords[:, 0], cust_coords[:, 1])
-    plt.scatter(depot_coord[0], depot_coord[1])
-    plt.show()
-    '''
-
 if __name__ == "__main__":
     generate("JK2", 200)

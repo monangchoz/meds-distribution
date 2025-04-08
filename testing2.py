@@ -103,9 +103,7 @@ def generate(cabang: str, num_customers: int):
         for code, qty in new_cust.get_products_dict().items():
             print(f"  - {code}: {qty}")
 
-    # -----------------------------
-    # 🔀 CLUSTERING SECTION
-    # -----------------------------
+    # CLUSTERING 
     cust_coords = np.stack([cust.coord for cust in customers])
 
     kmeans = KMeans(n_clusters=2, random_state=0).fit(cust_coords)
@@ -119,9 +117,7 @@ def generate(cabang: str, num_customers: int):
         cluster_members = [c for c in customers if c.cluster == i]
         print(f"Cluster {i}: {len(cluster_members)} customers")
 
-    # -----------------------------
-    # 🗺️ MAP SECTION
-    # -----------------------------
+    # MAP SECTION
     map = folium.Map((depot.coord[0], depot.coord[1]), zoom_start=12)
 
     # Add depot marker
