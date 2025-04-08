@@ -75,6 +75,24 @@ def compute_intersection_nd(start_point_a: np.ndarray,
         retv2 *=intersection_length[k]
     return retv2
 
+@nb.njit(nb.float64(nb.float64[:],nb.float64[:],nb.float64[:],nb.float64[:],nb.float64[:]), cache=True)
+def compute_intersection_ndv2(start_point_a: np.ndarray,
+                            dim_a: np.ndarray,
+                            start_point_b: np.ndarray,
+                            dim_b: np.ndarray,
+                            end_b: np.ndarray)->float:
+    end_a = start_point_a+dim_a
+    intersection_start = np.maximum(start_point_a, start_point_b)
+    intersection_end = np.minimum(end_a, end_b)
+    intersection_length = intersection_end-intersection_start
+    # intersection_length = np.maximum(intersection_length, 0.)
+    retv2 = 1
+    for k in range(2):
+        if intersection_length[k]<=0:
+            return 0
+        retv2 *=intersection_length[k]
+    return retv2
+
 
 # @nb.njit(nb.bool(nb.float64[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
 def is_intersect_nd_any_idx(ep: np.ndarray,
@@ -103,16 +121,15 @@ def is_intersect_nd_any_v2(ep: np.ndarray,
             return True
     return False
 
-@nb.njit(nb.bool[:](nb.float64[:,:],nb.float64[:],nb.float64[:,:],nb.float64[:,:]), cache=True)
+@nb.njit(nb.bool[:](nb.float64[:,:],nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:]), cache=True)
 def is_intersect_nd_any_vectorized(ext_points: np.ndarray,
                         item_dim: np.ndarray,
                         inserted_item_dims: np.ndarray,
-                        filled_positions: np.ndarray)->np.ndarray:
+                        filled_positions: np.ndarray,
+                        inserted_item_end_points: np.ndarray)->np.ndarray:
     n_a, _ = ext_points.shape
     n_b, _ = inserted_item_dims.shape
-    end_a, end_b = ext_points+item_dim[None, :], inserted_item_dims+filled_positions
-    # is_intersect_all_dim = np.logical_not(np.logical_or(end_a[:, None, :]<=start_point_b[None, :, :], start_point_a[:, None, :]>=end_b[None, :, :]))
-    # is_intersect: np.ndarray = np.ones((n_a, n_b), dtype=np.bool_)
+    end_a, end_b = ext_points+item_dim[None, :], inserted_item_end_points
     is_intersect_any_items: np.ndarray = np.zeros((n_a,), dtype=np.bool_)
     for i in range(n_a):
         for j in range(n_b):
@@ -124,14 +141,26 @@ def is_intersect_nd_any_vectorized(ext_points: np.ndarray,
             if intersection_occurs:
                 is_intersect_any_items[i]=True
                 break
-        
-        
-                # if not is_intersect_all_dim[i,j,k]:
-                #     is_intersect[i,j]=False
-                # is_intersect[i,j] = np.all(is_intersect_all_dim[i,j,:])
     return is_intersect_any_items
-    # intersect_flags = is_intersect_nd_vectorized(ext_points, item_dim[None, :], filled_positions, inserted_item_dims)
-    # return np.sum(intersect_flags, axis=1)>0
+
+@nb.njit(nb.bool[:](nb.float64[:,:],nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:]), cache=True,fastmath=True)
+def is_intersect_nd_any_vectorized_ur(ext_points: np.ndarray,
+                        item_dim: np.ndarray,
+                        inserted_item_dims: np.ndarray,
+                        filled_positions: np.ndarray,
+                        inserted_item_end_points: np.ndarray)->np.ndarray:
+    n_a, _ = ext_points.shape
+    n_b, _ = inserted_item_dims.shape
+    end_a, end_b = ext_points+item_dim[None, :], inserted_item_end_points
+    is_intersect_any_items: np.ndarray = np.zeros((n_a,), dtype=np.bool_)
+    for i in range(n_a):
+        for j in range(n_b):
+            if not (end_a[i,0]<=filled_positions[j,0] or end_b[j,0]<=ext_points[i,0] or\
+                end_a[i,1]<=filled_positions[j,1] or end_b[j,1]<=ext_points[i,1] or\
+                end_a[i,2]<=filled_positions[j,2] or end_b[j,2]<=ext_points[i,2]):
+                is_intersect_any_items[i]=True
+                break
+    return is_intersect_any_items
         
 
 @nb.njit(nb.int64(nb.int64,nb.int64,nb.float64,nb.float64), cache=True)
