@@ -80,7 +80,11 @@ def build_clusters(all_coords, centers, points_per_cluster=20, max_radius_km=5):
 
         # Add to fill the remaining spot on the cluster if the coordinates in the cluster is not enough
         if len(eligible_indices) < points_per_cluster:
-            selected_indices = np.argsort(distances)[:points_per_cluster]
+            print("Run")
+            selected_indices = np.argsort(distances)
+            selected_indices = selected_indices[:points_per_cluster]
+            np.random.shuffle(selected_indices)
+            print(selected_indices)
             cluster_points = remaining_coords[selected_indices]
             
             clusters.append(cluster_points)
@@ -96,7 +100,7 @@ def build_clusters(all_coords, centers, points_per_cluster=20, max_radius_km=5):
             # Remove selected points from remaining_coords
             remaining_coords = np.delete(remaining_coords, eligible_indices[selected_indices], axis=0)
 
-        # print(eligible_indices)
+            # print(eligible_indices)
     return clusters
 
 # ===== 4. PRINT RESULTS =====
@@ -110,8 +114,8 @@ def print_results ():
 
 if __name__=="__main__":
     all_coordinates = generate("JK2")
-    cluster_centers = get_far_centers(all_coordinates, num_clusters=2, min_distance_km=15)
-    clusters = build_clusters(all_coordinates, cluster_centers, points_per_cluster=20, max_radius_km=10)
+    cluster_centers = get_far_centers(all_coordinates, num_clusters=3, min_distance_km=15)
+    clusters = build_clusters(all_coordinates, cluster_centers, points_per_cluster=20, max_radius_km=5)
     print_results()
     #print(clusters[0][0])
 
