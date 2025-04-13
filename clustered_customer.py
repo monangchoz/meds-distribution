@@ -77,14 +77,26 @@ def build_clusters(all_coords, centers, points_per_cluster=20, max_radius_km=5):
         
         # Select the closest (points_per_cluster) points within max_radius_km
         eligible_indices = np.where(distances <= max_radius_km)[0]
-        selected_indices = np.argsort(distances[eligible_indices])[:points_per_cluster]
-        cluster_points = remaining_coords[eligible_indices][selected_indices]
-        
-        clusters.append(cluster_points)
-        
-        # Remove selected points from remaining_coords
-        remaining_coords = np.delete(remaining_coords, eligible_indices[selected_indices], axis=0)
-    
+
+        # Add to fill the remaining spot on the cluster if the coordinates in the cluster is not enough
+        if len(eligible_indices) < points_per_cluster:
+            selected_indices = np.argsort(distances)[:points_per_cluster]
+            cluster_points = remaining_coords[selected_indices]
+            
+            clusters.append(cluster_points)
+            
+            # Remove selected points from remaining_coords
+            remaining_coords = np.delete(remaining_coords, selected_indices, axis=0)
+        else:
+            selected_indices = np.argsort(distances[eligible_indices])[:points_per_cluster]
+            cluster_points = remaining_coords[eligible_indices][selected_indices]
+            
+            clusters.append(cluster_points)
+            
+            # Remove selected points from remaining_coords
+            remaining_coords = np.delete(remaining_coords, eligible_indices[selected_indices], axis=0)
+
+        # print(eligible_indices)
     return clusters
 
 # ===== 4. PRINT RESULTS =====
@@ -98,15 +110,15 @@ def print_results ():
 
 if __name__=="__main__":
     all_coordinates = generate("JK2")
-    cluster_centers = get_far_centers(all_coordinates, num_clusters=2, min_distance_km=6)
-    clusters = build_clusters(all_coordinates, cluster_centers, points_per_cluster=20, max_radius_km=3)
+    cluster_centers = get_far_centers(all_coordinates, num_clusters=2, min_distance_km=15)
+    clusters = build_clusters(all_coordinates, cluster_centers, points_per_cluster=20, max_radius_km=10)
     print_results()
     #print(clusters[0][0])
 
     map = folium.Map((-6.200000, 106.750000),zoom_start=12)
     for i in range (len(clusters)):
         for j in range(len(clusters[i])):
-            print(clusters[i][j])
+            #print(clusters[i][j])
             folium.Marker(location=[clusters[i][j][0],clusters[i][j][1]]).add_to(map)  
 
     map.save("map.html")
