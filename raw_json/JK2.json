@@ -392,17 +392,6 @@
     },
     {
       "KODE_CABANG": "JK2",
-      "CUSTOMER_NUMBER": 110585,
-      "ALAMAT": "JL. DR. SAHARJO NO. 45 BLOK A16, A15, & A12 , MANGGARAI - TEBET",
-      "Maps": "-6.212774, 106.846098",
-      "Alamat_2": "Infinia Park Modern WHS Blok A-11, A-12, A-15, A-16 Jalan Dr. Saharjo No. 45, Jakarta Selatan, Desa/Kelurahan Manggarai, Kec. Tebet, Kota Adm. Jakarta Selatan, Provinsi DKI Jakarta, Kode Pos: 12850",
-      "Maps_2": "-6.212774, 106.846098",
-      "customer_coords": "(-6.212774, 106.846098)",
-      "depot_coords": "(-6.212774, 106.846098)",
-      "distance_from_depot": 0.0
-    },
-    {
-      "KODE_CABANG": "JK2",
       "CUSTOMER_NUMBER": 111305,
       "ALAMAT": "PERTOKOAN SELMIS JL. ASEM BARIS RAYA NO. 52 BLOK II NO. 11RT/RW;0/0 , KEBON BARU - TEBET",
       "Maps": "-6.231355, 106.858934",
