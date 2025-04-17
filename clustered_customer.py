@@ -122,22 +122,6 @@ def random_orders(ids, filepath: str, output_path: str = None):
 
     return randomized_data
 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__=="__main__":
     all_coordinates_codes = generate("JK2")
 
