@@ -84,7 +84,7 @@ class HVRP3L_OPT(ElementwiseProblem):
                                            item_priorities,
                                            container_dim,
                                            0.8,
-                                           100)
+                                           5)
             positions, rotations, is_packing_feasible = packing_result
             
             if not is_packing_feasible:

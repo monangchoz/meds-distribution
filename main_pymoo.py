@@ -1,4 +1,3 @@
-import multiprocessing as mp
 import pathlib
 import random
 import time
@@ -6,7 +5,6 @@ import time
 import numpy as np
 from pymoo.algorithms.soo.nonconvex.de import DE
 from pymoo.optimize import minimize
-from pymoo.core.problem import StarmapParallelization
 from pymoo.termination.default import DefaultSingleObjectiveTermination
 
 from pymoo_interface.arr1 import ARR1
@@ -15,19 +13,14 @@ from pymoo_interface.hvrp3l_opt import HVRP3L_OPT
 
 
 def run():
-    filename = "JK2_nc_50_ni__2766_nv_4_0.json"
-    # filename = "JK2_nc_50_ni__2628_nv_10_0.json"
-    # filename = "JK2_nc_30_ni__1363_nv_20_0.json"
-    
+    filename = "JK2_nc_30_ni__914_nv_4_0.json"
+    # filename = "JK2_nc_50_ni__2763_nv_4_0.json"
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
-    # n_threads = 4
-    # pool = mp.Pool(n_threads)
-    # runner = StarmapParallelization(pool.starmap)
     start = time.time()
     problem_intf = HVRP3L_OPT(problem, ARR1())
-    algo = DE(pop_size=3)
-    termination = DefaultSingleObjectiveTermination(n_max_gen=1)
+    algo = DE(pop_size=10)
+    termination = DefaultSingleObjectiveTermination(n_max_gen=10)
     res = minimize(problem_intf, algo, termination=termination, verbose=True)
     end = time.time()
     print(end-start)

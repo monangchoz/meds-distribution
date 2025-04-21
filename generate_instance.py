@@ -81,8 +81,8 @@ def generate_customers(cabang, num_customers)->List[Customer]:
      
 def generate(cabang: str, 
              num_customers: int,
-             num_normal_trucks:int=5,
-             num_reefer_trucks:int=5):
+             num_normal_trucks:int=2,
+             num_reefer_trucks:int=2):
     filename = cabang+".json"
     filepath = pathlib.Path()/"raw_json"/filename
     customers: List[Node] = []

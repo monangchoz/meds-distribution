@@ -8,7 +8,7 @@ class RepairMechanism:
 
 class ARR1(RepairMechanism):
     def repair(self, solution: Solution):
-        print(solution.cust_vhc_assignment_map)
+        # print(solution.cust_vhc_assignment_map)
         unvisited_customer_idxs: np.ndarray = np.nonzero(solution.cust_vhc_assignment_map==NO_VEHICLE)[0]
         if len(unvisited_customer_idxs) == 0:
             return
