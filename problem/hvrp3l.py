@@ -1,14 +1,14 @@
-import json 
+import json
 import os
 import pathlib
 from typing import List, Optional, Union
 
 import numpy as np
-from sklearn.metrics.pairwise import haversine_distances
-
 from problem.customer import Customer
 from problem.node import Node
 from problem.vehicle import Vehicle
+from sklearn.metrics.pairwise import haversine_distances
+
 
 class HVRP3L:
     def __init__(self,
@@ -62,6 +62,7 @@ class HVRP3L:
             self.vehicle_container_dims[i,:] = vehicle.container_dim
         self.vehicle_fixed_costs: np.ndarray = np.asanyarray([vehicle.fixed_cost for vehicle in vehicles])
         self.vehicle_variable_costs: np.ndarray = np.asanyarray([vehicle.variable_cost for vehicle in vehicles])
+        self.vehicle_reefer_flags: np.ndarray = np.asanyarray([vehicle.is_reefer for vehicle in vehicles])
         
         # now for the items?
         # i dont know whether it is a good idea (enough merit) 
@@ -90,8 +91,10 @@ class HVRP3L:
                 i += 1
 
     def compute_route_total_distance(self, route: List[int])->float:
+        if len(route)==0:
+            return 0
         total_distance = np.sum(self.distance_matrix[route[:-1], route[1:]])
-        total_distance += self.distance_matrix[route[-1], 0]
+        total_distance += self.distance_matrix[route[-1], 0] + self.distance_matrix[0, route[0]]
         return total_distance
                 
     def to_json(self, cabang:str): 

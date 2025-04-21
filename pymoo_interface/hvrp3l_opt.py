@@ -1,13 +1,13 @@
 import math
 
-from line_profiler import profile
 import numpy as np
-from pymoo.core.problem import ElementwiseProblem
-
-from pymoo_interface.arr1 import ARR1, RepairMechanism
 from ep_heuristic.random_slpack import random_slpack
+from line_profiler import profile
 from problem.hvrp3l import HVRP3L
-from problem.solution import Solution, NO_VEHICLE
+from problem.solution import NO_VEHICLE, Solution
+from pymoo.core.problem import ElementwiseProblem
+from pymoo_interface.arr1 import ARR1, RepairMechanism
+
 
 class HVRP3L_OPT(ElementwiseProblem):
     def __init__(self,
