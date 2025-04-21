@@ -127,7 +127,7 @@ def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
                           reefer_truck_dict["SERVICE"],
                           reefer_truck_dict["KAPASITAS"],
                           dim,
-                          False,
+                          True,
                           reefer_truck_dict["RATE"],
                           reefer_truck_dict["VARIABLE_RATE"])
         vehicles.append(new_vec)

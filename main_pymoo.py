@@ -2,6 +2,7 @@ import pathlib
 import random
 import time
 
+
 import numpy as np
 from problem.hvrp3l import HVRP3L
 from pymoo.algorithms.soo.nonconvex.de import DE
@@ -17,10 +18,12 @@ def run():
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
     start = time.time()
-    problem_intf = HVRP3L_OPT(problem, ARR1())
+    problem_intf = HVRP3L_OPT(problem, ARR1(problem.num_customers, problem.num_vehicles))
     algo = DE(pop_size=10)
-    termination = DefaultSingleObjectiveTermination(n_max_gen=10)
-    res = minimize(problem_intf, algo, termination=termination, verbose=True)
+    termination = DefaultSingleObjectiveTermination(n_max_gen=100)
+    res = minimize(problem_intf, algo, termination=termination, 
+                   seed=1, 
+                   verbose=True)
     end = time.time()
     print(end-start)
 if __name__ == "__main__":
