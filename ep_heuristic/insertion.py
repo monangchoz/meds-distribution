@@ -1,13 +1,14 @@
-from line_profiler import profile
 import math
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import numba as nb
 import numpy as np
-
-from ep_heuristic.utils import is_intersect_nd_any_v2,\
-    compute_intersection_nd, compute_intersection_ndv2, is_intersect_nd_vectorized,\
-        is_intersect_nd_any_vectorized_ur
+from ep_heuristic.utils import (compute_intersection_nd,
+                                compute_intersection_ndv2,
+                                is_intersect_nd_any_v2,
+                                is_intersect_nd_any_vectorized_ur,
+                                is_intersect_nd_vectorized)
+from line_profiler import profile
 from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 
 
@@ -131,7 +132,7 @@ def is_insertion_feasible_vectorized(feasibility_flags:np.ndarray,
     
     return feasibility_flags
 
-@nb.njit(nb.int64(nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:],nb.float64), cache=True, parallel=True)
+@nb.njit(nb.int64(nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:],nb.float64), cache=True)
 # @profile
 def find_ep(item_dim: np.ndarray,
             inserted_item_dims: np.ndarray,

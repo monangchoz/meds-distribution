@@ -76,9 +76,9 @@ class ARR1(RepairMechanism):
         for vehicle_idx, route in enumerate(solution.routes):
             self.tmp_routes[vehicle_idx, :len(route)] = route
             self.tmp_route_lens[vehicle_idx] = len(route)
-        cust_demand_volume = solution.customer_demand_volumes[cust_idx]
-        cust_demand_weight = solution.customer_demand_weights[cust_idx]
-        cust_need_reefer = solution.customer_reefer_flags[cust_idx]    
+        cust_demand_volume = solution.node_demand_volumes[cust_idx]
+        cust_demand_weight = solution.node_demand_weights[cust_idx]
+        cust_need_reefer = solution.node_reefer_flags[cust_idx]    
         return get_sorted_possible_insertion_positions(self.vehicle_idxs,
                                                        self.positions,
                                                        self.insertion_costs,
@@ -103,10 +103,9 @@ class ARR1(RepairMechanism):
                       pos_idx: int, 
                       solution: Solution)->Tuple[np.ndarray,np.ndarray,bool]:
         problem = solution.problem
-        customers = problem.customers
         new_route = solution.routes[vehicle_idx]
         new_route = new_route[:pos_idx] + [cust_idx] + new_route[pos_idx:]
-        total_num_items = sum(customers[ci].num_items for ci in new_route)
+        total_num_items = sum(solution.node_num_items[cust_idx] for cust_idx in new_route)
 
         # this all actually can be pre-allocated in the problem interface
         # and used freely, to remove allocation time
@@ -115,9 +114,9 @@ class ARR1(RepairMechanism):
         item_weights: np.ndarray = np.zeros([total_num_items, ], dtype=float)
         item_priorities: np.ndarray = np.zeros([total_num_items, ], dtype=float)
         n = 0
-        for i, ci in enumerate(new_route):
-            c_num_items = customers[ci].num_items
-            item_mask = problem.customer_item_mask[ci, :]
+        for i, cust_idx in enumerate(new_route):
+            c_num_items = solution.node_num_items[cust_idx]
+            item_mask = problem.node_item_mask[cust_idx, :]
             item_dims[n:n+c_num_items] = problem.item_dims[item_mask]
             item_volumes[n:n+c_num_items] = problem.item_volumes[item_mask]
             item_weights[n:n+c_num_items] = problem.item_weights[item_mask]
@@ -139,8 +138,6 @@ class ARR1(RepairMechanism):
         unvisited_customer_idxs: np.ndarray = np.where(solution.node_vhc_assignment_map==NO_VEHICLE)[0]
         if len(unvisited_customer_idxs) == 0:
             return
-        print(unvisited_customer_idxs)
-        exit()
         for cust_idx in unvisited_customer_idxs:
             vehicle_idxs, positions, insertion_costs = self.get_possible_insertions(cust_idx, solution)
             if len(vehicle_idxs) == 0:
@@ -155,17 +152,17 @@ class ARR1(RepairMechanism):
                 if len(solution.routes[vehicle_idx])==0:
                     solution.total_vehicle_fixed_cost += solution.vehicle_fixed_costs[vehicle_idx]
                     insertion_cost -= solution.vehicle_fixed_costs[vehicle_idx]
-                solution.total_vehicle_variable_cost += insertion_cost    
+                solution.total_vehicle_variable_cost += insertion_cost  
 
                 # now commit the route, because we can pack
-                solution.cust_vhc_assignment_map[cust_idx] = vehicle_idx
-                solution.filled_volumes[vehicle_idx] += solution.customer_demand_volumes[cust_idx]
-                solution.filled_weight_caps[vehicle_idx] = solution.customer_demand_weights[cust_idx]
+                solution.node_vhc_assignment_map[cust_idx] = vehicle_idx
+                solution.filled_volumes[vehicle_idx] += solution.node_demand_volumes[cust_idx]
+                solution.filled_weight_caps[vehicle_idx] = solution.node_demand_volumes[cust_idx]
                 solution.routes[vehicle_idx].insert(pos_idx, cust_idx)
                 n = 0
-                for ci in solution.routes[vehicle_idx]:
-                    c_num_items = solution.problem.customers[ci].num_items
-                    item_mask = solution.problem.customer_item_mask[ci, :]
+                for cust_idx in solution.routes[vehicle_idx]:
+                    c_num_items = solution.node_num_items[cust_idx]
+                    item_mask = solution.node_item_mask[cust_idx, :]
                     solution.item_positions[item_mask] = positions[n:n+c_num_items]
                     solution.item_rotations[item_mask] = rotations[n:n+c_num_items]
                     n += c_num_items

@@ -47,7 +47,7 @@ class HVRP3L:
         # okay from this on is information that are essential for solver
         self.total_demand_volumes: np.ndarray = np.zeros([self.num_nodes,], dtype=float)
         self.total_demand_weights: np.ndarray = np.zeros([self.num_nodes,], dtype=float)
-        self.customer_reefer_flags: np.ndarray = np.zeros([self.num_nodes,], dtype=bool)
+        self.node_reefer_flags: np.ndarray = np.zeros([self.num_nodes,], dtype=bool)
         self.node_num_items: np.ndarray = np.zeros([self.num_nodes,], dtype=int)
         for customer in self.customers:
             self.node_num_items[customer.idx] = customer.num_items
@@ -55,7 +55,7 @@ class HVRP3L:
             self.total_demand_volumes[customer.idx] = total_volume
             total_weight = sum(item.weight for item in customer.items)
             self.total_demand_weights[customer.idx] = total_weight
-            self.customer_reefer_flags[customer.idx] = customer.need_refer_truck
+            self.node_reefer_flags[customer.idx] = customer.need_refer_truck
 
         self.vehicle_volume_capacities: np.ndarray = np.asanyarray([vehicle.volume_capacity for vehicle in self.vehicles], dtype=float)
         self.vehicle_weight_capacities: np.ndarray = np.asanyarray([vehicle.weight_capacity for vehicle in self.vehicles], dtype=float)

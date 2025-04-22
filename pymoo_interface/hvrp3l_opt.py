@@ -1,12 +1,49 @@
 import math
+from typing import List
 
 import numpy as np
 from ep_heuristic.random_slpack import random_slpack
 from line_profiler import profile
 from problem.hvrp3l import HVRP3L
 from problem.solution import NO_VEHICLE, Solution
+from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.problem import ElementwiseProblem
 from pymoo_interface.arr1 import ARR1, RepairMechanism
+
+
+def hash_x_to_ndarray(x: np.ndarray, problem: HVRP3L)->np.ndarray:
+    """
+        hash? an individu for duplicate elimination
+    """
+    priorities = np.empty((problem.num_customers,), dtype=float)
+    arr = np.empty((problem.num_customers, 2), dtype=int) # first dim for vehicle, second for orderings
+
+    for i in range(problem.num_customers, 2*problem.num_customers):
+        ci = i-problem.num_customers
+        cust_idx = problem.customers[ci].idx
+        if problem.node_reefer_flags[cust_idx]:
+            vi = math.floor(x[i]*problem.num_reefer_trucks)
+        else:
+            vi = math.floor(x[i]*problem.num_vehicles)
+        arr[0, ci] = vi
+
+    for i in range(problem.num_customers):
+        priorities[i] = x[i]
+    arr[1, :] = np.argsort(priorities)
+    return arr
+
+
+
+class DuplicateElimination(ElementwiseDuplicateElimination):
+    def __init__(self, problem: HVRP3L, **kwargs):
+        super().__init__(**kwargs)
+        self.problem: HVRP3L = problem
+
+    def is_equal(self, a, b):
+        print("hello2")
+        arr_a = hash_x_to_ndarray(a, self.problem)
+        arr_b = hash_x_to_ndarray(b, self.problem)
+        return np.array_equal(arr_a, arr_b)
 
 
 class HVRP3L_OPT(ElementwiseProblem):
@@ -23,26 +60,24 @@ class HVRP3L_OPT(ElementwiseProblem):
         # the next num_customers dims are for vehicle assignment
         self.xl = np.zeros([self.n_var, ], dtype=float)
         self.xu = np.ones([self.n_var, ], dtype=float)
-        
-    # this is the decoding method
-    @profile
-    def _evaluate(self, x:np.ndarray, out:dict, *args, **kwargs):
-        solution: Solution = Solution(self.hvrp3l_instance)
-        problem = self.hvrp3l_instance
+
+    def decode(self, x: np.ndarray)->Solution:
+        problem: HVRP3L = self.hvrp3l_instance
+        solution: Solution = Solution(problem)
         customers = solution.problem.customers
         # try to map first into vehicle
         # if not feasible?
         
-        for i in range(self.hvrp3l_instance.num_customers, 2*self.hvrp3l_instance.num_customers):
-            ci = i-self.hvrp3l_instance.num_customers
+        for i in range(problem.num_customers, 2*problem.num_customers):
+            ci = i-problem.num_customers
             cust_idx = customers[ci].idx
             if solution.node_reefer_flags[cust_idx]:
-                vi = math.floor(x[i]*self.hvrp3l_instance.num_reefer_trucks)
+                vi = math.floor(x[i]*problem.num_reefer_trucks)
             else:
-                vi = math.floor(x[i]*self.hvrp3l_instance.num_vehicles)
+                vi = math.floor(x[i]*problem.num_vehicles)
             solution.node_vhc_assignment_map[cust_idx] = vi
 
-        for vi in range(self.hvrp3l_instance.num_vehicles):
+        for vi in range(problem.num_vehicles):
             vi_node_idx = np.nonzero(solution.node_vhc_assignment_map==vi)[0]
             vi_x_idx = vi_node_idx-1 # it's to get their idx in x (chromosome/individu,i.e., cust 2 is in x[1])
             if len(vi_node_idx) == 0:
@@ -111,10 +146,12 @@ class HVRP3L_OPT(ElementwiseProblem):
             solution.total_vehicle_fixed_cost += solution.vehicle_fixed_costs[vi]
             total_distance = solution.problem.compute_route_total_distance(solution.routes[vi])
             solution.total_vehicle_variable_cost += total_distance*solution.vehicle_variable_costs[vi]
-        # exit()
         self.repair(solution)
+        return solution
+        
+    # this is the decoding method
+    @profile
+    def _evaluate(self, x:np.ndarray, out:dict, *args, **kwargs):
+        solution = self.decode(x)
         out["F"] = solution.total_cost
-        # print(solution.total_cost)
-        # try inserting, if not feasible, cancel this vehicle assignment, and 
-        # then we repair later.
             

@@ -23,7 +23,7 @@ class Solution:
         self.node_num_items: np.ndarray = hvrp3l_instance.node_num_items
         self.node_demand_volumes: np.ndarray = hvrp3l_instance.total_demand_volumes
         self.node_demand_weights: np.ndarray = hvrp3l_instance.total_demand_weights
-        self.node_reefer_flags: np.ndarray = hvrp3l_instance.customer_reefer_flags
+        self.node_reefer_flags: np.ndarray = hvrp3l_instance.node_reefer_flags
         self.vehicle_volume_capacities: np.ndarray = hvrp3l_instance.vehicle_volume_capacities
         self.vehicle_weight_capacities: np.ndarray = hvrp3l_instance.vehicle_weight_capacities
         self.vehicle_container_dims: np.ndarray = hvrp3l_instance.vehicle_container_dims
