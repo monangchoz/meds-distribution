@@ -10,7 +10,8 @@ from pymoo.core.problem import StarmapParallelization
 from pymoo.optimize import minimize
 from pymoo.termination.default import DefaultSingleObjectiveTermination
 from pymoo_interface.arr1 import ARR1
-from pymoo_interface.hvrp3l_opt import HVRP3L_OPT, DuplicateElimination
+from pymoo_interface.hvrp3l_opt import (HVRP3L_OPT, DuplicateElimination,
+                                        RepairEncoding)
 
 
 def run():
@@ -22,8 +23,12 @@ def run():
     pool = mp.Pool(6)
     runner = StarmapParallelization(pool.starmap)
     problem_intf = HVRP3L_OPT(problem, ARR1(problem.num_customers, problem.num_vehicles), elementwise_runner=runner)
-    algo = BRKGA(n_elites=20, n_offsprings=10, n_mutants=5, eliminate_duplicates=DuplicateElimination(problem))
-    termination = DefaultSingleObjectiveTermination(n_max_gen=10)
+    algo = BRKGA(n_elites=20, 
+                 n_offsprings=10, 
+                 n_mutants=5,
+                 repair=RepairEncoding(), 
+                 eliminate_duplicates=DuplicateElimination(problem))
+    termination = DefaultSingleObjectiveTermination(n_max_gen=1000)
     res = minimize(problem_intf, algo, termination=termination,
                    seed=1,
                    verbose=True)

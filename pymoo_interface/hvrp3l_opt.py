@@ -7,16 +7,41 @@ from line_profiler import profile
 from problem.hvrp3l import HVRP3L
 from problem.solution import NO_VEHICLE, Solution
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
+from pymoo.core.individual import Individual
 from pymoo.core.problem import ElementwiseProblem
+from pymoo.core.repair import Repair
 from pymoo_interface.arr1 import ARR1, RepairMechanism
 
+
+def get_routes_from_x(x: np.ndarray, problem: HVRP3L)->List[List[int]]:
+    """
+        not necessarily feasible, hopefully (should!) x has been repaired
+    """
+    routes = [[] for _ in range(problem.num_vehicles)] # first dim for vehicle, second for orderings
+
+    for i in range(problem.num_customers, 2*problem.num_customers):
+        ci = i-problem.num_customers
+        cust_idx = problem.customers[ci].idx
+        if problem.node_reefer_flags[cust_idx]:
+            vi = math.floor(x[i]*problem.num_reefer_trucks)
+        else:
+            vi = math.floor(x[i]*problem.num_vehicles)
+        routes[vi].append(cust_idx)
+
+    for vi in range(problem.num_vehicles):
+        priorities = np.asanyarray([x[cust_idx-1] for cust_idx in routes[vi]])
+        routes[vi] = np.asanyarray(routes[vi])
+        sorted_idx = np.argsort(priorities)
+        routes[vi] = routes[vi][sorted_idx]        
+
+    return routes
 
 def hash_x_to_ndarray(x: np.ndarray, problem: HVRP3L)->np.ndarray:
     """
         hash? an individu for duplicate elimination
     """
     priorities = np.empty((problem.num_customers,), dtype=float)
-    arr = np.empty((problem.num_customers, 2), dtype=int) # first dim for vehicle, second for orderings
+    arr = np.empty((2, problem.num_customers), dtype=int) # first dim for vehicle, second for orderings
 
     for i in range(problem.num_customers, 2*problem.num_customers):
         ci = i-problem.num_customers
@@ -39,12 +64,11 @@ class DuplicateElimination(ElementwiseDuplicateElimination):
         super().__init__(**kwargs)
         self.problem: HVRP3L = problem
 
-    def is_equal(self, a, b):
-        print("hello2")
-        arr_a = hash_x_to_ndarray(a, self.problem)
-        arr_b = hash_x_to_ndarray(b, self.problem)
+    def is_equal(self, a:Individual, b:Individual):
+        arr_a = hash_x_to_ndarray(a.x, self.problem)
+        arr_b = hash_x_to_ndarray(b.x, self.problem)
         return np.array_equal(arr_a, arr_b)
-
+    
 
 class HVRP3L_OPT(ElementwiseProblem):
     def __init__(self,
@@ -54,7 +78,7 @@ class HVRP3L_OPT(ElementwiseProblem):
         super().__init__(elementwise=True, **kwargs)
         self.hvrp3l_instance = hvrp3l_instance
         self.n_var = 2*hvrp3l_instance.num_customers
-        self.repair = repair_mechanism.repair
+        self.add_remaining_requests = repair_mechanism.repair
 
         # first num_customers dims are for customer priority
         # the next num_customers dims are for vehicle assignment
@@ -146,12 +170,36 @@ class HVRP3L_OPT(ElementwiseProblem):
             solution.total_vehicle_fixed_cost += solution.vehicle_fixed_costs[vi]
             total_distance = solution.problem.compute_route_total_distance(solution.routes[vi])
             solution.total_vehicle_variable_cost += total_distance*solution.vehicle_variable_costs[vi]
-        self.repair(solution)
+        solution = self.add_remaining_requests(solution)
         return solution
-        
+    
+    def get_total_cost_without_decoding(self, x:np.ndarray)->float:
+        routes = get_routes_from_x(x, self.hvrp3l_instance)
+        total_fixed_cost = 0
+        total_variable_cost = 0
+        for vi, route in enumerate(routes):
+            if len(route)==0:
+                continue
+            total_fixed_cost += self.hvrp3l_instance.vehicle_fixed_costs[vi]
+            distance = self.hvrp3l_instance.compute_route_total_distance(route)
+            total_variable_cost += distance*self.hvrp3l_instance.vehicle_variable_costs[vi]
+        return total_fixed_cost + total_variable_cost
+
+
     # this is the decoding method
     @profile
     def _evaluate(self, x:np.ndarray, out:dict, *args, **kwargs):
-        solution = self.decode(x)
-        out["F"] = solution.total_cost
+        total_cost = self.get_total_cost_without_decoding(x)
+        out["F"] = total_cost
             
+
+class RepairEncoding(Repair):
+    def _do(self, problem: HVRP3L_OPT, X:np.ndarray, **kwargs):
+        print(problem)
+        for i, x in enumerate(X):
+            solution = problem.decode(x)
+            print(solution)
+            # print(solution.routes)
+            print(x)
+            new_x = x.copy()
+            exit()
