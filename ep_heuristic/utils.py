@@ -4,6 +4,38 @@ import numba as nb
 import numpy as np
 
 
+def is_packing_feasible(container_dim: np.ndarray,
+                        item_dims: np.ndarray, 
+                        rotations: np.ndarray,
+                        positions: np.ndarray)->bool:
+    item_actual_dims = np.take_along_axis(item_dims, rotations, axis=1)
+    num_items, _ = item_dims.shape
+    for i in range(num_items):
+        if is_outside_container(positions[i], item_actual_dims[i], container_dim):
+            return False
+        if is_intersect_nd_any_v2(positions[i], item_actual_dims[i], item_actual_dims[:i], positions[:i]):
+            return False
+    return True
+
+@nb.njit(nb.bool_(nb.float64[:],nb.float64[:],nb.float64[:]), cache=True)
+def is_outside_container(position: np.ndarray,item_dim: np.ndarray,container_dim: np.ndarray):
+    for k in range(3):
+        if position[k]+item_dim[k]>container_dim[k]:
+            return True
+    return False
+
+@nb.njit(nb.bool_[:](nb.float64[:,:],nb.float64[:],nb.float64[:]), cache=True)
+def check_if_outside_containerv2(insertion_positions: np.ndarray,item_dim: np.ndarray,container_dim: np.ndarray):
+    num_positions, _ = insertion_positions.shape
+    is_out_of_container = np.zeros((num_positions,), dtype=np.bool_)
+    for i in range(num_positions):
+        for k in range(3):
+            if insertion_positions[i,k]+item_dim[k]>container_dim[k]:
+                is_out_of_container[i]=True
+                break
+    return is_out_of_container
+    
+
 @np.vectorize(otypes=[bool])
 def is_intersect_1d(start_point_a: float, 
                     length_a: float,

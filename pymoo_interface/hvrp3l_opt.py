@@ -10,7 +10,7 @@ from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.individual import Individual
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.repair import Repair
-from pymoo_interface.arr1 import ARR1, RepairMechanism
+from pymoo_interface.arr2 import RepairMechanism
 
 
 def get_routes_from_x(x: np.ndarray, problem: HVRP3L)->List[List[int]]:
@@ -165,7 +165,7 @@ class HVRP3L_OPT(ElementwiseProblem):
                 n += c_num_items
 
         for vi in range(solution.num_vehicles):
-            if len(solution.routes[vi]) == 1:
+            if len(solution.routes[vi]) == 0:
                 continue
             solution.total_vehicle_fixed_cost += solution.vehicle_fixed_costs[vi]
             total_distance = solution.problem.compute_route_total_distance(solution.routes[vi])
@@ -194,12 +194,28 @@ class HVRP3L_OPT(ElementwiseProblem):
             
 
 class RepairEncoding(Repair):
-    def _do(self, problem: HVRP3L_OPT, X:np.ndarray, **kwargs):
-        print(problem)
+    def _do(self, problem: HVRP3L_OPT, X:np.ndarray, **kwargs)->np.ndarray:
+        hvrp3l_instance = problem.hvrp3l_instance
         for i, x in enumerate(X):
             solution = problem.decode(x)
-            print(solution)
-            # print(solution.routes)
-            print(x)
-            new_x = x.copy()
-            exit()
+            for vi, route in enumerate(solution.routes):
+                for cust_idx in route:
+                    vxi = hvrp3l_instance.num_customers + cust_idx-1
+                    if hvrp3l_instance.node_reefer_flags[cust_idx]:
+                        vi_original = math.floor(x[vxi]*hvrp3l_instance.num_reefer_trucks)
+                    else:
+                        vi_original = math.floor(x[vxi]*hvrp3l_instance.num_vehicles)
+                    if vi_original==vi:
+                        continue
+                    
+                    if hvrp3l_instance.node_reefer_flags[cust_idx]:
+                        new_x_vi = float(vi)/hvrp3l_instance.num_reefer_trucks + 1/(2*hvrp3l_instance.num_reefer_trucks)
+                    else:
+                        new_x_vi = float(vi)/hvrp3l_instance.num_vehicles + 1/(2*hvrp3l_instance.num_vehicles)
+                    x[vxi] = new_x_vi
+                cis = [cust_idx-1 for cust_idx in route]
+                priorities = x[cis]
+                sorted_priorites = np.sort(priorities)
+                x[cis] = sorted_priorites
+                X[i] = x
+        return X

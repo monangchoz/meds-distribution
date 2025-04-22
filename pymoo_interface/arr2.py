@@ -70,7 +70,7 @@ def get_sorted_possible_insertion_positions(vehicle_idxs:np.ndarray,
     sorted_idx = np.argsort(insertion_costs[:num_possible_insertions])
     return vehicle_idxs[sorted_idx], positions[sorted_idx], insertion_costs[sorted_idx]
 
-class ARR1(RepairMechanism):
+class ARR2(RepairMechanism):
     
     def get_possible_insertions(self, cust_idx:int, solution:Solution)->Tuple[np.ndarray, np.ndarray, np.ndarray]:
         for vehicle_idx, route in enumerate(solution.routes):
@@ -137,7 +137,7 @@ class ARR1(RepairMechanism):
     def repair(self, solution: Solution)->Solution:
         unvisited_customer_idxs: np.ndarray = np.where(solution.node_vhc_assignment_map==NO_VEHICLE)[0]
         if len(unvisited_customer_idxs) == 0:
-            return
+            return solution
         for cust_idx in unvisited_customer_idxs:
             vehicle_idxs, positions, insertion_costs = self.get_possible_insertions(cust_idx, solution)
             if len(vehicle_idxs) == 0:

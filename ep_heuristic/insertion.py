@@ -7,7 +7,8 @@ from ep_heuristic.utils import (compute_intersection_nd,
                                 compute_intersection_ndv2,
                                 is_intersect_nd_any_v2,
                                 is_intersect_nd_any_vectorized_ur,
-                                is_intersect_nd_vectorized)
+                                is_intersect_nd_vectorized,
+                                check_if_outside_containerv2)
 from line_profiler import profile
 from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 
@@ -88,21 +89,6 @@ def compute_supported_base_area_v2(item_dim: np.ndarray,
     return supported_base_area
 
 
-@nb.njit(nb.bool_[:](nb.float64[:,:],nb.float64[:],nb.float64[:]), cache=True)
-def check_if_outside_container(insertion_positions: np.ndarray,item_dim: np.ndarray,container_dim: np.ndarray):
-    is_out_of_container = np.sum(insertion_positions + item_dim[None, :] > container_dim[None, :], axis=1)>0
-    return is_out_of_container
-
-@nb.njit(nb.bool_[:](nb.float64[:,:],nb.float64[:],nb.float64[:]), cache=True)
-def check_if_outside_containerv2(insertion_positions: np.ndarray,item_dim: np.ndarray,container_dim: np.ndarray):
-    num_positions, _ = insertion_positions.shape
-    is_out_of_container = np.zeros((num_positions,), dtype=np.bool_)
-    for i in range(num_positions):
-        for k in range(3):
-            if insertion_positions[i,k]+item_dim[k]>container_dim[k]:
-                is_out_of_container[i]=True
-                break
-    return is_out_of_container
 
 
 @nb.njit(nb.bool_[:](nb.bool_[:],nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:],nb.float64), cache=True)
@@ -123,8 +109,6 @@ def is_insertion_feasible_vectorized(feasibility_flags:np.ndarray,
     
     is_still_feasible_and_floating = np.logical_and(feasibility_flags, insertion_positions[:, 2]>0)
     supported_base_area = compute_supported_base_area_vec(item_dim, insertion_positions[is_still_feasible_and_floating], inserted_item_dims, filled_positions, inserted_item_end_points)
-    # supported_base_areav2 = compute_supported_base_area_v2(item_dim, insertion_positions[is_still_feasible_and_floating], inserted_item_dims, filled_positions)
-    # assert np.allclose(supported_base_area, supported_base_areav2)
     base_area = item_dim[0]*item_dim[1]
     enough_base_support = supported_base_area/base_area >= base_support_alpha
     feasibility_flags[is_still_feasible_and_floating] = enough_base_support

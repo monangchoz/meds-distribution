@@ -2,6 +2,7 @@ from typing import List
 
 import numpy as np
 from problem.hvrp3l import HVRP3L
+from ep_heuristic.utils import is_packing_feasible
 
 NO_VEHICLE:int = 99999
 DEPOT:int = 0
@@ -48,3 +49,54 @@ class Solution:
     @property
     def total_cost(self):
         return self.total_vehicle_fixed_cost + self.total_vehicle_variable_cost
+    
+    @property
+    def is_feasible(self):
+        total_fixed_cost = 0
+        total_vehicle_variable_cost = 0
+        
+        is_visited = np.ndarray((self.num_nodes, ), dtype=bool)
+        is_visited[0] = True
+        for vi, route in enumerate(self.routes):
+            for cust_idx in route:
+                assert not is_visited[cust_idx]
+                is_visited[cust_idx] = True
+        assert np.sum(is_visited) == self.num_nodes
+        filled_volumes = np.zeros((self.num_vehicles,), dtype=float)
+        filled_weights = np.zeros((self.num_vehicles,), dtype=float)
+        for vi, route in enumerate(self.routes):
+            if len(route)==0:
+                continue
+            total_fixed_cost += self.vehicle_fixed_costs[vi]
+            distance = 0
+            prev_node = 0
+            for cust_idx in route:
+                distance += self.problem.distance_matrix[prev_node, cust_idx]
+                prev_node = cust_idx
+            distance += self.problem.distance_matrix[prev_node, 0]
+            total_vehicle_variable_cost += distance*self.vehicle_variable_costs[vi]
+            
+            for cust_idx in route:
+                filled_volumes[vi] += self.node_demand_volumes[cust_idx]
+                filled_weights[vi] += self.node_demand_weights[cust_idx]
+            assert filled_volumes[vi] <= self.vehicle_volume_capacities[vi]
+            assert filled_weights[vi] <= self.vehicle_weight_capacities[vi]
+            
+            total_num_items = sum(self.node_num_items[cust_idx] for cust_idx in route)
+            item_dims: np.ndarray = np.zeros([total_num_items, 3], dtype=float)
+            positions: np.ndarray = np.zeros([total_num_items, 3], dtype=float)
+            rotations: np.ndarray = np.zeros([total_num_items, 3], dtype=int)
+            n = 0
+            for i, cust_idx in enumerate(route):
+                c_num_items = self.node_num_items[cust_idx]
+                item_mask = self.node_item_mask[cust_idx, :]
+                item_dims[n:n+c_num_items] = self.item_dims[item_mask]
+                positions[n:n+c_num_items] = self.item_positions[item_mask]
+                rotations[n:n+c_num_items] = self.item_rotations[item_mask]
+                n += c_num_items
+            assert is_packing_feasible(self.vehicle_container_dims[vi], item_dims, rotations, positions)        
+        print(self.total_vehicle_fixed_cost, total_fixed_cost)
+        print(self.total_vehicle_variable_cost, total_vehicle_variable_cost)
+        assert self.total_vehicle_fixed_cost == total_fixed_cost
+        assert self.total_vehicle_variable_cost == total_vehicle_variable_cost
+        return True
