@@ -45,15 +45,17 @@ class HVRP3L:
 
 
         # okay from this on is information that are essential for solver
-        self.total_demand_volumes: np.ndarray = np.zeros([self.num_customers,], dtype=float)
-        self.total_demand_weights: np.ndarray = np.zeros([self.num_customers,], dtype=float)
-        self.customer_reefer_flags: np.ndarray = np.zeros([self.num_customers,], dtype=bool)
-        for ci, customer in enumerate(self.customers):
+        self.total_demand_volumes: np.ndarray = np.zeros([self.num_nodes,], dtype=float)
+        self.total_demand_weights: np.ndarray = np.zeros([self.num_nodes,], dtype=float)
+        self.customer_reefer_flags: np.ndarray = np.zeros([self.num_nodes,], dtype=bool)
+        self.node_num_items: np.ndarray = np.zeros([self.num_nodes,], dtype=int)
+        for customer in self.customers:
+            self.node_num_items[customer.idx] = customer.num_items
             total_volume = sum(item.volume for item in customer.items)
-            self.total_demand_volumes[ci] = total_volume
+            self.total_demand_volumes[customer.idx] = total_volume
             total_weight = sum(item.weight for item in customer.items)
-            self.total_demand_weights[ci] = total_weight
-            self.customer_reefer_flags[ci] = customer.need_refer_truck
+            self.total_demand_weights[customer.idx] = total_weight
+            self.customer_reefer_flags[customer.idx] = customer.need_refer_truck
 
         self.vehicle_volume_capacities: np.ndarray = np.asanyarray([vehicle.volume_capacity for vehicle in self.vehicles], dtype=float)
         self.vehicle_weight_capacities: np.ndarray = np.asanyarray([vehicle.weight_capacity for vehicle in self.vehicles], dtype=float)
@@ -83,11 +85,11 @@ class HVRP3L:
         self.item_dims: np.ndarray = np.stack(item_dims)
         self.item_fragility_flags: np.ndarray = np.asanyarray(item_fragility_flags, dtype=bool) 
 
-        self.customer_item_mask: np.ndarray = np.zeros([self.num_customers, self.num_items], dtype=bool)
+        self.node_item_mask: np.ndarray = np.zeros([self.num_nodes, self.num_items], dtype=bool)
         i = 0
-        for ci, customer in enumerate(customers):
+        for customer in customers:
             for item in customer.items:
-                self.customer_item_mask[ci, i] = True
+                self.node_item_mask[customer.idx, i] = True
                 i += 1
 
     def compute_route_total_distance(self, route: List[int])->float:

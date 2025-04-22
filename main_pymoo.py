@@ -2,7 +2,6 @@ import pathlib
 import random
 import time
 
-
 import numpy as np
 from problem.hvrp3l import HVRP3L
 from pymoo.algorithms.soo.nonconvex.de import DE
@@ -13,8 +12,8 @@ from pymoo_interface.hvrp3l_opt import HVRP3L_OPT
 
 
 def run():
-    # filename = "JK2_nc_30_ni__914_nv_4_0.json"
-    filename = "JK2_nc_50_ni__2763_nv_4_0.json"
+    filename = "JK2_nc_30_ni__914_nv_4_0.json"
+    # filename = "JK2_nc_50_ni__2763_nv_4_0.json"
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
     start = time.time()

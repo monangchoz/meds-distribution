@@ -26,7 +26,7 @@ class HVRP3L_OPT(ElementwiseProblem):
         
     # this is the decoding method
     @profile
-    def _evaluate(self, x, out, *args, **kwargs):
+    def _evaluate(self, x:np.ndarray, out:dict, *args, **kwargs):
         solution: Solution = Solution(self.hvrp3l_instance)
         problem = self.hvrp3l_instance
         customers = solution.problem.customers
@@ -35,32 +35,34 @@ class HVRP3L_OPT(ElementwiseProblem):
         
         for i in range(self.hvrp3l_instance.num_customers, 2*self.hvrp3l_instance.num_customers):
             ci = i-self.hvrp3l_instance.num_customers
-            if customers[ci].need_refer_truck:
+            cust_idx = customers[ci].idx
+            if solution.node_reefer_flags[cust_idx]:
                 vi = math.floor(x[i]*self.hvrp3l_instance.num_reefer_trucks)
             else:
                 vi = math.floor(x[i]*self.hvrp3l_instance.num_vehicles)
-            solution.cust_vhc_assignment_map[ci] = vi
+            solution.node_vhc_assignment_map[cust_idx] = vi
 
         for vi in range(self.hvrp3l_instance.num_vehicles):
-            vi_cust_idx = np.nonzero(solution.cust_vhc_assignment_map==vi)[0]
-            if len(vi_cust_idx) == 0:
+            vi_node_idx = np.nonzero(solution.node_vhc_assignment_map==vi)[0]
+            vi_x_idx = vi_node_idx-1 # it's to get their idx in x (chromosome/individu,i.e., cust 2 is in x[1])
+            if len(vi_node_idx) == 0:
                 continue
 
             # simple capacity checking
-            total_weights = np.sum(solution.customer_demand_weights[vi_cust_idx])
+            total_weights = np.sum(solution.node_demand_weights[vi_node_idx])
             if total_weights>problem.vehicle_weight_capacities[vi]:
                 continue
-            total_volumes = np.sum(solution.customer_demand_volumes[vi_cust_idx])
+            total_volumes = np.sum(solution.node_demand_volumes[vi_node_idx])
             if total_volumes>problem.vehicle_volume_capacities[vi]:
                 continue
 
             
-            cust_priorities = x[vi_cust_idx]
+            cust_priorities = x[vi_x_idx]
             sorted_idx = np.argsort(cust_priorities)
-            vi_cust_idx = vi_cust_idx[sorted_idx]
+            vi_node_idx = vi_node_idx[sorted_idx]
 
-            total_num_items = sum([customers[ci].num_items for ci in vi_cust_idx])
-
+            total_num_items = sum(solution.node_num_items[cust_idx] for cust_idx in vi_node_idx)
+            
             # this all actually can be pre-allocated in the problem interface
             # and used freely, to remove allocation time
             item_dims: np.ndarray = np.zeros([total_num_items, 3], dtype=float)
@@ -68,9 +70,9 @@ class HVRP3L_OPT(ElementwiseProblem):
             item_weights: np.ndarray = np.zeros([total_num_items, ], dtype=float)
             item_priorities: np.ndarray = np.zeros([total_num_items, ], dtype=float)
             n = 0
-            for i, ci in enumerate(vi_cust_idx):
-                c_num_items = customers[ci].num_items
-                item_mask = problem.customer_item_mask[ci, :]
+            for i, cust_idx in enumerate(vi_node_idx):
+                c_num_items = solution.node_num_items[cust_idx]
+                item_mask = problem.node_item_mask[cust_idx, :]
                 item_dims[n:n+c_num_items] = problem.item_dims[item_mask]
                 item_volumes[n:n+c_num_items] = problem.item_volumes[item_mask]
                 item_weights[n:n+c_num_items] = problem.item_weights[item_mask]
@@ -88,17 +90,17 @@ class HVRP3L_OPT(ElementwiseProblem):
             positions, rotations, is_packing_feasible = packing_result
             
             if not is_packing_feasible:
-                solution.cust_vhc_assignment_map[vi_cust_idx] = NO_VEHICLE
+                solution.node_vhc_assignment_map[vi_node_idx] = NO_VEHICLE
                 continue
             # now commit the route, because we can pack
-            solution.cust_vhc_assignment_map[vi_cust_idx] = vi
+            solution.node_vhc_assignment_map[vi_node_idx] = vi
             solution.filled_volumes[vi] = total_volumes
             solution.filled_weight_caps[vi] = total_weights
-            solution.routes[vi] += vi_cust_idx.tolist()
+            solution.routes[vi] += vi_node_idx.tolist()
             n = 0
-            for i, ci in enumerate(vi_cust_idx):
-                c_num_items = customers[ci].num_items
-                item_mask = problem.customer_item_mask[ci, :]
+            for i, cust_idx in enumerate(vi_node_idx):
+                c_num_items = solution.node_num_items[cust_idx]
+                item_mask = problem.node_item_mask[cust_idx, :]
                 solution.item_positions[item_mask] = positions[n:n+c_num_items]
                 solution.item_rotations[item_mask] = rotations[n:n+c_num_items]
                 n += c_num_items
@@ -109,6 +111,7 @@ class HVRP3L_OPT(ElementwiseProblem):
             solution.total_vehicle_fixed_cost += solution.vehicle_fixed_costs[vi]
             total_distance = solution.problem.compute_route_total_distance(solution.routes[vi])
             solution.total_vehicle_variable_cost += total_distance*solution.vehicle_variable_costs[vi]
+        # exit()
         self.repair(solution)
         out["F"] = solution.total_cost
         # print(solution.total_cost)

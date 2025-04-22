@@ -1,9 +1,9 @@
-import numpy as np
 from typing import List, Tuple
 
-
-from problem.solution import Solution, NO_VEHICLE
+import numpy as np
 from ep_heuristic.random_slpack import random_slpack
+from problem.solution import NO_VEHICLE, Solution
+
 
 class RepairMechanism:
     def __init__(self, 
@@ -136,7 +136,7 @@ class ARR1(RepairMechanism):
 
     
     def repair(self, solution: Solution)->Solution:
-        unvisited_customer_idxs: np.ndarray = np.where(solution.cust_vhc_assignment_map==NO_VEHICLE)[0]
+        unvisited_customer_idxs: np.ndarray = np.where(solution.node_vhc_assignment_map==NO_VEHICLE)[0]
         if len(unvisited_customer_idxs) == 0:
             return
         print(unvisited_customer_idxs)
