@@ -1,8 +1,9 @@
-from typing import List
+import copy
+from typing import List, Optional
 
 import numpy as np
-from problem.hvrp3l import HVRP3L
 from ep_heuristic.utils import is_packing_feasible
+from problem.hvrp3l import HVRP3L
 
 NO_VEHICLE:int = 99999
 DEPOT:int = 0
@@ -11,15 +12,21 @@ DEPOT_DONT_CARE: int = 99998
 
 class Solution:
     def __init__(self,
-                 hvrp3l_instance: HVRP3L):
+                 hvrp3l_instance: HVRP3L,
+                 filled_volumes: Optional[np.ndarray] = None,
+                 filled_weight_caps: Optional[np.ndarray] = None,
+                 item_positions: Optional[np.ndarray] = None,
+                 item_rotations: Optional[np.ndarray] = None,
+                 routes: Optional[List[List[int]]] = None,
+                 node_vhc_assignment_map: Optional[np.ndarray] = None,
+                 total_vehicle_variable_cost: float = 0,
+                 total_vehicle_fixed_cost: float = 0,
+                 ):
         self.problem: HVRP3L = hvrp3l_instance
         self.num_nodes = hvrp3l_instance.num_nodes
         self.num_customers = hvrp3l_instance.num_customers
         self.num_vehicles = hvrp3l_instance.num_vehicles
         self.num_items = hvrp3l_instance.num_items
-        self.routes: List[List[int]] = [[] for _ in range(self.num_vehicles)]
-        self.node_vhc_assignment_map: np.ndarray = np.full([self.num_nodes,], NO_VEHICLE, dtype=int)
-        self.node_vhc_assignment_map[DEPOT] = DEPOT_DONT_CARE
         
         self.node_num_items: np.ndarray = hvrp3l_instance.node_num_items
         self.node_demand_volumes: np.ndarray = hvrp3l_instance.total_demand_volumes
@@ -38,13 +45,39 @@ class Solution:
         self.item_fragility_flags: np.ndarray = hvrp3l_instance.item_fragility_flags
         self.node_item_mask: np.ndarray = hvrp3l_instance.node_item_mask
         
-        self.filled_volumes: np.ndarray = np.zeros([self.num_vehicles,], dtype=float)
-        self.filled_weight_caps: np.ndarray = np.zeros([self.num_vehicles,], dtype=float)
-        self.item_positions: np.ndarray = np.zeros_like(self.item_dims)
-        self.item_rotations: np.ndarray = np.zeros_like(self.item_dims, dtype=int)
+        # decision variables
+        # all must be provided if copying, otherwise, none for all
+        if filled_volumes is not None:
+            self.filled_volumes = filled_volumes.copy()
+            self.filled_weight_caps = filled_weight_caps.copy()
+            self.item_positions = item_positions.copy()
+            self.item_rotations = item_rotations.copy()
+            self.routes = copy.deepcopy(routes)
+            self.node_vhc_assignment_map = node_vhc_assignment_map.copy()
+            self.total_vehicle_variable_cost = total_vehicle_variable_cost
+            self.total_vehicle_fixed_cost = total_vehicle_fixed_cost
+        else:
+            self.filled_volumes: np.ndarray = np.zeros([self.num_vehicles,], dtype=float)
+            self.filled_weight_caps: np.ndarray = np.zeros([self.num_vehicles,], dtype=float)
+            self.item_positions: np.ndarray = np.zeros_like(self.item_dims)
+            self.item_rotations: np.ndarray = np.zeros_like(self.item_dims, dtype=int)
+            self.routes: List[List[int]] = [[] for _ in range(self.num_vehicles)]
+            self.node_vhc_assignment_map: np.ndarray = np.full([self.num_nodes,], NO_VEHICLE, dtype=int)
+            self.node_vhc_assignment_map[DEPOT] = DEPOT_DONT_CARE
+            self.total_vehicle_variable_cost:float = 0
+            self.total_vehicle_fixed_cost:float = 0
 
-        self.total_vehicle_variable_cost:float = 0
-        self.total_vehicle_fixed_cost:float = 0
+    def copy(self):
+        return self.__class__(self.problem,
+                              self.filled_volumes,
+                              self.filled_weight_caps,
+                              self.item_positions,
+                              self.item_rotations,
+                              self.routes,
+                              self.node_vhc_assignment_map,
+                              self.total_vehicle_variable_cost,
+                              self.total_vehicle_fixed_cost)
+
 
     @property
     def total_cost(self):
@@ -55,7 +88,7 @@ class Solution:
         total_fixed_cost = 0
         total_vehicle_variable_cost = 0
         
-        is_visited = np.ndarray((self.num_nodes, ), dtype=bool)
+        is_visited = np.zeros((self.num_nodes, ), dtype=bool)
         is_visited[0] = True
         for vi, route in enumerate(self.routes):
             for cust_idx in route:

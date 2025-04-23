@@ -4,13 +4,13 @@ import random
 from typing import List
 
 import numpy as np
-
 from problem.customer import Customer
 from problem.hvrp3l import HVRP3L
 from problem.item import Item
 from problem.node import Node
-from problem.vehicle import Vehicle        
-        
+from problem.vehicle import Vehicle
+
+
 def get_customer_items_random_date(cust_id: str)->List[Item]:
     transaction_filepath = pathlib.Path()/"raw_json"/"Transaksi_v2.json"
     with open(transaction_filepath.absolute(), "r") as json_data:
@@ -105,6 +105,19 @@ def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
         vec_dict = json.load(json_data)
     vehicles: List[Vehicle] = []
     i = 0
+    reefer_truck_dict = vec_dict["REEFER_TRUCK"]
+    for _ in range(num_reefer_trucks):
+        l,w,h = reefer_truck_dict["PANJANG"], reefer_truck_dict["LEBAR"], reefer_truck_dict["TINGGI"]
+        dim = np.asanyarray([l,w,h], dtype=float)
+        new_vec = Vehicle(i,
+                          reefer_truck_dict["SERVICE"],
+                          reefer_truck_dict["KAPASITAS"],
+                          dim,
+                          True,
+                          reefer_truck_dict["RATE"],
+                          reefer_truck_dict["VARIABLE_RATE"])
+        vehicles.append(new_vec)
+        i+=1
     normal_truck_dict = vec_dict["NORMAL_TRUCK"]
     for _ in range(num_normal_trucks):
         l,w,h = normal_truck_dict["PANJANG"], normal_truck_dict["LEBAR"], normal_truck_dict["TINGGI"]
@@ -119,19 +132,7 @@ def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
         vehicles.append(new_vec)
         i+=1
     
-    reefer_truck_dict = vec_dict["REEFER_TRUCK"]
-    for _ in range(num_reefer_trucks):
-        l,w,h = reefer_truck_dict["PANJANG"], reefer_truck_dict["LEBAR"], reefer_truck_dict["TINGGI"]
-        dim = np.asanyarray([l,w,h], dtype=float)
-        new_vec = Vehicle(i,
-                          reefer_truck_dict["SERVICE"],
-                          reefer_truck_dict["KAPASITAS"],
-                          dim,
-                          True,
-                          reefer_truck_dict["RATE"],
-                          reefer_truck_dict["VARIABLE_RATE"])
-        vehicles.append(new_vec)
-        i+=1
+    
     return vehicles
 
 if __name__=="__main__":

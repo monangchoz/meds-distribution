@@ -15,7 +15,8 @@ class HVRP3L:
                  depot_coord: np.ndarray,
                  customers: List[Customer],
                  vehicles: List[Vehicle],
-                 distance_matrix: Optional[np.ndarray] = None):
+                 distance_matrix: Optional[np.ndarray] = None,
+                 ceil_distance_matrix: bool= True):
         self.depot: Node= Node(0, depot_coord)
         self.customers: List[Customer] = customers
         self.nodes: List[Union[Node, Customer]] = [self.depot] + customers
@@ -24,8 +25,9 @@ class HVRP3L:
         self.distance_matrix: np.ndarray
         if distance_matrix is None:
             self.distance_matrix = haversine_distances(self.coords, self.coords)
+            self.distance_matrix = np.ceil(self.distance_matrix)
         else:
-            self.distance_matrix = distance_matrix
+            self.distance_matrix = np.ceil(distance_matrix)
         
         self.num_nodes: int = len(self.nodes)
         self.num_customers: int = len(self.customers)
