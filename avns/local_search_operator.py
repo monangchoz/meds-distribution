@@ -1,9 +1,22 @@
+from dataclasses import dataclass
 import random
 import numpy as np
 
 from problem.hvrp3l import HVRP3L
 from problem.solution import Solution
 from avns.utils import try_packing_custs_in_route
+
+
+@dataclass
+class LocalSearchArgs:
+    v1: int
+    v2: int
+    d_cost: float
+    
+@dataclass
+class SwapCustomerArgs(LocalSearchArgs):
+    ci_v1: int
+    ci_v2: int
 
 class LocalSearchOperator:
     def __init__(self):
@@ -13,7 +26,7 @@ class LocalSearchOperator:
         raise NotImplementedError()
     
 class SwapCustomer(LocalSearchOperator):
-    def __call__(self, original_solution:Solution)->Solution:
+    def __call__(self, original_solution:Solution, v1, v2, ci_v1, ci_v2)->Solution:
         problem = original_solution.problem
         solution = original_solution.copy()
         non_empty_routes_idx = [vi for vi in range(problem.num_vehicles) if len(solution.routes[vi])>0]
@@ -22,8 +35,6 @@ class SwapCustomer(LocalSearchOperator):
         ci_v2 = random.randint(0, len(solution.routes[v2])-1)
         cust_idx_v1 = solution.routes[v1][ci_v1]
         cust_idx_v2 = solution.routes[v2][ci_v2]
-        
-        
         
         d_filled_volumes_v1 = np.sum(problem.total_demand_volumes[cust_idx_v2] - problem.total_demand_volumes[cust_idx_v1])
         d_filled_volumes_v2 = -d_filled_volumes_v1
@@ -84,3 +95,13 @@ class SwapCustomer(LocalSearchOperator):
         d_cost = d_distance_v1*problem.vehicle_variable_costs[v1] + d_distance_v2*problem.vehicle_variable_costs[v2]
         solution.total_vehicle_variable_cost += d_cost
         return solution
+    
+    def __repr__(self):
+        return "customer-swap"
+    
+class CustomerShift(LocalSearchOperator):
+    def __call__(self, original_solution:Solution, v1: int, v2: int, ci_v1: int, new_pos_in_v2: int)->Solution:
+        problem = original_solution.problem
+        solution = original_solution.copy()
+        cust_idx = original_solution.routes[v1][ci_v1]
+        
