@@ -111,6 +111,7 @@ def greedy_insert(problem: HVRP3L, max_trials=100)->Solution:
         solution = Solution(problem)
         sorted_custs_idx = np.arange(problem.num_customers)+1
         np.random.shuffle(sorted_custs_idx)
+        sorted_custs_idx = sorted_custs_idx.tolist()
         initial_solution, is_feasible_solution_found = try_inserting_to_vehicles(solution, sorted_custs_idx)
         if is_feasible_solution_found:
             break
