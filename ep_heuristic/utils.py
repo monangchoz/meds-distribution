@@ -14,6 +14,7 @@ def is_packing_feasible(container_dim: np.ndarray,
         if is_outside_container(positions[i], item_actual_dims[i], container_dim):
             return False
         if is_intersect_nd_any_v2(positions[i], item_actual_dims[i], item_actual_dims[:i], positions[:i]):
+            intersected_item_idx = is_intersect_nd_any_idx(positions[i], item_actual_dims[i], item_actual_dims[:i], positions[:i])
             return False
     return True
 

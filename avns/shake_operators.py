@@ -28,6 +28,37 @@ def swap_customers_in_routes(v1_route: List[int],
         new_v2_route[pos] = v1_custs_idx[i]
     return new_v1_route, new_v2_route
 
+def try_packing_custs_in_route(solution: Solution, vi: int, route:List[int]):
+    problem = solution.problem
+    total_num_items = np.sum(solution.node_num_items[route])
+            
+    # this all actually can be pre-allocated in the problem interface
+    # and used freely, to remove allocation time
+    item_dims: np.ndarray = np.zeros([total_num_items, 3], dtype=float)
+    item_volumes: np.ndarray = np.zeros([total_num_items, ], dtype=float)
+    item_weights: np.ndarray = np.zeros([total_num_items, ], dtype=float)
+    item_priorities: np.ndarray = np.zeros([total_num_items, ], dtype=float)
+    n = 0
+    for i, cust_idx in enumerate(route):
+        c_num_items = solution.node_num_items[cust_idx]
+        item_mask = problem.node_item_mask[cust_idx, :]
+        item_dims[n:n+c_num_items] = problem.item_dims[item_mask]
+        item_volumes[n:n+c_num_items] = problem.item_volumes[item_mask]
+        item_weights[n:n+c_num_items] = problem.item_weights[item_mask]
+        item_priorities[n:n+c_num_items] = i
+        n += c_num_items
+            
+        # let's try packing
+    container_dim = problem.vehicle_container_dims[vi]
+    packing_result = random_slpack(item_dims,
+                                    item_volumes,
+                                    item_priorities,
+                                    container_dim,
+                                    0.8,
+                                    5)
+    return packing_result
+
+
 class ShakeOperator:
     def __init__(self):
         pass
@@ -88,12 +119,50 @@ class SE(ShakeOperator):
                                                                       v1_custs_idx,
                                                                       original_solution.routes[v2],
                                                                       v2_custs_idx)
+                print(v1_custs_idx, solution.routes[v1], new_v1_route)
+                print(v2_custs_idx, solution.routes[v2], new_v2_route)
                 
+                packing_result_v1 = try_packing_custs_in_route(solution, v1, new_v1_route)
+                positions_v1, rotations_v1, is_packing_feasible_v1 = packing_result_v1
+                if not is_packing_feasible_v1:
+                    continue
+                packing_result_v2 = try_packing_custs_in_route(solution, v2, new_v2_route)
+                positions_v2, rotations_v2, is_packing_feasible_v2 = packing_result_v2
+                if not is_packing_feasible_v2:
+                    continue
                 
-                
-                print(original_solution.routes[v1], new_v1_route)
-                print(original_solution.routes[v2], new_v2_route)
-                exit()
+                # swapping is feasible, commit the route
+                solution.node_vhc_assignment_map[new_v1_route] = v1
+                solution.filled_volumes[v1] += d_filled_volumes_v1
+                solution.filled_weight_caps[v1] += d_filled_weights_v1
+                solution.routes[v1] = new_v1_route
+                n = 0
+                for i, cust_idx in enumerate(new_v1_route):
+                    c_num_items = solution.node_num_items[cust_idx]
+                    item_mask = problem.node_item_mask[cust_idx, :]
+                    solution.item_positions[item_mask] = positions_v1[n:n+c_num_items]
+                    solution.item_rotations[item_mask] = rotations_v1[n:n+c_num_items]
+                    n += c_num_items
+                    
+                solution.node_vhc_assignment_map[new_v2_route] = v2
+                solution.filled_volumes[v2] += d_filled_volumes_v2
+                solution.filled_weight_caps[v2] += d_filled_weights_v2
+                solution.routes[v2] = new_v2_route
+                n = 0
+                for i, cust_idx in enumerate(new_v2_route):
+                    c_num_items = solution.node_num_items[cust_idx]
+                    item_mask = problem.node_item_mask[cust_idx, :]
+                    solution.item_positions[item_mask] = positions_v2[n:n+c_num_items]
+                    solution.item_rotations[item_mask] = rotations_v2[n:n+c_num_items]
+                    n += c_num_items
+
+                # compute d_variable costs
+                d_distance_v1 = problem.compute_route_total_distance(new_v1_route) - problem.compute_route_total_distance(original_solution.routes[v1])
+                d_distance_v2 = problem.compute_route_total_distance(new_v2_route) - problem.compute_route_total_distance(original_solution.routes[v2])
+                d_cost = d_distance_v1*problem.vehicle_variable_costs[v1] + d_distance_v2*problem.vehicle_variable_costs[v2]
+                solution.total_vehicle_variable_cost += d_cost
+                return solution
+        return original_solution
 
     def __call__(self, original_solution: Solution)->Solution:
         solution = original_solution

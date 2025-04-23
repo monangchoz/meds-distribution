@@ -16,10 +16,10 @@ def run():
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
     initial_solution = greedy_insert(problem)
-    print(initial_solution.is_feasible)
     se21 = SE(2, True, 10, 1)
-    se21(initial_solution)
-
+    solution = se21(initial_solution)
+    print(solution.is_feasible)
+    
 if __name__ == "__main__":
     np.random.seed(1)
     random.seed(1)
