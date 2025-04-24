@@ -43,8 +43,8 @@ class HVRP3L:
                 normal_trucks += [vehicle]
         self.num_reefer_trucks:int = len(reefer_trucks)
         self.num_normal_trucks:int = len(normal_trucks)
-        self.vehicles: List[Vehicle] = reefer_trucks + normal_trucks
-
+        vehicles = reefer_trucks + normal_trucks
+        self.vehicles: List[Vehicle] = vehicles
 
         # okay from this on is information that are essential for solver
         self.total_demand_volumes: np.ndarray = np.zeros([self.num_nodes,], dtype=float)
@@ -67,7 +67,6 @@ class HVRP3L:
         self.vehicle_fixed_costs: np.ndarray = np.asanyarray([vehicle.fixed_cost for vehicle in vehicles])
         self.vehicle_variable_costs: np.ndarray = np.asanyarray([vehicle.variable_cost for vehicle in vehicles])
         self.vehicle_reefer_flags: np.ndarray = np.asanyarray([vehicle.is_reefer for vehicle in vehicles])
-        
         # now for the items?
         # i dont know whether it is a good idea (enough merit) 
         # to flatten all of them here, or not.

@@ -94,6 +94,8 @@ class Solution:
             for cust_idx in route:
                 assert not is_visited[cust_idx]
                 is_visited[cust_idx] = True
+                assert not self.node_reefer_flags[cust_idx] or self.vehicle_reefer_flags[vi]
+
         assert np.sum(is_visited) == self.num_nodes
         filled_volumes = np.zeros((self.num_vehicles,), dtype=float)
         filled_weights = np.zeros((self.num_vehicles,), dtype=float)
