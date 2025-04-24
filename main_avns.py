@@ -5,7 +5,7 @@ import time
 
 import numpy as np
 from avns.greedy_insert import greedy_insert
-from avns.local_search_operator import CustomerShift, SwapCustomer
+from avns.local_search_operator import CustomerShift, SwapCustomer, RouteInterchange
 from avns.shake_operators import SE
 from problem.hvrp3l import HVRP3L
 from problem.solution import Solution
@@ -18,7 +18,7 @@ def run():
     problem = HVRP3L.read_from_json(instance_filepath)
     initial_solution = greedy_insert(problem)
     # se21 = SE(3, True, 10, 2)
-    sc = CustomerShift()
+    sc = RouteInterchange()
     potential_args = sc.get_all_potential_args(initial_solution)
     potential_args = sorted(potential_args)
     chosen_args = None

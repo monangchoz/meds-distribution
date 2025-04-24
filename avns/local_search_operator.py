@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Sequence, Tuple
+from itertools import combinations
 
 import numpy as np
 from avns.utils import try_packing_custs_in_route
@@ -57,7 +58,7 @@ class LocalSearchOperator:
     def get_all_potential_args(self, solution: Solution)->Sequence[LocalSearchArgs]:
         raise NotImplementedError()
 
-    def __call__(self, soltuion:Solution, args)->Tuple[Solution, bool]:
+    def __call__(self, solution:Solution, args)->Tuple[Solution, bool]:
         raise NotImplementedError()
     
     # def do(self, original_solution: Solution, *args, **kwargs)->Solution:
@@ -311,6 +312,7 @@ class CustomerShift(LocalSearchOperator):
                       v1: int,
                       ci: int,
                       new_pos: int)->Tuple[Solution, bool]:
+        solution = original_solution.copy()
         original_route = solution.routes[v1]
         cust_idx = original_route[ci]
         new_route = original_route.copy()
@@ -340,3 +342,130 @@ class CustomerShift(LocalSearchOperator):
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
+    
+@dataclass
+class RouteInterchangeArgs(LocalSearchArgs):
+    start_idx: int
+    end_idx: int
+    
+def compute_same_route_interchange_d_cost(solution: Solution,
+                                          v1:int,
+                                          start_idx:int,
+                                          end_idx:int):
+    original_route = solution.routes[v1]
+    new_route = original_route.copy()
+    new_route[start_idx:end_idx+1] = new_route[start_idx:end_idx+1][::-1]
+    new_cost = solution.problem.compute_route_total_distance(new_route)*solution.vehicle_variable_costs[v1]
+    original_cost = solution.problem.compute_route_total_distance(original_route)*solution.vehicle_variable_costs[v1]
+    d_cost = new_cost-original_cost
+    return d_cost
+
+def compute_route_interchange_d_cost(solution: Solution,
+                                          v1:int,
+                                          v2:int,
+                                          start_idx:int,
+                                          end_idx:int):
+    problem = solution.problem
+    original_v1_route = solution.routes[v1]
+    original_v2_route = solution.routes[v2]
+    combined_route = solution.routes[v1] + solution.routes[v2]
+    combined_route[start_idx:end_idx+1] = combined_route[start_idx:end_idx+1][::-1]
+    new_v1_route = combined_route[:len(original_v1_route)]
+    new_v2_route = combined_route[len(original_v1_route):]
+    d_distance_v1 = problem.compute_route_total_distance(new_v1_route)-problem.compute_route_total_distance(original_v1_route)
+    d_distance_v2 = problem.compute_route_total_distance(new_v2_route)-problem.compute_route_total_distance(original_v2_route)
+    d_cost = d_distance_v1*solution.vehicle_variable_costs[v1] + d_distance_v2*solution.vehicle_variable_costs[v2]
+    return d_cost
+
+def is_interchange_potential(solution: Solution,
+                             v1: int,
+                             v2: int,
+                             start_idx: int,
+                             end_idx: int):
+    problem = solution.problem
+    if problem.vehicle_reefer_flags[v1] and not problem.vehicle_reefer_flags[v2]:
+        return False
+    if problem.vehicle_reefer_flags[v2] and not problem.vehicle_reefer_flags[v1]:
+        return False
+    
+    
+    original_v1_route = solution.routes[v1]
+    combined_route = solution.routes[v1] + solution.routes[v2]
+    combined_route[start_idx:end_idx+1] = combined_route[start_idx:end_idx+1][::-1]
+    new_v1_route = combined_route[:len(original_v1_route)]
+    new_v2_route = combined_route[len(original_v1_route):]
+    
+    new_filled_volumes_v1 = np.sum(problem.total_demand_volumes[new_v1_route])
+    new_filled_volumes_v2 = np.sum(problem.total_demand_volumes[new_v2_route])
+    if new_filled_volumes_v1 > problem.vehicle_volume_capacities[v1]:
+        return False
+    if new_filled_volumes_v2 > problem.vehicle_volume_capacities[v2]:
+        return False
+    new_filled_weights_v1 = np.sum(problem.total_demand_weights[new_v1_route])
+    new_filled_weights_v2 = np.sum(problem.total_demand_weights[new_v2_route])
+    if new_filled_weights_v1 > problem.vehicle_weight_capacities[v1]:
+        return False
+    if new_filled_weights_v2 > problem.vehicle_weight_capacities[v2]:
+        return False
+    return True
+
+
+class RouteInterchange(LocalSearchOperator):
+    def get_all_potential_args(self, solution:Solution)->List[RouteInterchangeArgs]:
+        potential_args:List[RouteInterchangeArgs] = []
+        problem = solution.problem
+        non_empty_routes_idx = [vi for vi in range(problem.num_vehicles) if len(solution.routes[vi])>0]
+        for v1 in range(problem.num_vehicles):
+            if not v1 in non_empty_routes_idx:
+                continue
+            total_length = len(solution.routes[v1])
+            for v2 in range(v1, problem.num_vehicles):
+                if not v2 in non_empty_routes_idx:
+                    continue
+                if v1==v2 and len(solution.routes[v1])==1:
+                    continue
+                if v1 != v2:
+                    total_length += len(solution.routes[v2])
+                pairs = combinations(range(total_length), 2)
+                for start_idx, end_idx in pairs:
+                    if v1==v2:
+                        d_cost = compute_same_route_interchange_d_cost(solution, v1, start_idx, end_idx)
+                    else:
+                        d_cost = compute_route_interchange_d_cost(solution, v1, v2, start_idx, end_idx)
+                    if d_cost>=0:
+                        continue
+                    if not is_interchange_potential(solution, v1, v2, start_idx, end_idx):
+                        continue
+                    potential_args.append(RouteInterchangeArgs(d_cost, v1, v2, start_idx, end_idx))
+        return potential_args
+    
+    def __call__(self, solution:Solution, args:RouteInterchangeArgs):
+        return self.do(solution, args.v1, args.v2, args.start_idx, args.end_idx)
+        
+    def do_same_route(self, original_solution:Solution, v1:int, start_idx:int, end_idx:int)->Tuple[Solution, bool]:
+        original_route = original_solution.routes[v1]
+        solution = original_solution.copy()
+        new_route = original_route.copy()
+        new_route[start_idx:end_idx+1] = new_route[start_idx:end_idx+1][::-1]
+        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_route)
+        if not is_new_route_applicable:
+            return original_solution, False
+        return solution, True
+        
+    def do(self, original_solution:Solution, v1:int, v2:int, start_idx:int, end_idx:int)->Tuple[Solution, bool]:
+        if v1 == v2:
+            return self.do_same_route(original_solution, v1, start_idx, end_idx)
+        solution = original_solution.copy()
+        original_v1_route = solution.routes[v1]
+        combined_route = solution.routes[v1] + solution.routes[v2]
+        combined_route[start_idx:end_idx+1] = combined_route[start_idx:end_idx+1][::-1]
+        new_v1_route = combined_route[:len(original_v1_route)]
+        new_v2_route = combined_route[len(original_v1_route):]
+        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_v1_route)
+        if not is_new_route_applicable:
+            return original_solution, False
+        solution, is_new_route_applicable = self.apply_new_route(solution, v2, new_v2_route)
+        if not is_new_route_applicable:
+            return original_solution, False
+        return solution, True
+        
