@@ -18,7 +18,7 @@ def run():
     problem = HVRP3L.read_from_json(instance_filepath)
     initial_solution = greedy_insert(problem)
     # se21 = SE(3, True, 10, 2)
-    sc = SwapCustomer()
+    sc = CustomerShift()
     potential_args = sc.get_all_potential_args(initial_solution)
     potential_args = sorted(potential_args)
     chosen_args = None

@@ -212,11 +212,31 @@ class CustomerShiftArgs(LocalSearchArgs):
     new_pos_in_v2: int
 
 
+def compute_same_route_shifting_dcost(solution: Solution,
+                                        v1: int,
+                                        ci: int,
+                                        new_pos: int)->float:
+    if ci==new_pos:
+        return 0
+    original_route = solution.routes[v1]
+    cust_idx = original_route[ci]
+    new_route = original_route.copy()
+    new_route = new_route[:ci] + new_route[ci+1:]
+    new_route = new_route[:new_pos] + [cust_idx] + new_route[new_pos:]
+    original_distance = solution.problem.compute_route_total_distance(original_route)
+    new_distance = solution.problem.compute_route_total_distance(new_route)
+    d_cost = (new_distance-original_distance)*solution.vehicle_variable_costs[v1]
+    return d_cost
+
+    
+
 def compute_shifting_dcost(solution: Solution,
                            v1: int,
                            v2: int,
                            ci_v1: int,
                            new_pos_in_v2: int)->float:
+    if v1==v2:
+        return compute_same_route_shifting_dcost(solution, v1, ci_v1, new_pos_in_v2)
     problem = solution.problem
     distance_matrix = solution.problem.distance_matrix
     cust_idx_1 = solution.routes[v1][ci_v1]
@@ -286,20 +306,37 @@ class CustomerShift(LocalSearchOperator):
     def __call__(self, solution: Solution, args: CustomerShiftArgs):
         return self.do(solution, args.v1, args.v2, args.ci_v1, args.new_pos_in_v2)
 
-    def do(self, original_solution:Solution, v1: int, v2: int, ci_v1: int, new_pos_in_v2: int)->Solution:
+    def do_same_route(self,
+                      original_solution: Solution,
+                      v1: int,
+                      ci: int,
+                      new_pos: int)->Tuple[Solution, bool]:
+        original_route = solution.routes[v1]
+        cust_idx = original_route[ci]
+        new_route = original_route.copy()
+        new_route = new_route[:ci] + new_route[ci+1:]
+        new_route = new_route[:new_pos] + [cust_idx] + new_route[new_pos:]
+        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_route)
+        if not is_new_route_applicable:
+            return original_solution, False
+        return solution, True
+
+    def do(self, original_solution:Solution, v1: int, v2: int, ci_v1: int, new_pos_in_v2: int)->Tuple[Solution, bool]:
+        if v1==v2:
+            self.do_same_route(original_solution, v1, ci_v1, new_pos_in_v2)
         solution = original_solution.copy()
         cust_idx = original_solution.routes[v1][ci_v1]
         
         v1_route = original_solution.routes[v1]
         new_v1_route = v1_route.copy()
-        new_v1_route = new_v1_route[ci_v1]
+        del new_v1_route[ci_v1]
         new_v2_route = original_solution.routes[v2].copy()
         new_v2_route = new_v2_route[:new_pos_in_v2] + [cust_idx] + new_v2_route[new_pos_in_v2:]
 
         solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_v1_route)
         if not is_new_route_applicable:
-            return original_solution
+            return original_solution, False
         solution, is_new_route_applicable = self.apply_new_route(solution, v2, new_v2_route)
         if not is_new_route_applicable:
-            return original_solution
-        return solution
+            return original_solution, False
+        return solution, True
