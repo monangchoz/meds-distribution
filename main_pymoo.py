@@ -33,6 +33,7 @@ def run():
                    seed=1,
                    verbose=True)
     solution = problem_intf.decode(res.X)
+    solution.is_feasible
     end = time.time()
 if __name__ == "__main__":
     np.random.seed(1)

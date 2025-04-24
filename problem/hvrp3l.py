@@ -25,9 +25,9 @@ class HVRP3L:
         self.distance_matrix: np.ndarray
         if distance_matrix is None:
             self.distance_matrix = haversine_distances(self.coords, self.coords)
-            self.distance_matrix = np.ceil(self.distance_matrix)
+            self.distance_matrix = np.trunc(self.distance_matrix*1000)/(1000)
         else:
-            self.distance_matrix = np.ceil(distance_matrix)
+            self.distance_matrix = np.trunc(self.distance_matrix*1000)/(1000)
         
         self.num_nodes: int = len(self.nodes)
         self.num_customers: int = len(self.customers)
