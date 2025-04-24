@@ -3,8 +3,8 @@ from itertools import combinations
 from typing import List, Tuple
 
 import numpy as np
-from problem.solution import Solution
 from avns.utils import try_packing_custs_in_route
+from problem.solution import Solution
 
 
 def swap_customers_in_routes(v1_route: List[int], 
@@ -62,6 +62,11 @@ class SE(ShakeOperator):
             if len(solution.routes[v1]) < segment_length or len(solution.routes[v2]) < segment_length:
                 continue
             
+            if solution.vehicle_reefer_flags[v1] and not solution.vehicle_reefer_flags[v2]:
+                continue
+            if solution.vehicle_reefer_flags[v2] and not solution.vehicle_reefer_flags[v1]:
+                continue
+
             # select random segment from v1
             start_idx = random.randint(0, len(original_solution.routes[v1])-segment_length)
             v1_custs_idx = original_solution.routes[v1][start_idx:start_idx+segment_length]
