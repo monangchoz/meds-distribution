@@ -82,7 +82,9 @@ class Solution:
 
     @property
     def total_cost(self):
-        return self.total_vehicle_fixed_cost + self.total_vehicle_variable_cost
+        ret = self.total_vehicle_fixed_cost + self.total_vehicle_variable_cost
+        ret = math.trunc(ret*1000)/1000
+        return ret
     
     @property
     def is_feasible(self):

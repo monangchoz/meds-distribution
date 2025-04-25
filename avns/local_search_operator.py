@@ -1,6 +1,7 @@
+import math
 from dataclasses import dataclass
-from typing import List, Sequence, Tuple
 from itertools import combinations
+from typing import List, Sequence, Tuple
 
 import numpy as np
 from avns.utils import try_packing_custs_in_route
@@ -88,7 +89,7 @@ def compute_swapping_dcost(solution: Solution,
     cust_idx_1 = solution.routes[v1][ci_v1]
     cust_idx_2 = solution.routes[v2][ci_v2]
     prev_node = 0
-    if len(solution.routes[v1])>1:
+    if ci_v1>0:
         prev_node = solution.routes[v1][ci_v1-1]
     next_node = 0
     if len(solution.routes[v1])>ci_v1+1:
@@ -96,7 +97,7 @@ def compute_swapping_dcost(solution: Solution,
     
     d_distance_v1 = distance_matrix[prev_node, cust_idx_2]-distance_matrix[prev_node, cust_idx_1] + distance_matrix[cust_idx_2, next_node] - distance_matrix[cust_idx_1, next_node]
     prev_node = 0
-    if len(solution.routes[v2])>1:
+    if ci_v2>0:
         prev_node = solution.routes[v2][ci_v2-1]
     next_node = 0
     if len(solution.routes[v2])>ci_v2+1:
@@ -146,15 +147,15 @@ class SwapCustomer(LocalSearchOperator):
         potential_args: List[SwapCustomerArgs] = []
         problem = solution.problem
         for cust_idx_1 in range(1, problem.num_nodes):
-            v1 = solution.node_vhc_assignment_map[cust_idx_1]
+            v1 = solution.node_vhc_assignment_map[cust_idx_1].item()
             v1_route = solution.routes[v1]
             ci_v1 = v1_route.index(cust_idx_1)
             for cust_idx_2 in range(cust_idx_1+1, problem.num_nodes):
-                v2 = solution.node_vhc_assignment_map[cust_idx_2]
+                v2 = solution.node_vhc_assignment_map[cust_idx_2].item()
                 v2_route = solution.routes[v2]
                 ci_v2 = v2_route.index(cust_idx_2)
                 d_cost = compute_swapping_dcost(solution, v1, v2, ci_v1, ci_v2)
-                if d_cost >= 0:
+                if d_cost >= -1e-9:
                     continue
                 if is_swapping_potential(solution, v1, v2, ci_v1, ci_v2):
                     potential_args.append(SwapCustomerArgs(d_cost, v1, v2, ci_v1, ci_v2))
@@ -247,10 +248,10 @@ def compute_shifting_dcost(solution: Solution,
     next_node = 0
     if len(solution.routes[v1])>ci_v1+1:
         next_node = solution.routes[v1][ci_v1+1]
-    d_distance_v1 = - distance_matrix[prev_node, cust_idx_1] - distance_matrix[cust_idx_1, next_node]
+    d_distance_v1 = distance_matrix[prev_node, next_node] - distance_matrix[prev_node, cust_idx_1] - distance_matrix[cust_idx_1, next_node]
     
     prev_node = 0
-    if len(solution.routes[v2])>1:
+    if new_pos_in_v2>0:
         prev_node = solution.routes[v2][new_pos_in_v2-1]
     next_node = 0
     if len(solution.routes[v2])>new_pos_in_v2:
@@ -261,8 +262,7 @@ def compute_shifting_dcost(solution: Solution,
     if len(solution.routes[v2])==0:
         d_cost += problem.vehicle_fixed_costs[v2]
     if len(solution.routes[v1])==1 and v1 != v2:
-        d_cost -= problem.vehicle_container_dims[v1]
-    
+        d_cost -= problem.vehicle_fixed_costs[v1]
     return d_cost
 
 def is_shifting_potential(solution: Solution,
@@ -290,7 +290,7 @@ class CustomerShift(LocalSearchOperator):
         potential_args: List[CustomerShiftArgs] = []
         problem = solution.problem
         for cust_idx_1 in range(1, problem.num_nodes):
-            v1 = solution.node_vhc_assignment_map[cust_idx_1]
+            v1 = solution.node_vhc_assignment_map[cust_idx_1].item()
             ci_v1 = solution.routes[v1].index(cust_idx_1)
             for v2 in range(problem.num_vehicles):
                 v2_route = solution.routes[v2]
@@ -298,7 +298,7 @@ class CustomerShift(LocalSearchOperator):
                     if v2==v1 and new_pos_in_v2==ci_v1:
                         continue
                     d_cost = compute_shifting_dcost(solution, v1, v2, ci_v1, new_pos_in_v2)
-                    if d_cost >= 0:
+                    if d_cost >= -1e-9:
                         continue
                     if is_shifting_potential(solution, v1, v2, ci_v1):
                         potential_args.append(CustomerShiftArgs(d_cost, v1, v2, ci_v1, new_pos_in_v2))
@@ -325,7 +325,7 @@ class CustomerShift(LocalSearchOperator):
 
     def do(self, original_solution:Solution, v1: int, v2: int, ci_v1: int, new_pos_in_v2: int)->Tuple[Solution, bool]:
         if v1==v2:
-            self.do_same_route(original_solution, v1, ci_v1, new_pos_in_v2)
+            return self.do_same_route(original_solution, v1, ci_v1, new_pos_in_v2)
         solution = original_solution.copy()
         cust_idx = original_solution.routes[v1][ci_v1]
         
@@ -342,6 +342,9 @@ class CustomerShift(LocalSearchOperator):
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
+    
+    def __repr__(self):
+        return "customer-shift"
     
 @dataclass
 class RouteInterchangeArgs(LocalSearchArgs):
@@ -432,7 +435,7 @@ class RouteInterchange(LocalSearchOperator):
                         d_cost = compute_same_route_interchange_d_cost(solution, v1, start_idx, end_idx)
                     else:
                         d_cost = compute_route_interchange_d_cost(solution, v1, v2, start_idx, end_idx)
-                    if d_cost>=0:
+                    if d_cost>=-1e-9:
                         continue
                     if not is_interchange_potential(solution, v1, v2, start_idx, end_idx):
                         continue
@@ -468,4 +471,7 @@ class RouteInterchange(LocalSearchOperator):
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
+    
+    def __repr__(self):
+        return "route-interchange"
         
