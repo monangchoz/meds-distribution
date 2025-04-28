@@ -142,7 +142,7 @@ def solve_rcsp(split_multiedge_matrix: List[List[List[SplitEdge]]], giant_route:
 class Diversification:
     def __init__(self, num_nodes: int):
         self.non_imp: int = 0
-        self.operators: List[Callable] = [self.ruin_reconstruct, self.concat_split]
+        self.operators: List[Callable] = [self.ruin_reconstruct]
         self.imp_number: np.ndarray = np.zeros((len(self.operators),), dtype=int)
         self.call_number: np.ndarray = np.zeros((len(self.operators),), dtype=int)
         self.best_cost: Optional[float] = None
@@ -162,7 +162,7 @@ class Diversification:
     def __call__(self, solution: Solution)->Solution:
         score = (1+self.imp_number)/(1+self.call_number)
         probs = score/np.sum(score)
-        chosen_operator_idx = np.random.choice(2, size=1, p=probs).item()
+        chosen_operator_idx = np.random.choice(len(self.operators), size=1, p=probs).item()
         self.last_op_idx = chosen_operator_idx
         self.call_number[chosen_operator_idx] += 1
         chosen_operator = self.operators[chosen_operator_idx]
@@ -182,8 +182,8 @@ class Diversification:
             solution.node_vhc_assignment_map[route] = NO_VEHICLE
             solution.filled_volumes[vi] -= np.sum(solution.node_demand_volumes[route])
             solution.filled_weight_caps[vi] -= np.sum(solution.node_demand_weights[route])
-            solution.vehicle_variable_costs -= problem.compute_route_total_distance(route)*problem.vehicle_variable_costs[vi]
-            solution.vehicle_fixed_costs -= solution.vehicle_fixed_costs[vi]
+            solution.total_vehicle_variable_cost -= problem.compute_route_total_distance(route)*problem.vehicle_variable_costs[vi]
+            solution.total_vehicle_fixed_cost -= solution.vehicle_fixed_costs[vi]
 
         # sort unvisited customers based on volume and weight
         unvisited_custs_idx = np.where(solution.node_vhc_assignment_map==NO_VEHICLE)[0]

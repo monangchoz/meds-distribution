@@ -34,6 +34,7 @@ def run():
     problem = HVRP3L.read_from_json(instance_filepath)
     avns = setup_avns(100)
     solution = avns.solve(problem)
+    solution.is_feasible
     
 if __name__ == "__main__":
     np.random.seed(1)
