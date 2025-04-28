@@ -4,7 +4,7 @@ from itertools import combinations
 from typing import List, Sequence, Tuple
 
 import numpy as np
-from avns.utils import try_packing_custs_in_route
+from avns.utils import apply_new_route
 from problem.solution import Solution
 
 
@@ -22,39 +22,6 @@ class SwapCustomerArgs(LocalSearchArgs):
 class LocalSearchOperator:
     def __init__(self):
         pass
-
-    def apply_new_route(self,
-                        solution:Solution,
-                        vehicle_idx: int,
-                        new_route: List[int])->Tuple[Solution, bool]:
-        problem = solution.problem
-        original_route = solution.routes[vehicle_idx].copy()
-        # if infeasible, return false
-        packing_result = try_packing_custs_in_route(solution, vehicle_idx, new_route)
-        positions, rotations, is_packing_feasible = packing_result
-        if not is_packing_feasible:
-            return solution, False
-        
-        solution.node_vhc_assignment_map[new_route] = vehicle_idx
-        solution.filled_volumes[vehicle_idx] = np.sum(problem.total_demand_volumes[new_route])
-        solution.filled_weight_caps[vehicle_idx] = np.sum(problem.total_demand_weights[new_route])
-        solution.routes[vehicle_idx] = new_route
-        n = 0
-        for i, cust_idx in enumerate(new_route):
-            c_num_items = solution.node_num_items[cust_idx]
-            item_mask = problem.node_item_mask[cust_idx, :]
-            solution.item_positions[item_mask] = positions[n:n+c_num_items]
-            solution.item_rotations[item_mask] = rotations[n:n+c_num_items]
-            n += c_num_items
-
-        d_distance = problem.compute_route_total_distance(new_route) - problem.compute_route_total_distance(original_route)
-        d_cost = d_distance*problem.vehicle_variable_costs[vehicle_idx]
-        if len(new_route) == 0 and len(original_route) > 0:
-            solution.total_vehicle_fixed_cost -= problem.vehicle_fixed_costs[vehicle_idx]
-        elif len(new_route) >0 and len(original_route)==0:
-            solution.total_vehicle_fixed_cost += problem.vehicle_fixed_costs[vehicle_idx]
-        solution.total_vehicle_variable_cost += d_cost
-        return solution, True
         
     def get_all_potential_args(self, solution: Solution)->Sequence[LocalSearchArgs]:
         raise NotImplementedError()
@@ -175,7 +142,7 @@ class SwapCustomer(LocalSearchOperator):
         new_route = solution.routes[v1].copy()
         new_route[ci_v1] = cust_idx_v2
         new_route[ci_v2] = cust_idx_v1
-        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v1, new_route)
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
@@ -197,10 +164,10 @@ class SwapCustomer(LocalSearchOperator):
         new_v2_route = solution.routes[v2].copy()
         new_v2_route[ci_v2] = cust_idx_v1
 
-        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_v1_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v1, new_v1_route)
         if not is_new_route_applicable:
             return original_solution, False
-        solution, is_new_route_applicable = self.apply_new_route(solution, v2, new_v2_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v2, new_v2_route)
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
@@ -318,7 +285,7 @@ class CustomerShift(LocalSearchOperator):
         new_route = original_route.copy()
         new_route = new_route[:ci] + new_route[ci+1:]
         new_route = new_route[:new_pos] + [cust_idx] + new_route[new_pos:]
-        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v1, new_route)
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
@@ -335,10 +302,10 @@ class CustomerShift(LocalSearchOperator):
         new_v2_route = original_solution.routes[v2].copy()
         new_v2_route = new_v2_route[:new_pos_in_v2] + [cust_idx] + new_v2_route[new_pos_in_v2:]
 
-        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_v1_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v1, new_v1_route)
         if not is_new_route_applicable:
             return original_solution, False
-        solution, is_new_route_applicable = self.apply_new_route(solution, v2, new_v2_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v2, new_v2_route)
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
@@ -450,7 +417,7 @@ class RouteInterchange(LocalSearchOperator):
         solution = original_solution.copy()
         new_route = original_route.copy()
         new_route[start_idx:end_idx+1] = new_route[start_idx:end_idx+1][::-1]
-        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v1, new_route)
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
@@ -464,10 +431,10 @@ class RouteInterchange(LocalSearchOperator):
         combined_route[start_idx:end_idx+1] = combined_route[start_idx:end_idx+1][::-1]
         new_v1_route = combined_route[:len(original_v1_route)]
         new_v2_route = combined_route[len(original_v1_route):]
-        solution, is_new_route_applicable = self.apply_new_route(solution, v1, new_v1_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v1, new_v1_route)
         if not is_new_route_applicable:
             return original_solution, False
-        solution, is_new_route_applicable = self.apply_new_route(solution, v2, new_v2_route)
+        solution, is_new_route_applicable = apply_new_route(solution, v2, new_v2_route)
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
