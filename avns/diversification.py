@@ -69,13 +69,17 @@ def generate_split_edge_matrix(solution: Solution, giant_route:List[int], is_ree
     node_in_gr_reefer_flags = problem.node_reefer_flags[giant_route]
     node_in_gr_demand_weights = problem.total_demand_weights[giant_route]
     node_in_gr_demand_volumes = problem.total_demand_volumes[giant_route]
-    while start_idx < num_nodes-1:
-        for end_idx in range(num_nodes, start_idx, -1):
+    for start_idx in range(num_nodes):
+        for end_idx in reversed(range(start_idx, num_nodes)):
+            print(start_idx, end_idx, flush=True)
             if np.any(node_in_gr_reefer_flags[start_idx:end_idx]) and not problem.vehicle_reefer_flags[vi]:
                 continue
-            
-            total_weight = node_in_gr_demand_weights[start_idx:end_idx]
-            total_volume = node_in_gr_demand_volumes[start_idx:end_idx]
+
+            if split_edge_matrix[start_idx][end_idx] is not None:
+                continue
+
+            total_weight = np.sum(node_in_gr_demand_weights[start_idx:end_idx])
+            total_volume = np.sum(node_in_gr_demand_volumes[start_idx:end_idx])
             is_weight_capacity_enough = total_weight<=problem.vehicle_weight_capacities[vi]
             is_volume_capacity_enough = total_volume<=problem.vehicle_volume_capacities[vi]
             if not is_weight_capacity_enough or not is_volume_capacity_enough:
@@ -115,8 +119,6 @@ def solve_rcsp(split_multiedge_matrix: List[List[List[SplitEdge]]], giant_route:
         if np.all(umask):
             continue
         
-        
-
         i = curr_node + 1
         for j in range(i, num_nodes):
             for edge in split_multiedge_matrix[i][j]:
@@ -222,9 +224,10 @@ class Diversification:
             ranks[sorted_idx] = np.arange(len(ranks))
             m = len(non_empty_routes_idx)
             probs = 2*(m-ranks+1)/(m*(m+1))
+            probs /= np.sum(probs)
             selected_vi = np.random.choice(non_empty_routes_idx, size=1, p=probs).item()
             giant_route += solution.routes[selected_vi]
-            non_empty_routes_idx.remove(first_vi)
+            non_empty_routes_idx.remove(selected_vi)
         return giant_route
             
     def alter(self, solution: Solution, giant_route):
@@ -254,7 +257,7 @@ class Diversification:
         split_multi_edge_matrix: List[List[List[SplitEdge]]] = [[[]]*num_nodes]*num_nodes
         reefer_split_edge_matrix = generate_split_edge_matrix(original_solution, giant_route, is_reefer=True)
         normal_split_edge_matrix = generate_split_edge_matrix(original_solution, giant_route, is_reefer=False)
-        
+        exit()
         for i in range(num_nodes):
             for j in range(i+1, num_nodes):
                 edge = reefer_split_edge_matrix[i][j]

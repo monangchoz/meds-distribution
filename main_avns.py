@@ -28,8 +28,9 @@ def setup_avns(max_iteration:int)->AVNS:
 
 
 def run():
-    filename = "JK2_nc_30_ni__914_nv_4_0.json"
+    # filename = "JK2_nc_30_ni__914_nv_4_0.json"
     # filename = "JK2_nc_50_ni__2763_nv_4_0.json"
+    filename = "JK2_nc_50_ni__3719_nv_10_0.json"
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
     avns = setup_avns(100)

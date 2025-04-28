@@ -136,4 +136,4 @@ def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
     return vehicles
 
 if __name__=="__main__":
-    generate("JK2", 50)
+    generate("JK2", 50, num_normal_trucks=5, num_reefer_trucks=5)
