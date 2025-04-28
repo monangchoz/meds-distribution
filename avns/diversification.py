@@ -1,12 +1,15 @@
-from dataclasses import dataclass
+
+import heapq
 import math
 import random
-from typing import Tuple, List, Callable, Optional
+from dataclasses import dataclass
+from typing import Callable, List, Optional, Tuple
 
 import numpy as np
-from problem.hvrp3l import HVRP3L
-from problem.solution import Solution, NO_VEHICLE
 from avns.utils import apply_new_route, try_packing_custs_in_route
+from problem.hvrp3l import HVRP3L
+from problem.solution import NO_VEHICLE, Solution
+
 
 def get_possible_insertion_positions(solution: Solution, cust_idx:int)->Tuple[np.ndarray, np.ndarray, np.ndarray]:
     problem = solution.problem
@@ -84,7 +87,7 @@ def generate_split_edge_matrix(solution: Solution, giant_route:List[int], is_ree
             for i in range(start_idx, end_idx):
                 total_cost = problem.vehicle_fixed_costs[vi]
                 ci = giant_route[start_idx]
-                for j in range(i+1, end_idx):
+                for j in range(i, end_idx): # starting from i not i+1, route with single customer
                     cj = giant_route[j]
                     distance = problem.distance_matrix[ci, cj]
                     cost = distance*problem.vehicle_variable_costs[vi]
@@ -93,17 +96,58 @@ def generate_split_edge_matrix(solution: Solution, giant_route:List[int], is_ree
                     split_edge_matrix[ci][cj] = edge
     return split_edge_matrix
             
+def solve_rcsp(split_multiedge_matrix: List[List[List[SplitEdge]]], giant_route:List[int], num_vehicles: int)->List[List[int]]:
+    pq:List[Tuple[float, int, np.ndarray, int, int]] = []
+    num_nodes = len(split_multiedge_matrix)
+    predecessor_policy: List[Tuple[int, int]] = [(999999,999999)]*num_nodes
+    vehicles_usage_mask = np.zeros((num_vehicles,), dtype=bool)
+    predecessor = -1
+    heapq.heappush(pq, (0, 0, vehicles_usage_mask, predecessor, 9999))
+    h_route: List[int] = []
+    while len(pq)>0:
+        curr_item = heapq.heappop(pq)
+        cost_to_reach, curr_node, umask, predecessor, vehicle_idx = curr_item
+        if curr_node>0:
+            predecessor_policy[curr_node] = (predecessor, vehicle_idx)
+        if curr_node == num_nodes-1:
+            # finished
+            break
+        if np.all(umask):
+            continue
+        
+        
+
+        i = curr_node + 1
+        for j in range(i, num_nodes):
+            for edge in split_multiedge_matrix[i][j]:
+                if umask[edge.vehicle_idx]:
+                    continue
+                new_umask = umask.copy()
+                new_umask[edge.vehicle_idx] = True
+                new_item = (cost_to_reach+edge.cost, j, new_umask, curr_node, edge.vehicle_idx)
+                heapq.heappush(pq, new_item)
+    
+    # now let's backtrack the predecessor policy and collect all routes
+    curr_node = num_nodes-1
+    routes: List[List[int]] = [[]*num_vehicles]
+    while curr_node > 0:
+        j = curr_node
+        i, vi = predecessor_policy[j]
+        routes[vi] = giant_route[i:j+1]
+        curr_node = i-1
+    return routes
+
 
 
 class Diversification:
-    def __init__(self, problem: HVRP3L):
+    def __init__(self, num_nodes: int):
         self.non_imp: int = 0
-        self.operators: List[Callable] = [self.ruin_reconstruct]
+        self.operators: List[Callable] = [self.ruin_reconstruct, self.concat_split]
         self.imp_number: np.ndarray = np.zeros((len(self.operators),), dtype=int)
         self.call_number: np.ndarray = np.zeros((len(self.operators),), dtype=int)
         self.best_cost: Optional[float] = None
         self.last_op_idx: int = 999999
-        self.edge_eliminated_counts: np.ndarray = np.zeros((problem.num_nodes, problem.num_nodes), dtype=int)
+        self.edge_eliminated_counts: np.ndarray = np.zeros((num_nodes, num_nodes), dtype=int)
         
     def update_improvement_status(self, current_solution: Solution):
         if self.best_cost is None:
@@ -113,6 +157,7 @@ class Diversification:
             self.non_imp += 1
         else:
             self.imp_number[self.last_op_idx] += 1
+            self.non_imp = 0
         
     def __call__(self, solution: Solution)->Solution:
         score = (1+self.imp_number)/(1+self.call_number)
@@ -203,45 +248,39 @@ class Diversification:
             giant_route[j] = tmp
         return giant_route
         
-    def split(self, solution:Solution, giant_route:List[int])->Solution:
-        problem = solution.problem
-        num_nodes = solution.problem.num_nodes
+    def split(self, original_solution:Solution, giant_route:List[int])->Solution:
+        problem = original_solution.problem
+        num_nodes = original_solution.problem.num_nodes
         split_multi_edge_matrix: List[List[List[SplitEdge]]] = [[[]]*num_nodes]*num_nodes
-        reefer_split_edge_matrix = generate_split_edge_matrix(solution, giant_route, is_reefer=True)
+        reefer_split_edge_matrix = generate_split_edge_matrix(original_solution, giant_route, is_reefer=True)
+        normal_split_edge_matrix = generate_split_edge_matrix(original_solution, giant_route, is_reefer=False)
+        
         for i in range(num_nodes):
             for j in range(i+1, num_nodes):
-                if reefer_split_edge_matrix[i][j] is None:
-                    continue
                 edge = reefer_split_edge_matrix[i][j]
-                # duplicate for every possible reefer matrix
-                for vi in range(problem.num_reefer_trucks):
-                    new_edge = SplitEdge(edge.cost, vi)
-                    split_multi_edge_matrix[i][j].append(new_edge)
-        
-        
-        normal_split_edge_matrix = generate_split_edge_matrix(solution, giant_route, is_reefer=False)
-        for i in range(num_nodes):
-            for j in range(i+1, num_nodes):
-                if normal_split_edge_matrix[i][j] is None:
-                    continue
+                if edge is not None:
+                    # duplicate for every possible reefer matrix
+                    for vi in range(problem.num_reefer_trucks):
+                        new_edge = SplitEdge(edge.cost, vi)
+                        split_multi_edge_matrix[i][j].append(new_edge)
                 edge = normal_split_edge_matrix[i][j]
-                # duplicate for every possible reefer matrix
-                for vi in range(problem.num_reefer_trucks, problem.num_vehicles):
-                    new_edge = SplitEdge(edge.cost, vi)
-                    split_multi_edge_matrix[i][j].append(new_edge)
+                if edge is not None:
+                    # duplicate for every possible normal matrix
+                    for vi in range(problem.num_reefer_trucks, problem.num_vehicles):
+                        new_edge = SplitEdge(edge.cost, vi)
+                        split_multi_edge_matrix[i][j].append(new_edge)
         
-            
-            
-        # solve dijkstra on (node, bitmask)
-        # convert shortest path route into routes and loading plans
-        # return new solution
+        final_routes = solve_rcsp(split_multi_edge_matrix, giant_route, problem.num_vehicles)
+        solution = original_solution.copy()
+        for vi, route in enumerate(final_routes):
+            solution, is_route_feasible = apply_new_route(solution, vi, route)
+            if not is_route_feasible:
+                return original_solution
         return solution
     
     def concat_split(self, original_solution: Solution)->Solution:
         giant_route = self.concat(original_solution)
-        giant_route = self.alter()
-        # final_routes_with_info, is_splitting_feasible = self.split(original_solution, giant_route)
+        giant_route = self.alter(original_solution, giant_route)
         solution = original_solution.copy()
-        # if is_splitting_feasible:
-        #     # apply final routes
+        solution = self.split(solution, giant_route)
         return solution 
