@@ -1,14 +1,15 @@
-from line_profiler import profile
+import math
 import random
 from typing import Optional, Tuple
 
 import numba as nb
 import numpy as np
-
-from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 from ep_heuristic.insertion import argsort_items, insert_items
+from line_profiler import profile
+from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 
 
+@nb.njit(nb.types.Tuple(nb.float64[:,:], nb.int64[:,:], nb.bool)(nb.float64[:,:],nb.float64[:], nb.int64[:], nb.float64[:], nb.float64, nb.int64))
 def random_slpack(item_dims: np.ndarray,
                     item_volumes: np.ndarray,
                     item_priorities: np.ndarray,
@@ -23,34 +24,56 @@ def random_slpack(item_dims: np.ndarray,
     item_base_areas = np.prod(item_dims[:, :2], axis=1)
     sorted_idx = argsort_items(item_base_areas, item_volumes, item_priorities)
     rotation_trial_idx = np.tile(np.arange(2), [num_items, 1])
-    positions: np.ndarray = np.empty((num_items, 3), dtype=np.float64)
-    rotations: np.ndarray = np.empty((num_items, 3), dtype=np.int64)
-    actual_item_dims: np.ndarray = np.empty_like(item_dims) #this can change if rotated.
+    # positions: np.ndarray = np.empty((num_items, 3), dtype=np.float64)
+    # rotations: np.ndarray = np.empty((num_items, 3), dtype=np.int64)
     
-    for i in range(max_trial):
-        if i>0:
-            # swap some orderings as a local search operator
-            j,k = random.randint(0, num_items-1), random.randint(0, num_items-1)
-            if item_priorities[j] == item_priorities[k]:
-                a = sorted_idx[j]
-                sorted_idx[j] = sorted_idx[k]
-                sorted_idx[k] = a
+
+    batch_size = 4
+    num_batches = math.ceil(max_trial/batch_size)
+    # batched parallelization
+    result_positions = np.empty((batch_size, num_items, 3), dtype=float)
+    result_rotations = np.empty((batch_size, num_items, 3), dtype=int)
+    result_feasibilities = np.zeros((batch_size,), dtype=bool)
+    actual_item_dims_tmp: np.ndarray = np.empty_like(result_positions) #this can change if rotated.
+
+    sorted_idx_batches = np.empty((batch_size, num_items), dtype=int)
+    rotation_trial_idx_batches = np.empty((batch_size, num_items, 2), dtype=int)
+    for b in range(batch_size):
+        sorted_idx_batches[b] = sorted_idx
+        rotation_trial_idx_batches[b] = rotation_trial_idx
+
+    for z in range(num_batches):
+        for b in range(batch_size):
+            if z*batch_size + b >= max_trial:
+                break
+            for t in range(5): # swapping 5 kali, maybe, i dont'know
+                # swap some orderings as a local search operator
+                j,k = np.random.randint(0, num_items-1, size=2)
+                # j,k = random.randint(0, num_items-1), random.randint(0, num_items-1)
+                if item_priorities[j] == item_priorities[k]:
+                    a = sorted_idx_batches[b, j]
+                    sorted_idx_batches[b,j] = sorted_idx_batches[b,k]
+                    sorted_idx_batches[b,k] = a
+                
+                j = np.random.randint(0, num_items-1)
+                rotation_trial_idx_batches[b, j, :] = rotation_trial_idx_batches[b, j, [1,0]]
             
-            j = random.randint(0, num_items-1)
-            rotation_trial_idx[j, :] = rotation_trial_idx[j,[1,0]]
-            
-        positions, rotations, is_feasible = insert_items(item_dims[sorted_idx], 
-                                                         container_dim, 
+            result_positions[b], result_rotations[b], result_feasibilities[b] = insert_items(item_dims[sorted_idx_batches[b]], 
+                                                         container_dim,
                                                          POSSIBLE_ROTATION_PERMUTATION_MATS, 
-                                                         rotation_trial_idx,
-                                                         positions,
-                                                         rotations,
-                                                         actual_item_dims, 
+                                                         rotation_trial_idx_batches[b],
+                                                         result_positions[b],
+                                                         result_rotations[b],
+                                                         actual_item_dims_tmp[b],
                                                          base_support_alpha)
-        if not is_feasible:
-            continue
-        inverted_idx = np.argsort(sorted_idx)
-        positions = positions[inverted_idx]
-        rotations = rotations[inverted_idx]
-        return positions, rotations, True
-    return positions, rotations, False
+        for b in range(batch_size):
+            if not result_feasibilities[b]:
+                continue
+            
+            inverted_idx = np.argsort(sorted_idx_batches[b])
+            positions = result_positions[b][inverted_idx]
+            rotations = result_rotations[b][inverted_idx]
+            return positions, rotations, True
+    
+
+    return result_positions[0], result_rotations[0], False

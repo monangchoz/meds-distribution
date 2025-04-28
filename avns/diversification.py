@@ -7,6 +7,7 @@ from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 from avns.utils import apply_new_route, try_packing_custs_in_route
+from line_profiler import profile
 from problem.hvrp3l import HVRP3L
 from problem.solution import NO_VEHICLE, Solution
 
@@ -171,6 +172,7 @@ class Diversification:
         new_solution = chosen_operator(solution)
         return new_solution
 
+    @profile
     def ruin_reconstruct(self, original_solution: Solution)->Solution:
         solution = original_solution.copy()
         problem = solution.problem

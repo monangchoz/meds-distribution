@@ -15,6 +15,8 @@ def try_inserting_to_vehicles(solution:Solution, sorted_custs_idx: np.ndarray)->
         # try to pack here actually, not after every insertion..?
         # check if packing feasible
         for vehicle_idx, route in enumerate(solution.routes):
+            if len(route)==0:
+                continue
             total_num_items = np.sum(problem.node_num_items[route])
             item_dims: np.ndarray = np.zeros([total_num_items, 3], dtype=float)
             item_volumes: np.ndarray = np.zeros([total_num_items, ], dtype=float)

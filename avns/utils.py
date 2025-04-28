@@ -2,8 +2,11 @@ from typing import List, Tuple
 
 import numpy as np
 from ep_heuristic.random_slpack import random_slpack
+from line_profiler import profile
 from problem.solution import Solution
 
+
+@profile
 def try_packing_custs_in_route(solution: Solution, 
                                vi: int, 
                                route:List[int])->Tuple[np.ndarray, np.ndarray, bool]:
@@ -36,6 +39,7 @@ def try_packing_custs_in_route(solution: Solution,
                                     5)
     return packing_result
 
+@profile
 def apply_new_route(solution:Solution,
                     vehicle_idx: int,
                     new_route: List[int])->Tuple[Solution, bool]:

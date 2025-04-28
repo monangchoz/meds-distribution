@@ -5,6 +5,7 @@ from typing import List, Sequence, Tuple
 
 import numpy as np
 from avns.utils import apply_new_route
+from line_profiler import profile
 from problem.solution import Solution
 
 
@@ -32,18 +33,43 @@ class LocalSearchOperator:
     # def do(self, original_solution: Solution, *args, **kwargs)->Solution:
     #     raise NotImplementedError()
 
+@profile
 def compute_same_route_swapping_dcost(solution:Solution, v1: int, ci_v1:int, ci_v2:int):
     original_route = solution.routes[v1]
-    original_distance = solution.problem.compute_route_total_distance(original_route)
-    cust_idx_1 = solution.routes[v1][ci_v1]
-    cust_idx_2 = solution.routes[v1][ci_v2]
-    new_route = original_route.copy()
-    new_route[ci_v1] = cust_idx_2
-    new_route[ci_v2] = cust_idx_1
-    new_distance = solution.problem.compute_route_total_distance(new_route)
-    d_cost = (new_distance-original_distance)*solution.vehicle_variable_costs[v1]
+    a = min(ci_v1, ci_v2)
+    b = max(ci_v1, ci_v2)
+    cust_a = original_route[a]
+    cust_b = original_route[b]
+    route_len = len(original_route)
+    prev_node_a = 0
+    if a > 0:
+        prev_node_a = original_route[a-1]
+    next_node_a = 0
+    if a+1 < route_len:
+        next_node_a = original_route[a+1]
+    
+    prev_node_b = 0
+    if b > 0:
+        prev_node_b = original_route[b-1]
+    next_node_b = 0
+    if b+1 < route_len:
+        next_node_b = original_route[b+1]
+    
+    new_prev_a = prev_node_b
+    new_next_a = next_node_b
+    new_prev_b = prev_node_a
+    new_next_b = next_node_a
+    if a == b-1:
+        new_prev_a = cust_b
+        new_next_b = cust_a
+    distance_matrix = solution.problem.distance_matrix
+    d_distance = distance_matrix[new_prev_a, cust_a] + distance_matrix[cust_a, new_next_a] + distance_matrix[new_prev_b, cust_b] + distance_matrix[cust_b, new_next_b]
+    d_distance += -(distance_matrix[prev_node_a, cust_a] + distance_matrix[cust_a, next_node_a] + distance_matrix[prev_node_b, cust_b] + distance_matrix[cust_b, next_node_b])
+    d_cost = d_distance*solution.vehicle_variable_costs[v1]
+
     return d_cost
 
+@profile
 def compute_swapping_dcost(solution: Solution,
                            v1: int,
                            v2: int,
@@ -73,6 +99,7 @@ def compute_swapping_dcost(solution: Solution,
     d_cost = d_distance_v1*problem.vehicle_variable_costs[v1] + d_distance_v2*problem.vehicle_variable_costs[v2]
     return d_cost
 
+@profile
 def is_swapping_potential(solution: Solution,
                            v1: int,
                            v2: int,
@@ -131,6 +158,7 @@ class SwapCustomer(LocalSearchOperator):
     def __call__(self, solution:Solution, args: SwapCustomerArgs)->Tuple[Solution, bool]:
         return self.do(solution, args.v1, args.v2, args.ci_v1, args.ci_v2)
 
+    @profile
     def do_same_route(self, original_solution:Solution,
                  v1: int,
                  ci_v1: int,
@@ -147,6 +175,7 @@ class SwapCustomer(LocalSearchOperator):
             return original_solution, False
         return solution, True
 
+    @profile
     def do(self, original_solution:Solution,
                  v1: int,
                  v2: int,
@@ -180,7 +209,7 @@ class CustomerShiftArgs(LocalSearchArgs):
     ci_v1: int
     new_pos_in_v2: int
 
-
+@profile
 def compute_same_route_shifting_dcost(solution: Solution,
                                         v1: int,
                                         ci: int,
@@ -198,7 +227,7 @@ def compute_same_route_shifting_dcost(solution: Solution,
     return d_cost
 
     
-
+@profile
 def compute_shifting_dcost(solution: Solution,
                            v1: int,
                            v2: int,
@@ -232,6 +261,7 @@ def compute_shifting_dcost(solution: Solution,
         d_cost -= problem.vehicle_fixed_costs[v1]
     return d_cost
 
+@profile
 def is_shifting_potential(solution: Solution,
                           v1: int,
                           v2: int,
@@ -274,6 +304,7 @@ class CustomerShift(LocalSearchOperator):
     def __call__(self, solution: Solution, args: CustomerShiftArgs):
         return self.do(solution, args.v1, args.v2, args.ci_v1, args.new_pos_in_v2)
 
+    @profile
     def do_same_route(self,
                       original_solution: Solution,
                       v1: int,
@@ -290,6 +321,7 @@ class CustomerShift(LocalSearchOperator):
             return original_solution, False
         return solution, True
 
+    @profile
     def do(self, original_solution:Solution, v1: int, v2: int, ci_v1: int, new_pos_in_v2: int)->Tuple[Solution, bool]:
         if v1==v2:
             return self.do_same_route(original_solution, v1, ci_v1, new_pos_in_v2)
@@ -318,6 +350,7 @@ class RouteInterchangeArgs(LocalSearchArgs):
     start_idx: int
     end_idx: int
     
+@profile
 def compute_same_route_interchange_d_cost(solution: Solution,
                                           v1:int,
                                           start_idx:int,
@@ -330,6 +363,7 @@ def compute_same_route_interchange_d_cost(solution: Solution,
     d_cost = new_cost-original_cost
     return d_cost
 
+@profile
 def compute_route_interchange_d_cost(solution: Solution,
                                           v1:int,
                                           v2:int,
@@ -347,6 +381,7 @@ def compute_route_interchange_d_cost(solution: Solution,
     d_cost = d_distance_v1*solution.vehicle_variable_costs[v1] + d_distance_v2*solution.vehicle_variable_costs[v2]
     return d_cost
 
+@profile
 def is_interchange_potential(solution: Solution,
                              v1: int,
                              v2: int,
@@ -412,6 +447,7 @@ class RouteInterchange(LocalSearchOperator):
     def __call__(self, solution:Solution, args:RouteInterchangeArgs):
         return self.do(solution, args.v1, args.v2, args.start_idx, args.end_idx)
         
+    @profile
     def do_same_route(self, original_solution:Solution, v1:int, start_idx:int, end_idx:int)->Tuple[Solution, bool]:
         original_route = original_solution.routes[v1]
         solution = original_solution.copy()
@@ -421,7 +457,8 @@ class RouteInterchange(LocalSearchOperator):
         if not is_new_route_applicable:
             return original_solution, False
         return solution, True
-        
+    
+    @profile
     def do(self, original_solution:Solution, v1:int, v2:int, start_idx:int, end_idx:int)->Tuple[Solution, bool]:
         if v1 == v2:
             return self.do_same_route(original_solution, v1, start_idx, end_idx)

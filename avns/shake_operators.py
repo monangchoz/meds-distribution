@@ -4,9 +4,11 @@ from typing import List, Tuple
 
 import numpy as np
 from avns.utils import try_packing_custs_in_route
+from line_profiler import profile
 from problem.solution import Solution
 
 
+@profile
 def swap_customers_in_routes(v1_route: List[int], 
                              v1_custs_idx: List[int], 
                              v2_route:List[int], 
@@ -45,6 +47,7 @@ class SE(ShakeOperator):
         self.max_trials = max_trials
         self.num_applications = num_applications
 
+    @profile
     def do_once(self, original_solution: Solution)->Solution:
         non_empty_routes_idx = [vi for vi in range(original_solution.num_vehicles) if len(original_solution.routes[vi]) > 0]
         if len(non_empty_routes_idx) == 1:

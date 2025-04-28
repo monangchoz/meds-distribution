@@ -48,4 +48,5 @@ class AVNS:
             self.curr_solution = div_solution
         if self.best_solution.total_cost > self.curr_solution.total_cost:
             self.best_solution = self.curr_solution
+        exit()
         return self.best_solution

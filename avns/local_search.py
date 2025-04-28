@@ -2,9 +2,11 @@ from typing import List, Sequence
 
 import numpy as np
 from avns.local_search_operator import LocalSearchArgs, LocalSearchOperator
+from line_profiler import profile
 from problem.solution import Solution
 
 
+@profile
 def local_search(solution: Solution, operators: List[LocalSearchOperator])->Solution:
     available_args: List[List[LocalSearchArgs]] = [[] for _ in range(len(operators))]
     is_operator_available: np.ndarray = np.ones((len(operators),), dtype=bool)
@@ -32,8 +34,10 @@ def local_search(solution: Solution, operators: List[LocalSearchOperator])->Solu
                     args = available_args[i][j]
                     if args.v1 in [chosen_args.v1, chosen_args.v2] or args.v2 in [chosen_args.v1, chosen_args.v2]:
                         del available_args[i][j]
-        print(f"Local search iteration {iteration}, new objective: {solution.total_cost}")
+        # print(f"Local search iteration {iteration}, new objective: {solution.total_cost}")
         iteration += 1
+        if iteration==20:
+            exit()
     return solution
         
         
