@@ -33,20 +33,21 @@ class AVNS:
         self.diversification.update_improvement_status(self.curr_solution)
 
         for iteration in range(self.max_iteration):
-            print(f"Iteration {iteration}, Best Total Cost: {self.best_solution.total_cost}")
+            print(f"Iteration {iteration}, Best Total Cost: {self.best_solution.total_cost}, total distance:{self.best_solution.total_distance}")
             new_solution = self.curr_solution.copy()
             for shake_op in self.shake_operators:
                 new_solution = shake_op(new_solution)
+                new_solution.is_feasible
                 new_solution = local_search(new_solution, self.local_search_operators)
+                new_solution.is_feasible
                 if new_solution.total_cost < self.best_solution.total_cost:
                     self.curr_solution = new_solution
                     self.best_solution = self.curr_solution.copy()
-                    
-            self.diversification.update_improvement_status(self.best_solution)
-            div_solution = self.best_solution.copy()
-            div_solution = self.diversification(div_solution)
-            self.curr_solution = div_solution
+                self.diversification.update_improvement_status(self.best_solution)
+                div_solution = self.best_solution.copy()
+                div_solution = self.diversification(div_solution)
+                self.curr_solution = div_solution
+                self.curr_solution.is_feasible
         if self.best_solution.total_cost > self.curr_solution.total_cost:
             self.best_solution = self.curr_solution
-        exit()
         return self.best_solution

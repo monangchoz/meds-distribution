@@ -87,6 +87,13 @@ class Solution:
         return ret
     
     @property
+    def total_distance(self):
+        ret = 0
+        for vi in range(self.num_vehicles):
+            ret += self.problem.compute_route_total_distance(self.routes[vi])
+        return ret
+    
+    @property
     def is_feasible(self):
         total_fixed_cost = 0
         total_vehicle_variable_cost = 0

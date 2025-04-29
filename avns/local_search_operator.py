@@ -434,6 +434,8 @@ class RouteInterchange(LocalSearchOperator):
                 pairs = combinations(range(total_length), 2)
                 for start_idx, end_idx in pairs:
                     if v1==v2:
+                        if end_idx <= start_idx:
+                            continue
                         d_cost = compute_same_route_interchange_d_cost(solution, v1, start_idx, end_idx)
                     else:
                         d_cost = compute_route_interchange_d_cost(solution, v1, v2, start_idx, end_idx)
@@ -441,7 +443,8 @@ class RouteInterchange(LocalSearchOperator):
                         continue
                     if not is_interchange_potential(solution, v1, v2, start_idx, end_idx):
                         continue
-                    potential_args.append(RouteInterchangeArgs(d_cost, v1, v2, start_idx, end_idx))
+                    args = RouteInterchangeArgs(d_cost, v1, v2, start_idx, end_idx)
+                    potential_args.append(args)
         return potential_args
     
     def __call__(self, solution:Solution, args:RouteInterchangeArgs):

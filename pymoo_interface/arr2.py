@@ -112,7 +112,7 @@ class ARR2(RepairMechanism):
         item_dims: np.ndarray = np.zeros([total_num_items, 3], dtype=float)
         item_volumes: np.ndarray = np.zeros([total_num_items, ], dtype=float)
         item_weights: np.ndarray = np.zeros([total_num_items, ], dtype=float)
-        item_priorities: np.ndarray = np.zeros([total_num_items, ], dtype=float)
+        item_priorities: np.ndarray = np.zeros([total_num_items, ], dtype=int)
         n = 0
         for i, cust_idx in enumerate(new_route):
             c_num_items = solution.node_num_items[cust_idx]

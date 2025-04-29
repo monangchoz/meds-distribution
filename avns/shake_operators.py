@@ -36,8 +36,8 @@ class ShakeOperator:
         pass
 
 class SE(ShakeOperator):
-    def __init__(self, 
-                 max_segment_length:int, 
+    def __init__(self,
+                 max_segment_length:int,
                  fixed_segment_length:bool,
                  max_trials:int,
                  num_applications:int):
@@ -46,6 +46,12 @@ class SE(ShakeOperator):
         self.fixed_segment_length = fixed_segment_length
         self.max_trials = max_trials
         self.num_applications = num_applications
+    
+    def __repr__(self):
+        name = f"SE{self.max_segment_length}{self.num_applications}"
+        if not self.fixed_segment_length:
+            name = "V"+name
+        return name
 
     @profile
     def do_once(self, original_solution: Solution)->Solution:

@@ -188,13 +188,14 @@ class Diversification:
             solution.filled_weight_caps[vi] -= np.sum(solution.node_demand_weights[route])
             solution.total_vehicle_variable_cost -= problem.compute_route_total_distance(route)*problem.vehicle_variable_costs[vi]
             solution.total_vehicle_fixed_cost -= solution.vehicle_fixed_costs[vi]
-
+            solution.routes[vi] = []
+            
         # sort unvisited customers based on volume and weight
         unvisited_custs_idx = np.where(solution.node_vhc_assignment_map==NO_VEHICLE)[0]
         demand_volumes = solution.node_demand_volumes[unvisited_custs_idx]
         sorted_idx = np.argsort(-demand_volumes)
-        unvisited_custs_idx = unvisited_custs_idx[sorted_idx]              
-        
+        unvisited_custs_idx = unvisited_custs_idx[sorted_idx]
+        unvisited_custs_idx = unvisited_custs_idx.tolist()
         # try to insert
         for cust_idx in unvisited_custs_idx:
             vehicles_idx, positions, d_costs = get_possible_insertion_positions(solution, cust_idx)
