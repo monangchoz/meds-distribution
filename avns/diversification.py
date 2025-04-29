@@ -7,10 +7,12 @@ from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 from avns.utils import apply_new_route, try_packing_custs_in_route
+from ep_heuristic.random_slpack import try_slpack
+from ep_heuristic.insertion import argsort_items
 from line_profiler import profile
 from problem.hvrp3l import HVRP3L
+from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 from problem.solution import NO_VEHICLE, Solution
-
 
 def get_possible_insertion_positions(solution: Solution, cust_idx:int)->Tuple[np.ndarray, np.ndarray, np.ndarray]:
     problem = solution.problem
@@ -141,8 +143,61 @@ def solve_rcsp(split_multiedge_matrix: List[List[List[SplitEdge]]], giant_route:
     return routes
 
 
-def check_packing(solution: Solution, cust_idx: int, vi:int, pos:int)->Tuple[int, int, np.ndarray, np.ndarray, bool]:
+def find_packable_insertion_point_nb(vehicles_idx_arr: np.ndarray, 
+                                     positions_arr: np.ndarray, 
+                                     all_item_dims: np.ndarray, 
+                                     all_item_volumes: np.ndarray, 
+                                     all_item_weights: np.ndarray, 
+                                     all_item_priorities: np.ndarray,
+                                     all_item_sorted_idxs: np.ndarray,
+                                     total_num_items_list: np.ndarray, 
+                                     container_dims: np.ndarray)->Tuple[np.ndarray, np.ndarray, int, int, bool]:
     
+    num_possible_positions = positions_arr.shape[0]
+    for i in range(num_possible_positions):
+        container_dim = container_dims[i]
+        total_num_items = total_num_items_list[i]
+        item_dims = all_item_dims[i,:total_num_items]
+        item_priorities = all_item_priorities[i, :total_num_items]
+        sorted_idx = all_item_sorted_idxs[i, :total_num_items]
+        try_slpack(item_dims, item_priorities, sorted_idx, container_dim, )
+        
+    # item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible  
+
+def find_packable_insertion_point(solution: Solution, cust_idx: int, vehicles_idx:List[int], positions:List[int])->Tuple[int, int, np.ndarray, np.ndarray, bool]:
+    problem = solution.problem
+    num_all_items = np.sum(solution.node_num_items)
+    num_possible_pos = len(positions)
+    
+    all_item_dims: np.ndarray = np.empty([num_possible_pos, num_all_items, 3], dtype=float)
+    all_item_volumes: np.ndarray = np.empty([num_possible_pos, num_all_items], dtype=float)
+    all_item_weights: np.ndarray = np.empty([num_possible_pos, num_all_items], dtype=float)
+    all_item_priorities: np.ndarray = np.empty([num_possible_pos, num_all_items], dtype=int)
+    all_item_sorted_idxs: np.ndarray = np.empty([num_possible_pos, num_all_items], dtype=int)
+    total_num_items_list: np.ndarray = np.empty((num_possible_pos,), dtype=int)
+    vehicles_idx_arr: np.ndarray = np.asanyarray(vehicles_idx, dtype=int)
+    positions_arr: np.ndarray = np.asanyarray(positions, dtype=int)
+    container_dims: np.ndarray = np.empty([num_possible_pos, 3], dtype=float)
+    for bi, vi, pos in enumerate(zip(vehicles_idx, positions)):
+        old_route = solution.routes[vi].copy()
+        new_route = old_route[:pos] + [cust_idx] + old_route[pos:]
+        n = 0
+        total_num_items = np.sum(solution.node_num_items[new_route])
+        total_num_items_list[bi] = total_num_items
+        container_dims[bi] = problem.vehicle_container_dims[vi]
+        for i, cust_idx in enumerate(new_route):
+            c_num_items = solution.node_num_items[cust_idx]
+            item_mask = problem.node_item_mask[cust_idx, :]
+            all_item_dims[bi, n:n+c_num_items] = problem.item_dims[item_mask]
+            all_item_volumes[bi, n:n+c_num_items] = problem.item_volumes[item_mask]
+            all_item_weights[bi, n:n+c_num_items] = problem.item_weights[item_mask]
+            all_item_priorities[bi, n:n+c_num_items] = i
+            n += c_num_items
+        item_base_areas = all_item_dims[bi, :total_num_items, 0]*all_item_dims[bi, :total_num_items, 1]
+        all_item_sorted_idxs[bi,:total_num_items] = argsort_items(item_base_areas, all_item_volumes[bi, :total_num_items], all_item_priorities[bi, :total_num_items])
+
+    item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible = find_packable_insertion_point_nb(vehicles_idx_arr, positions_arr, all_item_dims, all_item_volumes, all_item_weights, all_item_priorities, container_dims)
+    return item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible
 
 
 
@@ -204,26 +259,14 @@ class Diversification:
         for cust_idx in unvisited_custs_idx:
             print("hello", cust_idx)
             vehicles_idx, positions, d_costs = get_possible_insertion_positions(solution, cust_idx)
-            cust_insertion_feasible: bool = False
-            k=1
-            final_item_positions = None
-            final_item_rotations = None
-            for vi, pos in zip(vehicles_idx, positions):
-                print(k)
-                k+=1
-                old_route = solution.routes[vi].copy()
-                new_route = old_route[:pos] + [cust_idx] + old_route[pos:]
-                item_positions, item_rotations, is_packing_feasible = try_packing_custs_in_route(solution, vi, new_route)
-                if not is_packing_feasible:
-                    continue
-                
-                solution, is_insertion_possible = apply_new_route(solution, vi, new_route, item_positions, item_rotations)
-                if is_insertion_possible:
-                    cust_insertion_feasible = True
-                    break
-            if not cust_insertion_feasible:
+            
+            
+            item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible = find_packable_insertion_point(solution, vehicles_idx, positions)
+            if not is_any_vi_pos_feasible:
                 return original_solution
-
+            old_route = solution.routes[vi].copy()
+            new_route = old_route[:pos] + [cust_idx] + old_route[pos:]
+            solution, _ = apply_new_route(solution, vi, new_route, item_positions, item_rotations)
         return solution
     
     def concat(self, solution: Solution)->List[int]:

@@ -22,55 +22,35 @@ def try_slpack(item_dims: np.ndarray,
                   ) ->Tuple[np.ndarray,np.ndarray,bool]:
     num_items = len(item_dims)
     
-    batch_size = 4
-    num_batches = math.ceil(max_trial/batch_size)
-    # batched parallelization
-    result_positions = np.empty((batch_size, num_items, 3), dtype=np.float64)
-    result_rotations = np.empty((batch_size, num_items, 3), dtype=np.int64)
-    result_feasibilities = np.zeros((batch_size,), dtype=np.bool_)
-    actual_item_dims_tmp: np.ndarray = np.empty_like(result_positions) #this can change if rotated.
+    positions = np.empty((num_items, 3), dtype=np.float64)
+    rotations = np.empty((num_items, 3), dtype=np.int64)
+    actual_item_dims: np.ndarray = np.empty_like(positions) #this can change if rotated.
 
-    sorted_idx_batches = np.empty((batch_size, num_items), dtype=np.int64)
-    rotation_trial_idx_batches = np.empty((batch_size, num_items, 2), dtype=np.int64)
-    for b in range(batch_size):
-        sorted_idx_batches[b] = sorted_idx
-        rotation_trial_idx_batches[b] = rotation_trial_idx
+    for i in range(max_trial):
+        if i>0:
+            # swap some orderings as a local search operator
+            j,k = np.random.randint(0, num_items-1, size=2)
+            # j,k = random.randint(0, num_items-1), random.randint(0, num_items-1)
+            if item_priorities[j] == item_priorities[k]:
+                a = sorted_idx[j]
+                sorted_idx[j] = sorted_idx[k]
+                sorted_idx[k] = a
+            j = np.random.randint(0, num_items-1)
+            rotation_trial_idx[j] = 1 - rotation_trial_idx[j]
 
-    for z in range(num_batches):
-        for b in range(batch_size):
-            if z*batch_size + b >= max_trial:
-                break
-            for t in range(5): # swapping 5 kali, maybe, i dont'know
-                # swap some orderings as a local search operator
-                j,k = np.random.randint(0, num_items-1, size=2)
-                # j,k = random.randint(0, num_items-1), random.randint(0, num_items-1)
-                if item_priorities[j] == item_priorities[k]:
-                    a = sorted_idx_batches[b, j]
-                    sorted_idx_batches[b,j] = sorted_idx_batches[b,k]
-                    sorted_idx_batches[b,k] = a
-                
-                j = np.random.randint(0, num_items-1)
-                
-                rotation_trial_idx_batches[b, j] = 1 - rotation_trial_idx_batches[b, j]
-
-            result_positions[b], result_rotations[b], result_feasibilities[b] = insert_items(item_dims[sorted_idx_batches[b]], 
-                                                         container_dim,
-                                                         possible_rotation_permutation_mats, 
-                                                         rotation_trial_idx_batches[b],
-                                                         result_positions[b],
-                                                         result_rotations[b],
-                                                         actual_item_dims_tmp[b],
-                                                         base_support_alpha)
-        for b in range(batch_size):
-            if not result_feasibilities[b]:
-                continue
-            
-            inverted_idx = np.argsort(sorted_idx_batches[b])
-            positions = result_positions[b][inverted_idx]
-            rotations = result_rotations[b][inverted_idx]
+        positions, rotations, is_insertion_feasible = insert_items(item_dims[sorted_idx], 
+                                                        container_dim,
+                                                        possible_rotation_permutation_mats, 
+                                                        rotation_trial_idx,
+                                                        positions,
+                                                        rotations,
+                                                        actual_item_dims,
+                                                        base_support_alpha)
+        if is_insertion_feasible:
             return positions, rotations, True
-    
-    return result_positions[0], result_rotations[0], False    
+            
+    return positions, rotations, False    
+
 
 def random_slpack(item_dims: np.ndarray,
                     item_volumes: np.ndarray,
