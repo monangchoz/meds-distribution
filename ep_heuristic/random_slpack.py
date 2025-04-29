@@ -10,7 +10,7 @@ from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 
 
 @nb.njit(nb.types.Tuple((nb.float64[:,:], nb.int64[:,:], nb.bool))
-         (nb.float64[:,:], nb.int64[:], nb.int64[:], nb.int64[:,:], nb.float64[:], nb.int64[:,:], nb.float64, nb.int64), parallel=True)
+         (nb.float64[:,:], nb.int64[:], nb.int64[:], nb.int64[:,:], nb.float64[:], nb.int64[:,:], nb.float64, nb.int64))
 def try_slpack(item_dims: np.ndarray,
                 item_priorities: np.ndarray,
                 sorted_idx: np.ndarray,
@@ -37,9 +37,9 @@ def try_slpack(item_dims: np.ndarray,
         rotation_trial_idx_batches[b] = rotation_trial_idx
 
     for z in range(num_batches):
-        for b in nb.prange(batch_size):
-            # if z*batch_size + b >= max_trial:
-            #     break
+        for b in range(batch_size):
+            if z*batch_size + b >= max_trial:
+                break
             for t in range(5): # swapping 5 kali, maybe, i dont'know
                 # swap some orderings as a local search operator
                 j,k = np.random.randint(0, num_items-1, size=2)

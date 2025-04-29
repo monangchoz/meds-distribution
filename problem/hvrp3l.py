@@ -1,3 +1,4 @@
+import folium
 import json
 import os
 import pathlib
@@ -24,7 +25,8 @@ class HVRP3L:
         self.coords: np.ndarray = np.stack([node.coord for node in self.nodes], dtype=float)
         self.distance_matrix: np.ndarray
         if distance_matrix is None:
-            self.distance_matrix = haversine_distances(self.coords, self.coords)
+            self.distance_matrix = haversine_distances(np.radians(self.coords), np.radians(self.coords))
+            self.distance_matrix *= 6378 #earth radius
             self.distance_matrix = np.trunc(self.distance_matrix*1000)/(1000)
         else:
             self.distance_matrix = np.trunc(self.distance_matrix*1000)/(1000)
@@ -141,4 +143,17 @@ class HVRP3L:
         
         problem = cls(depot_coord, customers, vehicles)
         return problem
-    
+
+    def get_customers_map(self)->folium.Map:
+        # Center of the map
+        latitudes = [customer.coord[0] for customer in self.customers]
+        longitudes = [customer.coord[1] for customer in self.customers]
+        center_lat = sum(latitudes) / len(latitudes)
+        center_lon = sum(longitudes) / len(longitudes)
+
+        m = folium.Map(location=[center_lat, center_lon], zoom_start=13)
+
+        for lat, lon in zip(latitudes, longitudes):
+            folium.Marker([lat, lon]).add_to(m)
+
+        return m

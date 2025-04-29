@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import numpy as np
 from ep_heuristic.random_slpack import random_slpack
@@ -8,11 +8,13 @@ from problem.solution import Solution
 
 @profile
 def try_packing_custs_in_route(solution: Solution, 
-                               vi: int, 
+                               vi: int,
                                route:List[int])->Tuple[np.ndarray, np.ndarray, bool]:
+    if len(route)==0:
+        return [], [], True
     problem = solution.problem
     total_num_items = np.sum(solution.node_num_items[route])
-            
+                 
     # this all actually can be pre-allocated in the problem interface
     # and used freely, to remove allocation time
     item_dims: np.ndarray = np.zeros([total_num_items, 3], dtype=float)
@@ -42,14 +44,17 @@ def try_packing_custs_in_route(solution: Solution,
 @profile
 def apply_new_route(solution:Solution,
                     vehicle_idx: int,
-                    new_route: List[int])->Tuple[Solution, bool]:
+                    new_route: List[int],
+                    positions: Optional[np.ndarray] = None,
+                    rotations: Optional[np.ndarray] = None)->Tuple[Solution, bool]:
     problem = solution.problem
     original_route = solution.routes[vehicle_idx].copy()
     # if infeasible, return false
     packing_result = try_packing_custs_in_route(solution, vehicle_idx, new_route)
-    positions, rotations, is_packing_feasible = packing_result
-    if not is_packing_feasible:
-        return solution, False
+    if positions is None:
+        positions, rotations, is_packing_feasible = packing_result
+        if not is_packing_feasible:
+            return solution, False
     
     solution.node_vhc_assignment_map[new_route] = vehicle_idx
     solution.filled_volumes[vehicle_idx] = np.sum(problem.total_demand_volumes[new_route])

@@ -141,6 +141,10 @@ def solve_rcsp(split_multiedge_matrix: List[List[List[SplitEdge]]], giant_route:
     return routes
 
 
+def check_packing(solution: Solution, cust_idx: int, vi:int, pos:int)->Tuple[int, int, np.ndarray, np.ndarray, bool]:
+    
+
+
 
 class Diversification:
     def __init__(self, num_nodes: int):
@@ -198,12 +202,22 @@ class Diversification:
         unvisited_custs_idx = unvisited_custs_idx.tolist()
         # try to insert
         for cust_idx in unvisited_custs_idx:
+            print("hello", cust_idx)
             vehicles_idx, positions, d_costs = get_possible_insertion_positions(solution, cust_idx)
             cust_insertion_feasible: bool = False
+            k=1
+            final_item_positions = None
+            final_item_rotations = None
             for vi, pos in zip(vehicles_idx, positions):
+                print(k)
+                k+=1
                 old_route = solution.routes[vi].copy()
                 new_route = old_route[:pos] + [cust_idx] + old_route[pos:]
-                solution, is_insertion_possible = apply_new_route(solution, vi, new_route)
+                item_positions, item_rotations, is_packing_feasible = try_packing_custs_in_route(solution, vi, new_route)
+                if not is_packing_feasible:
+                    continue
+                
+                solution, is_insertion_possible = apply_new_route(solution, vi, new_route, item_positions, item_rotations)
                 if is_insertion_possible:
                     cust_insertion_feasible = True
                     break

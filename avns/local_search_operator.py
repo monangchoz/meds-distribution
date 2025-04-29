@@ -239,7 +239,7 @@ def compute_shifting_dcost(solution: Solution,
     distance_matrix = solution.problem.distance_matrix
     cust_idx_1 = solution.routes[v1][ci_v1]
     prev_node = 0
-    if len(solution.routes[v1])>1:
+    if ci_v1>0:
         prev_node = solution.routes[v1][ci_v1-1]
     next_node = 0
     if len(solution.routes[v1])>ci_v1+1:
