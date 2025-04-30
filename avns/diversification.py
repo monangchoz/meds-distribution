@@ -1,18 +1,19 @@
-
 import heapq
 import math
 import random
 from dataclasses import dataclass
 from typing import Callable, List, Optional, Tuple
 
+import numba as nb
 import numpy as np
 from avns.utils import apply_new_route, try_packing_custs_in_route
-from ep_heuristic.random_slpack import try_slpack
 from ep_heuristic.insertion import argsort_items
+from ep_heuristic.random_slpack import try_slpack
 from line_profiler import profile
 from problem.hvrp3l import HVRP3L
 from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS
 from problem.solution import NO_VEHICLE, Solution
+
 
 def get_possible_insertion_positions(solution: Solution, cust_idx:int)->Tuple[np.ndarray, np.ndarray, np.ndarray]:
     problem = solution.problem
@@ -54,117 +55,36 @@ def get_possible_insertion_positions(solution: Solution, cust_idx:int)->Tuple[np
     return vehicles_idx_, positions_, d_costs_
 
 
-@dataclass
-class SplitEdge:
-    cost: float
-    vehicle_idx: int
 
-def generate_split_edge_matrix(solution: Solution, giant_route:List[int], is_reefer:bool)->List[List[Optional[SplitEdge]]]:
-    # generate graph
-    problem = solution.problem
-    num_nodes = solution.problem.num_nodes
-    split_edge_matrix: List[List[Optional[SplitEdge]]] = [[None]*num_nodes]*num_nodes
-    start_idx = 0
-    # representative
-    vi = problem.num_reefer_trucks
-    if is_reefer:
-        vi = 0
-    node_in_gr_reefer_flags = problem.node_reefer_flags[giant_route]
-    node_in_gr_demand_weights = problem.total_demand_weights[giant_route]
-    node_in_gr_demand_volumes = problem.total_demand_volumes[giant_route]
-    for start_idx in range(num_nodes):
-        for end_idx in reversed(range(start_idx, num_nodes)):
-            print(start_idx, end_idx, flush=True)
-            if np.any(node_in_gr_reefer_flags[start_idx:end_idx]) and not problem.vehicle_reefer_flags[vi]:
-                continue
-
-            if split_edge_matrix[start_idx][end_idx] is not None:
-                continue
-
-            total_weight = np.sum(node_in_gr_demand_weights[start_idx:end_idx])
-            total_volume = np.sum(node_in_gr_demand_volumes[start_idx:end_idx])
-            is_weight_capacity_enough = total_weight<=problem.vehicle_weight_capacities[vi]
-            is_volume_capacity_enough = total_volume<=problem.vehicle_volume_capacities[vi]
-            if not is_weight_capacity_enough or not is_volume_capacity_enough:
-                continue
-            _,_, is_packing_feasible = try_packing_custs_in_route(solution, vi, giant_route[start_idx:end_idx])
-            if not is_packing_feasible:
-                continue
-            
-            for i in range(start_idx, end_idx):
-                total_cost = problem.vehicle_fixed_costs[vi]
-                ci = giant_route[start_idx]
-                for j in range(i, end_idx): # starting from i not i+1, route with single customer
-                    cj = giant_route[j]
-                    distance = problem.distance_matrix[ci, cj]
-                    cost = distance*problem.vehicle_variable_costs[vi]
-                    total_cost += cost
-                    edge = SplitEdge(total_cost, vi)
-                    split_edge_matrix[ci][cj] = edge
-    return split_edge_matrix
-            
-def solve_rcsp(split_multiedge_matrix: List[List[List[SplitEdge]]], giant_route:List[int], num_vehicles: int)->List[List[int]]:
-    pq:List[Tuple[float, int, np.ndarray, int, int]] = []
-    num_nodes = len(split_multiedge_matrix)
-    predecessor_policy: List[Tuple[int, int]] = [(999999,999999)]*num_nodes
-    vehicles_usage_mask = np.zeros((num_vehicles,), dtype=bool)
-    predecessor = -1
-    heapq.heappush(pq, (0, 0, vehicles_usage_mask, predecessor, 9999))
-    h_route: List[int] = []
-    while len(pq)>0:
-        curr_item = heapq.heappop(pq)
-        cost_to_reach, curr_node, umask, predecessor, vehicle_idx = curr_item
-        if curr_node>0:
-            predecessor_policy[curr_node] = (predecessor, vehicle_idx)
-        if curr_node == num_nodes-1:
-            # finished
-            break
-        if np.all(umask):
-            continue
-        
-        i = curr_node + 1
-        for j in range(i, num_nodes):
-            for edge in split_multiedge_matrix[i][j]:
-                if umask[edge.vehicle_idx]:
-                    continue
-                new_umask = umask.copy()
-                new_umask[edge.vehicle_idx] = True
-                new_item = (cost_to_reach+edge.cost, j, new_umask, curr_node, edge.vehicle_idx)
-                heapq.heappush(pq, new_item)
-    
-    # now let's backtrack the predecessor policy and collect all routes
-    curr_node = num_nodes-1
-    routes: List[List[int]] = [[]*num_vehicles]
-    while curr_node > 0:
-        j = curr_node
-        i, vi = predecessor_policy[j]
-        routes[vi] = giant_route[i:j+1]
-        curr_node = i-1
-    return routes
-
-
-def find_packable_insertion_point_nb(vehicles_idx_arr: np.ndarray, 
-                                     positions_arr: np.ndarray, 
-                                     all_item_dims: np.ndarray, 
-                                     all_item_volumes: np.ndarray, 
-                                     all_item_weights: np.ndarray, 
+@nb.jit(nb.types.Tuple((nb.float64[:,:], nb.int64[:,:], nb.int64, nb.int64, nb.bool))(nb.int64[:],nb.int64[:],nb.float64[:,:,:],nb.int64[:,:],nb.int64[:,:],nb.int64[:],nb.float64[:,:],nb.int64[:,:]))
+def find_packable_insertion_point_nb(vehicles_idx_arr: np.ndarray,
+                                     positions_arr: np.ndarray,
+                                     all_item_dims: np.ndarray,
                                      all_item_priorities: np.ndarray,
                                      all_item_sorted_idxs: np.ndarray,
-                                     total_num_items_list: np.ndarray, 
-                                     container_dims: np.ndarray)->Tuple[np.ndarray, np.ndarray, int, int, bool]:
+                                     total_num_items_list: np.ndarray,
+                                     container_dims: np.ndarray,
+                                     possible_rotation_permutation_mats: np.ndarray)->Tuple[np.ndarray, np.ndarray, int, int, bool]:
     
     num_possible_positions = positions_arr.shape[0]
+    all_rotation_trial_idxs = np.zeros((num_possible_positions, np.max(total_num_items_list), 2), dtype=np.int64)
+    all_rotation_trial_idxs[:,:,1] = 1
     for i in range(num_possible_positions):
         container_dim = container_dims[i]
         total_num_items = total_num_items_list[i]
         item_dims = all_item_dims[i,:total_num_items]
         item_priorities = all_item_priorities[i, :total_num_items]
         sorted_idx = all_item_sorted_idxs[i, :total_num_items]
-        try_slpack(item_dims, item_priorities, sorted_idx, container_dim, )
-        
+        rotation_trial_idx = all_rotation_trial_idxs[i, :total_num_items]
+        item_positions, item_rotations, is_packing_feasible = try_slpack(item_dims, item_priorities, sorted_idx, rotation_trial_idx, container_dim, possible_rotation_permutation_mats, 0.8, 5)
+        if is_packing_feasible:
+            return item_positions, item_rotations, vehicles_idx_arr[i], positions_arr[i], True
+
+    return np.empty((1,1),dtype=np.float64), np.empty((1,1), dtype=np.int64), 0, 0, False
     # item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible  
 
-def find_packable_insertion_point(solution: Solution, cust_idx: int, vehicles_idx:List[int], positions:List[int])->Tuple[int, int, np.ndarray, np.ndarray, bool]:
+@profile
+def find_packable_insertion_point(solution: Solution, cust_idx: int, vehicles_idx:List[int], positions:List[int])->Tuple[np.ndarray, np.ndarray, int, int, bool]:
     problem = solution.problem
     num_all_items = np.sum(solution.node_num_items)
     num_possible_pos = len(positions)
@@ -178,16 +98,16 @@ def find_packable_insertion_point(solution: Solution, cust_idx: int, vehicles_id
     vehicles_idx_arr: np.ndarray = np.asanyarray(vehicles_idx, dtype=int)
     positions_arr: np.ndarray = np.asanyarray(positions, dtype=int)
     container_dims: np.ndarray = np.empty([num_possible_pos, 3], dtype=float)
-    for bi, vi, pos in enumerate(zip(vehicles_idx, positions)):
+    for bi, (vi, pos) in enumerate(zip(vehicles_idx, positions)):
         old_route = solution.routes[vi].copy()
         new_route = old_route[:pos] + [cust_idx] + old_route[pos:]
         n = 0
         total_num_items = np.sum(solution.node_num_items[new_route])
         total_num_items_list[bi] = total_num_items
         container_dims[bi] = problem.vehicle_container_dims[vi]
-        for i, cust_idx in enumerate(new_route):
-            c_num_items = solution.node_num_items[cust_idx]
-            item_mask = problem.node_item_mask[cust_idx, :]
+        for i, vi_cust_idx in enumerate(new_route):
+            c_num_items = solution.node_num_items[vi_cust_idx]
+            item_mask = problem.node_item_mask[vi_cust_idx, :]
             all_item_dims[bi, n:n+c_num_items] = problem.item_dims[item_mask]
             all_item_volumes[bi, n:n+c_num_items] = problem.item_volumes[item_mask]
             all_item_weights[bi, n:n+c_num_items] = problem.item_weights[item_mask]
@@ -196,7 +116,7 @@ def find_packable_insertion_point(solution: Solution, cust_idx: int, vehicles_id
         item_base_areas = all_item_dims[bi, :total_num_items, 0]*all_item_dims[bi, :total_num_items, 1]
         all_item_sorted_idxs[bi,:total_num_items] = argsort_items(item_base_areas, all_item_volumes[bi, :total_num_items], all_item_priorities[bi, :total_num_items])
 
-    item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible = find_packable_insertion_point_nb(vehicles_idx_arr, positions_arr, all_item_dims, all_item_volumes, all_item_weights, all_item_priorities, container_dims)
+    item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible = find_packable_insertion_point_nb(vehicles_idx_arr, positions_arr, all_item_dims, all_item_priorities,  all_item_sorted_idxs, total_num_items_list, container_dims, POSSIBLE_ROTATION_PERMUTATION_MATS)
     return item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible
 
 
@@ -257,93 +177,12 @@ class Diversification:
         unvisited_custs_idx = unvisited_custs_idx.tolist()
         # try to insert
         for cust_idx in unvisited_custs_idx:
-            print("hello", cust_idx)
+            print("hello", cust_idx, flush=True)
             vehicles_idx, positions, d_costs = get_possible_insertion_positions(solution, cust_idx)
-            
-            
-            item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible = find_packable_insertion_point(solution, vehicles_idx, positions)
+            item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible = find_packable_insertion_point(solution, cust_idx, vehicles_idx, positions)
             if not is_any_vi_pos_feasible:
                 return original_solution
             old_route = solution.routes[vi].copy()
             new_route = old_route[:pos] + [cust_idx] + old_route[pos:]
             solution, _ = apply_new_route(solution, vi, new_route, item_positions, item_rotations)
         return solution
-    
-    def concat(self, solution: Solution)->List[int]:
-        distance_matrix = solution.problem.distance_matrix
-        non_empty_routes_idx = [vi for vi in range(solution.num_vehicles) if len(solution.routes[vi])>0]
-        first_vi = random.choice(non_empty_routes_idx)
-        non_empty_routes_idx.remove(first_vi)
-        giant_route = solution.routes[first_vi].copy()
-        while len(non_empty_routes_idx) > 0:
-            starting_nodes = [solution.routes[vi][0] for vi in non_empty_routes_idx]
-            giant_route_last_node = giant_route[-1]
-            distances_to_giant_route = distance_matrix[giant_route_last_node][starting_nodes]
-            sorted_idx = np.argsort(distances_to_giant_route)
-            ranks = np.empty_like(sorted_idx)
-            ranks[sorted_idx] = np.arange(len(ranks))
-            m = len(non_empty_routes_idx)
-            probs = 2*(m-ranks+1)/(m*(m+1))
-            probs /= np.sum(probs)
-            selected_vi = np.random.choice(non_empty_routes_idx, size=1, p=probs).item()
-            giant_route += solution.routes[selected_vi]
-            non_empty_routes_idx.remove(selected_vi)
-        return giant_route
-            
-    def alter(self, solution: Solution, giant_route):
-        distance_matrix = solution.problem.distance_matrix
-        dij = distance_matrix[giant_route[:-1], giant_route[1:]]
-        avgi = np.average(distance_matrix[giant_route[:-1]], axis=1)
-        avgj = np.average(distance_matrix[giant_route[1:]], axis=1)
-        avgij = (avgi+avgj)/2
-        etij = self.edge_eliminated_counts[giant_route[:-1], giant_route[1:]]
-        uij = (dij/avgij)/(1+etij)
-        
-        i = np.argmax(uij)
-        j = i+1
-        giant_route = giant_route[j:]+giant_route[:i+1]
-        
-        num_pairs_to_swap = math.trunc(self.non_imp/2)
-        for _ in range(num_pairs_to_swap):
-            i, j = np.random.choice(len(giant_route), size=2, replace=False)
-            tmp = giant_route[i]
-            giant_route[i] = giant_route[j]
-            giant_route[j] = tmp
-        return giant_route
-        
-    def split(self, original_solution:Solution, giant_route:List[int])->Solution:
-        problem = original_solution.problem
-        num_nodes = original_solution.problem.num_nodes
-        split_multi_edge_matrix: List[List[List[SplitEdge]]] = [[[]]*num_nodes]*num_nodes
-        reefer_split_edge_matrix = generate_split_edge_matrix(original_solution, giant_route, is_reefer=True)
-        normal_split_edge_matrix = generate_split_edge_matrix(original_solution, giant_route, is_reefer=False)
-        exit()
-        for i in range(num_nodes):
-            for j in range(i+1, num_nodes):
-                edge = reefer_split_edge_matrix[i][j]
-                if edge is not None:
-                    # duplicate for every possible reefer matrix
-                    for vi in range(problem.num_reefer_trucks):
-                        new_edge = SplitEdge(edge.cost, vi)
-                        split_multi_edge_matrix[i][j].append(new_edge)
-                edge = normal_split_edge_matrix[i][j]
-                if edge is not None:
-                    # duplicate for every possible normal matrix
-                    for vi in range(problem.num_reefer_trucks, problem.num_vehicles):
-                        new_edge = SplitEdge(edge.cost, vi)
-                        split_multi_edge_matrix[i][j].append(new_edge)
-        
-        final_routes = solve_rcsp(split_multi_edge_matrix, giant_route, problem.num_vehicles)
-        solution = original_solution.copy()
-        for vi, route in enumerate(final_routes):
-            solution, is_route_feasible = apply_new_route(solution, vi, route)
-            if not is_route_feasible:
-                return original_solution
-        return solution
-    
-    def concat_split(self, original_solution: Solution)->Solution:
-        giant_route = self.concat(original_solution)
-        giant_route = self.alter(original_solution, giant_route)
-        solution = original_solution.copy()
-        solution = self.split(solution, giant_route)
-        return solution 
