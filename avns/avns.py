@@ -31,6 +31,7 @@ class AVNS:
     @profile
     def solve(self, problem:HVRP3L)->Solution:
         self.reset(problem)
+        self.curr_solution.is_feasible
 
         for iteration in range(self.max_iteration):
             # print(f"Iteration {iteration}, Best Total Cost: {self.best_solution.total_cost}, total distance:{self.best_solution.total_distance}")
@@ -45,6 +46,7 @@ class AVNS:
             # self.diversification.update_improvement_status(self.best_solution)
             div_solution = self.best_solution.copy()
             div_solution = self.diversification(div_solution)
+            div_solution.is_feasible
             self.curr_solution = div_solution
             exit()
         if self.best_solution.total_cost > self.curr_solution.total_cost:

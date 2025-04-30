@@ -56,7 +56,7 @@ def get_possible_insertion_positions(solution: Solution, cust_idx:int)->Tuple[np
 
 
 
-@nb.jit(nb.types.Tuple((nb.float64[:,:], nb.int64[:,:], nb.int64, nb.int64, nb.bool))(nb.int64[:],nb.int64[:],nb.float64[:,:,:],nb.int64[:,:],nb.int64[:,:],nb.int64[:],nb.float64[:,:],nb.int64[:,:]))
+@nb.jit(nb.types.Tuple((nb.float64[:,:], nb.int64[:,:], nb.int64, nb.int64, nb.bool))(nb.int64[:],nb.int64[:],nb.float64[:,:,:],nb.int64[:,:],nb.int64[:,:],nb.int64[:],nb.float64[:,:],nb.int64[:,:]), parallel=True)
 def find_packable_insertion_point_nb(vehicles_idx_arr: np.ndarray,
                                      positions_arr: np.ndarray,
                                      all_item_dims: np.ndarray,
@@ -67,18 +67,37 @@ def find_packable_insertion_point_nb(vehicles_idx_arr: np.ndarray,
                                      possible_rotation_permutation_mats: np.ndarray)->Tuple[np.ndarray, np.ndarray, int, int, bool]:
     
     num_possible_positions = positions_arr.shape[0]
-    all_rotation_trial_idxs = np.zeros((num_possible_positions, np.max(total_num_items_list), 2), dtype=np.int64)
+    batch_size = 4
+    num_batches = math.ceil(num_possible_positions/batch_size)
+    
+    max_total_num_items = np.max(total_num_items_list)
+    all_rotation_trial_idxs = np.zeros((batch_size, max_total_num_items, 2), dtype=np.int64)
     all_rotation_trial_idxs[:,:,1] = 1
-    for i in range(num_possible_positions):
-        container_dim = container_dims[i]
-        total_num_items = total_num_items_list[i]
-        item_dims = all_item_dims[i,:total_num_items]
-        item_priorities = all_item_priorities[i, :total_num_items]
-        sorted_idx = all_item_sorted_idxs[i, :total_num_items]
-        rotation_trial_idx = all_rotation_trial_idxs[i, :total_num_items]
-        item_positions, item_rotations, is_packing_feasible = try_slpack(item_dims, item_priorities, sorted_idx, rotation_trial_idx, container_dim, possible_rotation_permutation_mats, 0.8, 5)
-        if is_packing_feasible:
-            return item_positions, item_rotations, vehicles_idx_arr[i], positions_arr[i], True
+
+    batch_item_positions = np.empty((batch_size, max_total_num_items, 3), dtype=np.float64)
+    batch_item_rotations = np.empty((batch_size, max_total_num_items, 3), dtype=np.int64)
+    batch_feasibilities  = np.empty((batch_size, ), dtype=np.bool_)
+    for n in range(num_batches):
+        for m in nb.prange(batch_size):
+            i = n*batch_size + m
+            if i >= num_possible_positions:
+                continue
+            container_dim = container_dims[i]
+            total_num_items = total_num_items_list[i]
+            item_dims = all_item_dims[i,:total_num_items]
+            item_priorities = all_item_priorities[i, :total_num_items]
+            sorted_idx = all_item_sorted_idxs[i, :total_num_items]
+            all_rotation_trial_idxs[m,:total_num_items,0]=0
+            all_rotation_trial_idxs[m,:total_num_items,1]=1
+            rotation_trial_idx = all_rotation_trial_idxs[m, :total_num_items]
+            batch_item_positions[m, :total_num_items], batch_item_rotations[m, :total_num_items], batch_feasibilities[m] = try_slpack(item_dims, item_priorities, sorted_idx, rotation_trial_idx, container_dim, possible_rotation_permutation_mats, 0.8, 5)
+        for m in range(batch_size):
+            i = n*batch_size + m
+            if i >= num_possible_positions:
+                continue
+            if batch_feasibilities[m]:
+                total_num_items = total_num_items_list[i]
+                return batch_item_positions[m, :total_num_items], batch_item_rotations[m, :total_num_items], vehicles_idx_arr[i], positions_arr[i], True
 
     return np.empty((1,1),dtype=np.float64), np.empty((1,1), dtype=np.int64), 0, 0, False
     # item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible  
@@ -177,7 +196,7 @@ class Diversification:
         unvisited_custs_idx = unvisited_custs_idx.tolist()
         # try to insert
         for cust_idx in unvisited_custs_idx:
-            print("hello", cust_idx, flush=True)
+            # print("hello", cust_idx, flush=True)
             vehicles_idx, positions, d_costs = get_possible_insertion_positions(solution, cust_idx)
             item_positions, item_rotations, vi, pos, is_any_vi_pos_feasible = find_packable_insertion_point(solution, cust_idx, vehicles_idx, positions)
             if not is_any_vi_pos_feasible:
