@@ -29,25 +29,29 @@ def try_slpack(item_dims: np.ndarray,
     for i in range(max_trial):
         if i>0:
             # swap some orderings as a local search operator
-            j,k = np.random.randint(0, num_items-1, size=2)
-            # j,k = random.randint(0, num_items-1), random.randint(0, num_items-1)
+            j,k = random.randint(0, num_items-1), random.randint(0, num_items-1)
             if item_priorities[j] == item_priorities[k]:
                 a = sorted_idx[j]
                 sorted_idx[j] = sorted_idx[k]
                 sorted_idx[k] = a
-            j = np.random.randint(0, num_items-1)
+            
+            j = random.randint(0, num_items-1)
             rotation_trial_idx[j] = 1 - rotation_trial_idx[j]
-
-        positions, rotations, is_insertion_feasible = insert_items(item_dims[sorted_idx], 
-                                                        container_dim,
-                                                        possible_rotation_permutation_mats, 
-                                                        rotation_trial_idx,
-                                                        positions,
-                                                        rotations,
-                                                        actual_item_dims,
-                                                        base_support_alpha)
-        if is_insertion_feasible:
-            return positions, rotations, True
+            
+        positions, rotations, is_feasible = insert_items(item_dims[sorted_idx], 
+                                                         container_dim, 
+                                                         possible_rotation_permutation_mats, 
+                                                         rotation_trial_idx,
+                                                         positions,
+                                                         rotations,
+                                                         actual_item_dims, 
+                                                         base_support_alpha)
+        if not is_feasible:
+            continue
+        inverted_idx = np.argsort(sorted_idx)
+        positions = positions[inverted_idx]
+        rotations = rotations[inverted_idx]
+        return positions, rotations, True
             
     return positions, rotations, False    
 

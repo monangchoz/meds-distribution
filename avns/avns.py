@@ -31,24 +31,22 @@ class AVNS:
     @profile
     def solve(self, problem:HVRP3L)->Solution:
         self.reset(problem)
-        self.curr_solution.is_feasible
 
         for iteration in range(self.max_iteration):
-            # print(f"Iteration {iteration}, Best Total Cost: {self.best_solution.total_cost}, total distance:{self.best_solution.total_distance}")
-            # new_solution = self.curr_solution.copy()
-            # for shake_op in self.shake_operators:
-            #     print(shake_op)
-            #     new_solution = shake_op(new_solution)
-            #     new_solution = local_search(new_solution, self.local_search_operators)
-            #     if new_solution.total_cost < self.best_solution.total_cost:
-            #         self.curr_solution = new_solution
-            #         self.best_solution = self.curr_solution.copy()
-            # self.diversification.update_improvement_status(self.best_solution)
+            print(f"Iteration {iteration}, Best Total Cost: {self.best_solution.total_cost}, total distance:{self.best_solution.total_distance}")
+            new_solution = self.curr_solution.copy()
+            for shake_op in self.shake_operators:
+                print(shake_op)
+                new_solution = shake_op(new_solution)
+                new_solution = local_search(new_solution, self.local_search_operators)
+                if new_solution.total_cost < self.best_solution.total_cost:
+                    self.curr_solution = new_solution
+                    self.best_solution = self.curr_solution.copy()
+            self.diversification.update_improvement_status(self.best_solution)
             div_solution = self.best_solution.copy()
             div_solution = self.diversification(div_solution)
             div_solution.is_feasible
             self.curr_solution = div_solution
-            exit()
         if self.best_solution.total_cost > self.curr_solution.total_cost:
             self.best_solution = self.curr_solution
         return self.best_solution
