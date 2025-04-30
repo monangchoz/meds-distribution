@@ -47,6 +47,7 @@ class AVNS:
             div_solution = self.diversification(div_solution)
             div_solution.is_feasible
             self.curr_solution = div_solution
+            exit()
         if self.best_solution.total_cost > self.curr_solution.total_cost:
             self.best_solution = self.curr_solution
         return self.best_solution
