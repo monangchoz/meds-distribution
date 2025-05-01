@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 from ep_heuristic.random_slpack import random_slpack
@@ -50,8 +50,8 @@ def apply_new_route(solution:Solution,
     problem = solution.problem
     original_route = solution.routes[vehicle_idx].copy()
     # if infeasible, return false
-    packing_result = try_packing_custs_in_route(solution, vehicle_idx, new_route)
     if positions is None:
+        packing_result = try_packing_custs_in_route(solution, vehicle_idx, new_route)
         positions, rotations, is_packing_feasible = packing_result
         if not is_packing_feasible:
             return solution, False
