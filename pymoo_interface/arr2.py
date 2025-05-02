@@ -16,7 +16,7 @@ class RepairMechanism:
         self.tmp_routes = np.empty((num_vehicles, num_customers+1), dtype=int)
         self.tmp_route_lens = np.empty((num_vehicles,), dtype=int)
 
-    def repair(self, solution: Solution):
+    def repair(self, solution: Solution, fallback_solution: Solution):
         raise NotImplementedError
 
 
@@ -134,7 +134,7 @@ class ARR2(RepairMechanism):
         return packing_result
 
     
-    def repair(self, solution: Solution)->Solution:
+    def repair(self, solution: Solution, fallback_solution: Solution)->Solution:
         unvisited_customer_idxs: np.ndarray = np.where(solution.node_vhc_assignment_map==NO_VEHICLE)[0]
         if len(unvisited_customer_idxs) == 0:
             return solution
@@ -168,6 +168,7 @@ class ARR2(RepairMechanism):
                     n += c_num_items
                 break
             if not is_reinsertion_feasible:
-                raise ValueError(f"Reinsertion failed for {cust_idx}")
+                return fallback_solution.copy()
+                # raise ValueError(f"Reinsertion failed for {cust_idx}")
         return solution
         

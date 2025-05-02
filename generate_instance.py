@@ -113,7 +113,7 @@ def classify_item_size(dim: np.ndarray) -> str:
 
 def sample_items_by_size(med_spec_dict, ratio: Tuple[float, float, float]) -> List[Item]:
     weight_threshold = random.uniform(20_000, 80_000)
-
+    volume_threshold = 100000
     small_pool, medium_pool, large_pool = [], [], []
     for code, spec in med_spec_dict.items():
         try:
@@ -131,8 +131,9 @@ def sample_items_by_size(med_spec_dict, ratio: Tuple[float, float, float]) -> Li
     size_pools = {"small": small_pool, "medium": medium_pool, "large": large_pool}
     items: List[Item] = []
     total_weight = 0.
+    total_volume = 0.
     i = 0
-    while total_weight < weight_threshold:
+    while total_weight < weight_threshold and total_volume < volume_threshold:
         size_choice = random.choices(["small", "medium", "large"], weights=ratio, k=1)[0]
         pool = size_pools[size_choice]
         if not pool:
@@ -148,8 +149,11 @@ def sample_items_by_size(med_spec_dict, ratio: Tuple[float, float, float]) -> Li
             dim = np.asarray([l, w, h], dtype=float)
             is_reefer_required = temp_req != "kamar"
             item = Item(i, code, dim, weight, False, is_reefer_required)
-            items.append(item)
+            total_volume += item.volume
             total_weight += weight
+            if total_weight >= weight_threshold or total_volume >= volume_threshold:
+                break
+            items.append(item)
             i += 1
         except Exception:
             continue

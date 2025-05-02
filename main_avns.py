@@ -59,8 +59,9 @@ def run():
     solution = avns.solve(problem)
     end_time = time.time()
     running_time = end_time-start_time
-    result_filepath = pathlib.Path()/"results"/"avns"/f"{filename_without_extension}.csv"
-    result_filepath.mkdir(parents=True, exist_ok=True)
+    result_dir = pathlib.Path()/"results"/"avns"
+    result_filepath = result_dir/f"{filename_without_extension}.csv"
+    result_dir.mkdir(parents=True, exist_ok=True)
     with open(result_filepath.absolute(), "+a") as f:
         result_str = f"{solution.total_cost},{running_time}\n"
         f.write(result_str)

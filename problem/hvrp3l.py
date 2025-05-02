@@ -107,7 +107,7 @@ class HVRP3L:
         instance_dir.mkdir(parents=True, exist_ok=True)
         filename = f"{cabang}_nc_{self.num_customers}_ncl_{num_clusters}_nv_{self.num_vehicles}_{demand_mode}"
         if ratio is not None:
-            ratio_str = '_'.join(f"{x}" for x in ratio)
+            ratio_str = '_'.join(format(x, ".2f") for x in ratio)
             filename += f"r_{ratio_str}"
         instance_filepath = ""
         for i in range(100000):

@@ -53,7 +53,8 @@ def setup_algorithm(algo_name: str, problem:HVRP3L):
                   repair=RepairEncoding(), 
                   eliminate_duplicates=DuplicateElimination(problem))
     elif algo_name == "de":
-        algo = DE(pop_size=30)
+        algo = DE(pop_size=30, 
+                  repair=RepairEncoding())
     elif algo_name == "cmaes":
         algo = CMAES()
     return algo
@@ -77,8 +78,9 @@ def run():
     solution = problem_intf.decode(res.X)
     end_time = time.time()
     running_time = end_time-start_time
-    result_filepath = pathlib.Path()/"results"/args.algo_name/f"{filename_without_extension}.csv"
-    result_filepath.mkdir(parents=True, exist_ok=True)
+    result_dir = pathlib.Path()/"results"/args.algo_name
+    result_filepath = result_dir/f"{filename_without_extension}.csv"
+    result_dir.mkdir(parents=True, exist_ok=True)
     with open(result_filepath.absolute(), "+a") as f:
         result_str = f"{solution.total_cost},{running_time}\n"
         f.write(result_str)

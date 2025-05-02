@@ -11,6 +11,7 @@ from pymoo.core.individual import Individual
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.repair import Repair
 from pymoo_interface.arr2 import RepairMechanism
+from avns.greedy_insert import greedy_insert
 
 
 def get_routes_from_x(x: np.ndarray, problem: HVRP3L)->List[List[int]]:
@@ -84,6 +85,8 @@ class HVRP3L_OPT(ElementwiseProblem):
         # the next num_customers dims are for vehicle assignment
         self.xl = np.zeros([self.n_var, ], dtype=float)
         self.xu = np.ones([self.n_var, ], dtype=float)
+        
+        self.fallback_solution: Solution = greedy_insert(hvrp3l_instance)
 
     def decode(self, x: np.ndarray)->Solution:
         problem: HVRP3L = self.hvrp3l_instance
@@ -170,7 +173,7 @@ class HVRP3L_OPT(ElementwiseProblem):
             solution.total_vehicle_fixed_cost += solution.vehicle_fixed_costs[vi]
             total_distance = solution.problem.compute_route_total_distance(solution.routes[vi])
             solution.total_vehicle_variable_cost += total_distance*solution.vehicle_variable_costs[vi]
-        solution = self.add_remaining_requests(solution)
+        solution = self.add_remaining_requests(solution, self.fallback_solution)
         return solution
     
     def get_total_cost_without_decoding(self, x:np.ndarray)->float:
