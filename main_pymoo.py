@@ -1,11 +1,16 @@
 import multiprocessing as mp
 import pathlib
 import random
+import argparse
 import time
 
 import numpy as np
 from problem.hvrp3l import HVRP3L
 from pymoo.algorithms.soo.nonconvex.brkga import BRKGA
+from pymoo.algorithms.soo.nonconvex.ga import GA
+from pymoo.algorithms.soo.nonconvex.de import DE
+from pymoo.algorithms.soo.nonconvex.cmaes import CMAES
+
 from pymoo.core.problem import StarmapParallelization
 from pymoo.optimize import minimize
 from pymoo.termination.default import DefaultSingleObjectiveTermination
@@ -15,15 +20,18 @@ from pymoo_interface.hvrp3l_opt import (HVRP3L_OPT, DuplicateElimination,
 
 def parse_args()->argparse.Namespace:
     parser = argparse.ArgumentParser(description="experiment arguments.")
+    
+    parser.add_argument("--algo-name",
+                        type=str,
+                        choices=["ga","brkga","cmaes","de"],
+                        required=True,
+                        help="algo name")
+    
     parser.add_argument("--instance-file-name",
                         type=str,
                         required=True,
                         help="instance filename")
     
-    parser.add_argument("--max-iteration",
-                    type=int,
-                    required=True,
-                    help="maximum iteration")
     
     parser.add_argument("--patience",
                     type=int,
@@ -40,11 +48,21 @@ def setup_algorithm(algo_name: str, problem:HVRP3L):
                     n_mutants=5,
                     repair=RepairEncoding(), 
                     eliminate_duplicates=DuplicateElimination(problem))
+    elif algo_name == "ga":
+        algo = GA(pop_size=30, 
+                  repair=RepairEncoding(), 
+                  eliminate_duplicates=DuplicateElimination(problem))
+    elif algo_name == "de":
+        algo = DE(pop_size=30)
+    elif algo_name == "cmaes":
+        algo = CMAES()
     return algo
 
 def run():
     args = parse_args()
-    filename = args.filename
+    filename = args.instance_file_name
+    filename_without_extension = filename[:-5]
+    
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
     start_time = time.time()
@@ -52,13 +70,19 @@ def run():
     runner = StarmapParallelization(pool.starmap)
     algo = setup_algorithm(args.algo_name, problem)
     problem_intf = HVRP3L_OPT(problem, ARR2(problem.num_customers, problem.num_vehicles), elementwise_runner=runner)
-    
-    termination = DefaultSingleObjectiveTermination(n_max_gen=10)
+    termination = DefaultSingleObjectiveTermination(n_max_gen=100, period=args.patience)
     res = minimize(problem_intf, algo, termination=termination,
                    seed=1,
                    verbose=True)
     solution = problem_intf.decode(res.X)
     end_time = time.time()
+    running_time = end_time-start_time
+    result_filepath = pathlib.Path()/"results"/args.algo_name/f"{filename_without_extension}.csv"
+    result_filepath.mkdir(parents=True, exist_ok=True)
+    with open(result_filepath.absolute(), "+a") as f:
+        result_str = f"{solution.total_cost},{running_time}\n"
+        f.write(result_str)
+
 if __name__ == "__main__":
     np.random.seed(1)
     random.seed(1)

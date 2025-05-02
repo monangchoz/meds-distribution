@@ -50,7 +50,7 @@ def setup_avns(max_iteration:int, patience:int)->AVNS:
 
 def run():
     args = parse_args()
-    filename = args.filename
+    filename = args.instance_file_name
     filename_without_extension = filename[:-5]
     instance_filepath = pathlib.Path()/"instances"/filename
     start_time = time.time()
