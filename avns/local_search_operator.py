@@ -304,6 +304,9 @@ class CustomerShift(LocalSearchOperator):
     def __call__(self, solution: Solution, args: CustomerShiftArgs):
         return self.do(solution, args.v1, args.v2, args.ci_v1, args.new_pos_in_v2)
 
+    @staticmethod
+    def do_same_route_nb()
+
     @profile
     def do_same_route(self,
                       original_solution: Solution,
