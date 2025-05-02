@@ -102,10 +102,13 @@ class HVRP3L:
         total_distance += self.distance_matrix[route[-1], 0] + self.distance_matrix[0, route[0]]
         return total_distance
                 
-    def to_json(self, cabang:str): 
+    def to_json(self, cabang:str, demand_mode: str, num_clusters:int, ratio=None): 
         instance_dir = pathlib.Path()/"instances"
         instance_dir.mkdir(parents=True, exist_ok=True)
-        filename = f"{cabang}_nc_{self.num_customers}_ni__{self.num_items}_nv_{self.num_vehicles}"
+        filename = f"{cabang}_nc_{self.num_customers}_ncl_{num_clusters}_nv_{self.num_vehicles}_{demand_mode}"
+        if ratio is not None:
+            ratio_str = '_'.join(f"{x}" for x in ratio)
+            filename += f"r_{ratio_str}"
         instance_filepath = ""
         for i in range(100000):
             instance_filepath = instance_dir/f"{filename}_{i}.json"

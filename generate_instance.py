@@ -259,7 +259,7 @@ def generate(cabang: str,
 
     vehicles = generate_vehicles(num_normal_trucks, num_reefer_trucks)
     problem = HVRP3L(depot_coord, customers, vehicles)
-    problem.to_json(cabang)
+    problem.to_json(cabang, demand_mode, num_clusters, ratio)
     
 
 def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
