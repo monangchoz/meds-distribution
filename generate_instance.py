@@ -2,7 +2,7 @@ import argparse
 import json
 import pathlib
 import random
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 from haversine import haversine
@@ -20,7 +20,7 @@ def parse_args():
                         required=True,
                         choices=["JK2","SBY","MKS"],
                         help="region for depot choice")
-    parser.add_argument("--num-customer",
+    parser.add_argument("--num-customers",
                         type=int,
                         required=True,
                         help="number of customers")
@@ -167,7 +167,7 @@ def generate_items_by_ratio(ratio) -> List[Item]:
 
 def load_customers_and_depot(cabang: str):
     filepath = pathlib.Path()/"raw_json"/f"{cabang}.json"
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
     depot_coord = np.array([float(c) for c in data["CABANG"]["Maps"].split(",")], dtype=float)
     customers_data = data["CUSTOMERS"]
@@ -204,52 +204,57 @@ def build_clusters(all_data, centers, points_per_cluster=10, max_radius_km=5):
 
 
 
-def generate_customers(cabang, num_customers, num_clusters, demand_mode)->List[Customer]:
+def generate_customers(cabang:str, 
+                       num_customers:int, 
+                       num_clusters:int, 
+                       demand_mode:int,
+                       ratio: Optional[Tuple[float,float,float]]=None)->List[Customer]:
     customers: List[Customer] = []
     depot_coord, all_customers = load_customers_and_depot(cabang)
     points_per_cluster = num_customers//num_clusters
 
     coords_cust_id_list = []
     if num_clusters == 1:
-        random_custs: List[Customer] = random.sample(all_customers, num_customers)
-        coords_cust_id_list = [(cust.coord, cust_id) for cust in random_custs]
+        random_custs = random.sample(all_customers, num_customers)
+        coords_cust_id_list = [(cust[0], cust[1]) for cust in random_custs]
     else:
         centers = get_far_centers(all_customers, num_clusters=num_clusters, min_distance_km=15)
         clusters = build_clusters(all_customers, centers, points_per_cluster=points_per_cluster, max_radius_km=5)
         coords_cust_id_list = [cust for cluster in clusters for cust in cluster]
-    customers: List[Customer] = []
+    
     for i, (coord, cust_id) in enumerate(coords_cust_id_list):
         items: List[Item]
         if demand_mode == "historical":
-            items = get_customer_items_random_date(str(cust_id), ratio=item_ratio)
+            items = get_customer_items_random_date(str(cust_id))
             print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g")
-        
+        else:
+            if ratio is None:
+                raise ValueError("if demand mode is not historical (generated), item size ratio must be provided")
+            items = generate_items_by_ratio(ratio)
+            print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g")
         new_cust = Customer(i+1, cust_id, coord, items)
         customers.append(new_cust)
 
-
-    # items = get_customer_items_random_date(str(cust_id))
-    # new_cust = Customer(i+1, cust_id, c_coord, items)
-    # customers += [new_cust]
     return customers
      
 def generate(cabang: str, 
              num_customers: int,
              demand_mode: str,
              num_clusters: int,
-             num_normal_trucks:int=2,
-             num_reefer_trucks:int=2):
+             num_normal_trucks:int,
+             num_reefer_trucks:int,
+             ratio:Optional[Tuple[float,float,float]]):
     filename = cabang+".json"
     filepath = pathlib.Path()/"raw_json"/filename
     customers: List[Node] = []
-    with open(filepath.absolute(), "r") as json_data:
+    with open(filepath.absolute(), "r", encoding="utf-8") as json_data:
         d = json.load(json_data)
         
     depot_coord = d["CABANG"]["Maps"]
     depot_coord = depot_coord.split(",")
     depot_coord = np.asanyarray([float(c) for c in depot_coord], dtype=float)
     
-    customers = generate_customers(cabang, num_customers, num_clusters, demand_mode)
+    customers = generate_customers(cabang, num_customers, num_clusters, demand_mode, ratio)
 
 
     vehicles = generate_vehicles(num_normal_trucks, num_reefer_trucks)
@@ -295,8 +300,19 @@ def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
 
 if __name__=="__main__":
     args = parse_args()
+    ratio = None
+    if args.demand_mode == "generated":
+        s = args.small_items_ratio
+        l = args.large_items_ratio
+        m = 1 - s - l
+        ratio = np.asanyarray([s,m,l])
+        ratio /= ratio.sum()
+        ratio = tuple(ratio.tolist())
+
     generate(args.region,
-             args.num_customer,
-             args.demand_mode, 
-             args.num_normal_trucks, 
-             args.num_reefer_trucks)
+             args.num_customers,
+             args.demand_mode,
+             args.num_clusters,
+             args.num_normal_trucks,
+             args.num_reefer_trucks,
+             ratio)
