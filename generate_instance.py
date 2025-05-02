@@ -1,15 +1,56 @@
+import argparse
 import json
 import pathlib
 import random
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
+from haversine import haversine
 from problem.customer import Customer
 from problem.hvrp3l import HVRP3L
 from problem.item import Item
 from problem.node import Node
 from problem.vehicle import Vehicle
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="instance generation args.")
+    parser.add_argument("--region",
+                        type=str,
+                        required=True,
+                        choices=["JK2","SBY","MKS"],
+                        help="region for depot choice")
+    parser.add_argument("--num-customer",
+                        type=int,
+                        required=True,
+                        help="number of customers")
+    parser.add_argument("--small-items-ratio",
+                        type=float,
+                        help="ratio of small items in customer orders")
+    parser.add_argument("--large-items-ratio",
+                        type=float,
+                        help="ratio of large items in customer orders")
+    parser.add_argument("--num-reefer-trucks",
+                        type=int,
+                        required=True,
+                        help="num of reefer trucks")
+    parser.add_argument("--num-normal-trucks",
+                        type=int,
+                        required=True,
+                        help="num of normal trucks")
+    
+    parser.add_argument("--num-clusters",
+                        type=int,
+                        default=1,
+                        help="num of clusters, 1=no cluster/random")
+    parser.add_argument("--demand-mode",
+                        type=str,
+                        choices=["historical","generated"],
+                        required=True,
+                        help="historical = sampling from historical demand, generated=sampling from items")
+    
+    
+    return parser.parse_args()
 
 def get_customer_items_random_date(cust_id: str)->List[Item]:
     transaction_filepath = pathlib.Path()/"raw_json"/"Transaksi_v2.json"
@@ -59,28 +100,143 @@ def get_customer_items_random_date(cust_id: str)->List[Item]:
                 i += 1
 
     return items
-    
-def generate_customers(cabang, num_customers)->List[Customer]:
-    filename = cabang+".json"
-    filepath = pathlib.Path()/"raw_json"/filename
+
+
+def classify_item_size(dim: np.ndarray) -> str:
+    volume = np.prod(dim)
+    if volume <= 1000:
+        return "small"
+    elif volume <= 10000:
+        return "medium"
+    else:
+        return "large"
+
+def sample_items_by_size(med_spec_dict, ratio: Tuple[float, float, float]) -> List[Item]:
+    weight_threshold = random.uniform(20_000, 80_000)
+
+    small_pool, medium_pool, large_pool = [], [], []
+    for code, spec in med_spec_dict.items():
+        try:
+            dim = np.array([spec["panjang_cm"], spec["lebar_cm"], spec["tinggi_cm"]], dtype=float)
+            size = classify_item_size(dim)
+            if size == "small":
+                small_pool.append(code)
+            elif size == "medium":
+                medium_pool.append(code)
+            else:
+                large_pool.append(code)
+        except Exception:
+            continue
+
+    size_pools = {"small": small_pool, "medium": medium_pool, "large": large_pool}
+    items: List[Item] = []
+    total_weight = 0.
+    i = 0
+    while total_weight < weight_threshold:
+        size_choice = random.choices(["small", "medium", "large"], weights=ratio, k=1)[0]
+        pool = size_pools[size_choice]
+        if not pool:
+            continue
+        code = random.choice(pool)
+        spec = med_spec_dict[code]
+        try:
+            weight = float(spec["berat_gram"])
+            if total_weight + weight > weight_threshold:
+                break
+            l, w, h = spec["panjang_cm"], spec["lebar_cm"], spec["tinggi_cm"]
+            temp_req = spec["suhu_simpan"]
+            dim = np.asarray([l, w, h], dtype=float)
+            is_reefer_required = temp_req != "kamar"
+            item = Item(i, code, dim, weight, False, is_reefer_required)
+            items.append(item)
+            total_weight += weight
+            i += 1
+        except Exception:
+            continue
+    return items
+
+def generate_items_by_ratio(ratio) -> List[Item]:
+    med_spec_filepath = pathlib.Path()/"raw_json"/"Dimensi_Suhu_v2.json"
+    with open(med_spec_filepath.absolute(), "r") as json_data:
+        med_spec_dict = json.load(json_data)
+    if not np.isclose(sum(ratio), 1.0):
+        raise ValueError(f"Invalid ratio {ratio}: must sum to 1.0")
+    return sample_items_by_size(med_spec_dict, ratio)
+
+# ==== Cluster and Coordinate Loader ====
+
+def load_customers_and_depot(cabang: str):
+    filepath = pathlib.Path()/"raw_json"/f"{cabang}.json"
+    with open(filepath, "r") as f:
+        data = json.load(f)
+    depot_coord = np.array([float(c) for c in data["CABANG"]["Maps"].split(",")], dtype=float)
+    customers_data = data["CUSTOMERS"]
+    customers = []
+    for i, c in enumerate(customers_data):
+        coord = np.array([float(x) for x in c["Maps"].split(",")])
+        customers.append((coord, c["CUSTOMER_NUMBER"]))
+    return depot_coord, customers
+
+def get_far_centers(data, num_clusters, min_distance_km):
+    centers = []
+    remaining_data = data.copy()
+    while len(centers) < num_clusters and remaining_data:
+        new_center = remaining_data[np.random.choice(len(remaining_data))]
+        centers.append(new_center)
+        distances = [haversine(new_center[0], d[0], unit='km') for d in remaining_data]
+        remaining_data = [d for d, dist in zip(remaining_data, distances) if dist >= min_distance_km]
+    return centers
+
+def build_clusters(all_data, centers, points_per_cluster=10, max_radius_km=5):
+    clusters = []
+    remaining_data = all_data.copy()
+    for center in centers:
+        distances = np.array([haversine(center[0], d[0], unit='km') for d in remaining_data])
+        eligible_indices = np.where(distances <= max_radius_km)[0]
+        if len(eligible_indices) < points_per_cluster:
+            selected_indices = np.argsort(distances)[:points_per_cluster]
+        else:
+            selected_indices = eligible_indices[np.argsort(distances[eligible_indices])[:points_per_cluster]]
+        cluster_points = [remaining_data[i] for i in selected_indices]
+        clusters.append(cluster_points)
+        remaining_data = [d for i, d in enumerate(remaining_data) if i not in selected_indices]
+    return clusters
+
+
+
+def generate_customers(cabang, num_customers, num_clusters, demand_mode)->List[Customer]:
     customers: List[Customer] = []
-    with open(filepath.absolute(), "r") as json_data:
-        d = json.load(json_data)
-    
-    customers_dict_list = d["CUSTOMERS"]
-    chosen_customers_idx = np.random.choice(len(customers_dict_list), size=num_customers, replace=False)
-    for i, c_idx in enumerate(chosen_customers_idx):
-        customer_dict = customers_dict_list[c_idx]
-        c_coord = customer_dict["Maps"].split(",")
-        c_coord = np.asanyarray([float(c) for c in c_coord], dtype=float)
-        cust_id = customer_dict["CUSTOMER_NUMBER"]
-        items = get_customer_items_random_date(str(cust_id))
-        new_cust = Customer(i+1, cust_id, c_coord, items)
-        customers += [new_cust]
+    depot_coord, all_customers = load_customers_and_depot(cabang)
+    points_per_cluster = num_customers//num_clusters
+
+    coords_cust_id_list = []
+    if num_clusters == 1:
+        random_custs: List[Customer] = random.sample(all_customers, num_customers)
+        coords_cust_id_list = [(cust.coord, cust_id) for cust in random_custs]
+    else:
+        centers = get_far_centers(all_customers, num_clusters=num_clusters, min_distance_km=15)
+        clusters = build_clusters(all_customers, centers, points_per_cluster=points_per_cluster, max_radius_km=5)
+        coords_cust_id_list = [cust for cluster in clusters for cust in cluster]
+    customers: List[Customer] = []
+    for i, (coord, cust_id) in enumerate(coords_cust_id_list):
+        items: List[Item]
+        if demand_mode == "historical":
+            items = get_customer_items_random_date(str(cust_id), ratio=item_ratio)
+            print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g")
+        
+        new_cust = Customer(i+1, cust_id, coord, items)
+        customers.append(new_cust)
+
+
+    # items = get_customer_items_random_date(str(cust_id))
+    # new_cust = Customer(i+1, cust_id, c_coord, items)
+    # customers += [new_cust]
     return customers
      
 def generate(cabang: str, 
              num_customers: int,
+             demand_mode: str,
+             num_clusters: int,
              num_normal_trucks:int=2,
              num_reefer_trucks:int=2):
     filename = cabang+".json"
@@ -93,7 +249,9 @@ def generate(cabang: str,
     depot_coord = depot_coord.split(",")
     depot_coord = np.asanyarray([float(c) for c in depot_coord], dtype=float)
     
-    customers = generate_customers(cabang, num_customers)    
+    customers = generate_customers(cabang, num_customers, num_clusters, demand_mode)
+
+
     vehicles = generate_vehicles(num_normal_trucks, num_reefer_trucks)
     problem = HVRP3L(depot_coord, customers, vehicles)
     problem.to_json(cabang)
@@ -136,4 +294,9 @@ def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
     return vehicles
 
 if __name__=="__main__":
-    generate("JK2", 50, num_normal_trucks=5, num_reefer_trucks=5)
+    args = parse_args()
+    generate(args.region,
+             args.num_customer,
+             args.demand_mode, 
+             args.num_normal_trucks, 
+             args.num_reefer_trucks)
