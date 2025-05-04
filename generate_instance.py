@@ -12,6 +12,7 @@ from problem.item import Item
 from problem.node import Node
 from problem.vehicle import Vehicle
 
+VOLUME_THRESHOLD = 500000
 
 def parse_args():
     parser = argparse.ArgumentParser(description="instance generation args.")
@@ -66,6 +67,7 @@ def get_customer_items_random_date(cust_id: str)->List[Item]:
         r_date = random.choice(list(historical_transaction_dict.keys()))
         raw_item_dict_list = historical_transaction_dict[r_date]
         i = 0
+        date_items: List[Item] = []
         for raw_item_dict in raw_item_dict_list:
             product_code = raw_item_dict["PRODUCT_CODE"]
             qty = raw_item_dict["SHIPPED_QTY"]
@@ -74,17 +76,34 @@ def get_customer_items_random_date(cust_id: str)->List[Item]:
             l,w,h = med_spec["panjang_cm"], med_spec["lebar_cm"], med_spec["tinggi_cm"]
             temp_req = med_spec["suhu_simpan"]
             dim = np.asanyarray([l,w,h], dtype=float)
+            if np.any(dim>150):
+                continue
             is_reefer_required = temp_req != "kamar"
             for _ in range(qty):
                 new_item = Item(i, product_code, dim, weight, False, is_reefer_required)
-                items.append(new_item)
+                date_items.append(new_item)
                 i += 1
+        
+        all_items_total_volume = sum(item.volume for item in date_items)
+        if all_items_total_volume > VOLUME_THRESHOLD:
+            random.shuffle(date_items)
+            total_volume = 0
+            for item in date_items:
+                total_volume += item.volume
+                if total_volume > VOLUME_THRESHOLD:
+                    break
+                items.append(item)
+        else:
+            items = date_items
+            
+        
     except KeyError:
         # generate items randomly
         threshold = 0.05*5000000 #gram
         total_weight = 0.
+        total_volume = 0
         i = 0
-        while total_weight < threshold:
+        while total_weight < threshold and total_volume<VOLUME_THRESHOLD:
             qty = random.randint(1, 10)
             product_code = random.choice(list(med_spec_dict.keys()))
             med_spec = med_spec_dict[product_code]
@@ -92,11 +111,17 @@ def get_customer_items_random_date(cust_id: str)->List[Item]:
             l,w,h = med_spec["panjang_cm"], med_spec["lebar_cm"], med_spec["tinggi_cm"]
             temp_req = med_spec["suhu_simpan"]
             dim = np.asanyarray([l,w,h], dtype=float)
+            if np.any(dim>150):
+                continue
+            volume = dim.prod()
             is_reefer_required = temp_req != "kamar"
             for _ in range(qty):
+                total_weight += weight
+                total_volume += volume
+                if total_weight > threshold or total_volume > VOLUME_THRESHOLD:
+                    break
                 new_item = Item(i, product_code, dim, weight, False, is_reefer_required)
                 items.append(new_item)
-                total_weight += weight
                 i += 1
 
     return items
@@ -112,51 +137,46 @@ def classify_item_size(dim: np.ndarray) -> str:
         return "large"
 
 def sample_items_by_size(med_spec_dict, ratio: Tuple[float, float, float]) -> List[Item]:
-    weight_threshold = random.uniform(20_000, 80_000)
-    volume_threshold = 100000
+    weight_threshold = random.uniform(50_000, 80_000)
     small_pool, medium_pool, large_pool = [], [], []
     for code, spec in med_spec_dict.items():
-        try:
-            dim = np.array([spec["panjang_cm"], spec["lebar_cm"], spec["tinggi_cm"]], dtype=float)
-            size = classify_item_size(dim)
-            if size == "small":
-                small_pool.append(code)
-            elif size == "medium":
-                medium_pool.append(code)
-            else:
-                large_pool.append(code)
-        except Exception:
+        dim = np.array([spec["panjang_cm"], spec["lebar_cm"], spec["tinggi_cm"]], dtype=float)
+        if np.any(dim>150):
             continue
+        size = classify_item_size(dim)
+        if size == "small":
+            small_pool.append(code)
+        elif size == "medium":
+            medium_pool.append(code)
+        else:
+            large_pool.append(code)
 
     size_pools = {"small": small_pool, "medium": medium_pool, "large": large_pool}
     items: List[Item] = []
     total_weight = 0.
     total_volume = 0.
     i = 0
-    while total_weight < weight_threshold and total_volume < volume_threshold:
+    while total_weight < weight_threshold and total_volume < VOLUME_THRESHOLD:
         size_choice = random.choices(["small", "medium", "large"], weights=ratio, k=1)[0]
         pool = size_pools[size_choice]
         if not pool:
             continue
         code = random.choice(pool)
         spec = med_spec_dict[code]
-        try:
-            weight = float(spec["berat_gram"])
-            if total_weight + weight > weight_threshold:
-                break
-            l, w, h = spec["panjang_cm"], spec["lebar_cm"], spec["tinggi_cm"]
-            temp_req = spec["suhu_simpan"]
-            dim = np.asarray([l, w, h], dtype=float)
-            is_reefer_required = temp_req != "kamar"
-            item = Item(i, code, dim, weight, False, is_reefer_required)
-            total_volume += item.volume
-            total_weight += weight
-            if total_weight >= weight_threshold or total_volume >= volume_threshold:
-                break
-            items.append(item)
-            i += 1
-        except Exception:
-            continue
+        weight = float(spec["berat_gram"])
+        if total_weight + weight > weight_threshold:
+            break
+        l, w, h = spec["panjang_cm"], spec["lebar_cm"], spec["tinggi_cm"]
+        temp_req = spec["suhu_simpan"]
+        dim = np.asarray([l, w, h], dtype=float)
+        is_reefer_required = temp_req != "kamar"
+        item = Item(i, code, dim, weight, False, is_reefer_required)
+        total_volume += item.volume
+        total_weight += weight
+        # if total_weight >= weight_threshold or total_volume >= VOLUME_THRESHOLD:
+        #     break
+        items.append(item)
+        i += 1
     return items
 
 def generate_items_by_ratio(ratio) -> List[Item]:
@@ -230,12 +250,13 @@ def generate_customers(cabang:str,
         items: List[Item]
         if demand_mode == "historical":
             items = get_customer_items_random_date(str(cust_id))
-            print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g")
+            print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
         else:
             if ratio is None:
                 raise ValueError("if demand mode is not historical (generated), item size ratio must be provided")
             items = generate_items_by_ratio(ratio)
-            print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g")
+            print(f"[{ratio} Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
+        assert len(items)>0
         new_cust = Customer(i+1, cust_id, coord, items)
         customers.append(new_cust)
 

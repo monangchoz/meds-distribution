@@ -9,6 +9,8 @@ def call_generate_instance(region: str,
                            num_normal_trucks: int = 10,
                            num_reefer_trucks: int = 10,
                            ratio:Optional[Tuple[float,float,float]]=None):
+    
+    # print(region, num_customers, demand_mode)
     cmd_args = ["python",
                 "generate_instance.py",
                 "--region",
@@ -45,6 +47,9 @@ if __name__ == "__main__":
                 for ncl in num_clusters_list:
                     args += [(region, nc, "historical", ncl, 10, 10, None)]
                     # call_generate_instance(region, nc, "historical", ncl)
+    # for arg in args:
+    #     call_generate_instance(*arg)
+    
     with mp.Pool(8) as p:
         p.starmap(call_generate_instance, args)
     
@@ -61,3 +66,5 @@ if __name__ == "__main__":
     with mp.Pool(8) as p:
         p.starmap(call_generate_instance, args)
                         # call_generate_instance(region, nc, "generated", ncl, ratio=r)
+    # for arg in args:
+    #     call_generate_instance(*arg)

@@ -108,7 +108,7 @@ class HVRP3L:
         filename = f"{cabang}_nc_{self.num_customers}_ncl_{num_clusters}_nv_{self.num_vehicles}_{demand_mode}"
         if ratio is not None:
             ratio_str = '_'.join(format(x, ".2f") for x in ratio)
-            filename += f"r_{ratio_str}"
+            filename += f"_r_{ratio_str}"
         instance_filepath = ""
         for i in range(100000):
             instance_filepath = instance_dir/f"{filename}_{i}.json"

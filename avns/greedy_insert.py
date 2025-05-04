@@ -11,7 +11,10 @@ def try_inserting_to_vehicles(solution:Solution, sorted_custs_idx: np.ndarray)->
 
     """
     problem = solution.problem
+    # ncu = 0
     if np.all(solution.node_vhc_assignment_map != NO_VEHICLE):
+        print("HELLO")
+        # print(ncu)
         # try to pack here actually, not after every insertion..?
         # check if packing feasible
         for vehicle_idx, route in enumerate(solution.routes):
@@ -83,7 +86,7 @@ def try_inserting_to_vehicles(solution:Solution, sorted_custs_idx: np.ndarray)->
     sorted_idx = np.argsort(insertion_costs)
     insertion_costs = insertion_costs[sorted_idx]
     vehicles_idx = vehicles_idx[sorted_idx]
-    
+    print(cust_idx, vehicles_idx)
     for vehicle_idx, cost in zip(vehicles_idx, insertion_costs):
         solution.filled_volumes += problem.total_demand_volumes[new_cust_idx]
         solution.filled_weight_caps += problem.total_demand_weights[new_cust_idx]
@@ -107,9 +110,10 @@ def try_inserting_to_vehicles(solution:Solution, sorted_custs_idx: np.ndarray)->
         solution.total_vehicle_variable_cost -= cost
     return solution, False
 
-def greedy_insert(problem: HVRP3L, max_trials=100)->Solution:
+def greedy_insert(problem: HVRP3L, max_trials=1)->Solution:
     initial_solution: Solution
     for trial in range(max_trials):
+        # print(f"trial {trial}")
         solution = Solution(problem)
         sorted_custs_idx = np.arange(problem.num_customers)+1
         np.random.shuffle(sorted_custs_idx)
@@ -117,5 +121,6 @@ def greedy_insert(problem: HVRP3L, max_trials=100)->Solution:
         initial_solution, is_feasible_solution_found = try_inserting_to_vehicles(solution, sorted_custs_idx)
         if is_feasible_solution_found:
             break
+    raise ValueError()
     return initial_solution
             
