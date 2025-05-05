@@ -11,7 +11,7 @@ from pymoo.core.individual import Individual
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.repair import Repair
 from pymoo_interface.arr2 import RepairMechanism
-from avns.greedy_insert import greedy_insert
+from avns.saving import saving
 
 
 def get_routes_from_x(x: np.ndarray, problem: HVRP3L)->List[List[int]]:
@@ -86,7 +86,7 @@ class HVRP3L_OPT(ElementwiseProblem):
         self.xl = np.zeros([self.n_var, ], dtype=float)
         self.xu = np.ones([self.n_var, ], dtype=float)
         
-        self.fallback_solution: Solution = greedy_insert(hvrp3l_instance)
+        self.fallback_solution: Solution = saving(hvrp3l_instance)
 
     def decode(self, x: np.ndarray)->Solution:
         problem: HVRP3L = self.hvrp3l_instance

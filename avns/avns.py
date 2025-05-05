@@ -1,7 +1,7 @@
 from typing import Optional, Sequence
 
 from avns.diversification import Diversification
-from avns.greedy_insert import greedy_insert
+from avns.saving import saving
 from avns.local_search import local_search
 from avns.local_search_operator import LocalSearchOperator
 from avns.shake_operators import ShakeOperator
@@ -27,7 +27,7 @@ class AVNS:
 
     def reset(self, problem: HVRP3L):
         self.diversification = Diversification(problem.num_nodes)
-        self.curr_solution = greedy_insert(problem)
+        self.curr_solution = saving(problem)
         self.best_solution = self.curr_solution.copy()
         self.diversification.update_improvement_status(self.curr_solution)
         self.non_imp_iteration = 0

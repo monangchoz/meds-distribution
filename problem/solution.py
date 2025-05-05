@@ -140,6 +140,7 @@ class Solution:
                 rotations[n:n+c_num_items] = self.item_rotations[item_mask]
                 n += c_num_items
             assert is_packing_feasible(self.vehicle_container_dims[vi], item_dims, rotations, positions)        
+        print(self.total_vehicle_fixed_cost, total_fixed_cost)
         assert math.isclose(self.total_vehicle_fixed_cost, total_fixed_cost)
-        assert math.isclose(self.total_vehicle_fixed_cost, total_fixed_cost)
+        assert math.isclose(self.total_vehicle_variable_cost, total_vehicle_variable_cost)
         return True
