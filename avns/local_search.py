@@ -25,7 +25,7 @@ def local_search(solution: Solution, operators: List[LocalSearchOperator])->Solu
             args = available_args[chosen_operator_idx].pop(0)
             solution, is_ls_feasible = chosen_operator(solution, args)
             if is_ls_feasible:
-                print(chosen_operator, args, solution.is_feasible)
+                # print(chosen_operator, args, solution.is_feasible)
                 chosen_args = args
                 break
         if chosen_args is not None:
@@ -36,8 +36,8 @@ def local_search(solution: Solution, operators: List[LocalSearchOperator])->Solu
                         del available_args[i][j]
         print(f"Local search iteration {iteration}, new objective: {solution.total_cost}")
         iteration += 1
-        # if iteration==20:
-        #     exit()
+        if iteration==100:
+            break
     return solution
         
         
