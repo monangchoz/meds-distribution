@@ -5,10 +5,11 @@ import random
 from typing import List, Optional, Tuple
 
 import numpy as np
+from ep_heuristic.random_slpack import try_slpack
 from haversine import haversine
 from problem.customer import Customer
 from problem.hvrp3l import HVRP3L
-from problem.item import Item
+from problem.item import POSSIBLE_ROTATION_PERMUTATION_MATS, Item
 from problem.node import Node
 from problem.vehicle import Vehicle
 
@@ -52,6 +53,33 @@ def parse_args():
     
     
     return parser.parse_args()
+
+
+
+def get_maximum_packable_items(items:List[Item])->List[Item]:
+    packable_items: List[Item] = []
+    vehicles = generate_vehicles(1,1)
+    vehicle = vehicles[1]
+    if np.any(np.asanyarray([item.is_reefer_required for item in items])):
+        vehicle = vehicles[0]
+
+    total_volume = 0
+    total_weight = 0
+    for item in items:
+        if total_volume + item.volume > vehicle.volume_capacity or total_weight + item.weight > vehicle.weight_capacity:
+            continue 
+        packable_items.append(item)
+        total_num_items = len(packable_items)
+        item_dims = np.stack([item_.dim for item_ in packable_items])
+        item_priorities = np.zeros((total_num_items,), dtype=int)
+        sorted_idx = np.arange(total_num_items)
+        rotation_trial_idx = np.zeros((total_num_items, 2), dtype=int)
+        rotation_trial_idx[:, 1] = 1
+
+        _, _, is_packing_feasible = try_slpack(item_dims, item_priorities, sorted_idx, rotation_trial_idx, vehicle.container_dim, POSSIBLE_ROTATION_PERMUTATION_MATS, 0.8, 5)
+        if not is_packing_feasible:
+            packable_items.pop()
+    return items
 
 def get_customer_items_random_date(cust_id: str)->List[Item]:
     transaction_filepath = pathlib.Path()/"raw_json"/"Transaksi_v2.json"
@@ -247,16 +275,17 @@ def generate_customers(cabang:str,
         coords_cust_id_list = [cust for cluster in clusters for cust in cluster]
     
     for i, (coord, cust_id) in enumerate(coords_cust_id_list):
-        items: List[Item]
-        if demand_mode == "historical":
-            items = get_customer_items_random_date(str(cust_id))
-            print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
-        else:
-            if ratio is None:
-                raise ValueError("if demand mode is not historical (generated), item size ratio must be provided")
-            items = generate_items_by_ratio(ratio)
-            print(f"[{ratio} Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
-        assert len(items)>0
+        items: List[Item] = []
+        while len(items)==0:
+            if demand_mode == "historical":
+                items = get_customer_items_random_date(str(cust_id))
+                print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
+            else:
+                if ratio is None:
+                    raise ValueError("if demand mode is not historical (generated), item size ratio must be provided")
+                items = generate_items_by_ratio(ratio)
+                print(f"[{ratio} Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
+            items = get_maximum_packable_items(items)
         new_cust = Customer(i+1, cust_id, coord, items)
         customers.append(new_cust)
 
@@ -338,6 +367,6 @@ if __name__=="__main__":
              args.num_customers,
              args.demand_mode,
              args.num_clusters,
-             args.num_normal_trucks,
-             args.num_reefer_trucks,
+             args.num_customers,
+             args.num_customers,
              ratio)

@@ -86,7 +86,7 @@ def try_inserting_to_vehicles(solution:Solution, sorted_custs_idx: np.ndarray)->
     sorted_idx = np.argsort(insertion_costs)
     insertion_costs = insertion_costs[sorted_idx]
     vehicles_idx = vehicles_idx[sorted_idx]
-    print(cust_idx, vehicles_idx)
+    # print(cust_idx, vehicles_idx)
     for vehicle_idx, cost in zip(vehicles_idx, insertion_costs):
         solution.filled_volumes += problem.total_demand_volumes[new_cust_idx]
         solution.filled_weight_caps += problem.total_demand_weights[new_cust_idx]
@@ -100,7 +100,8 @@ def try_inserting_to_vehicles(solution:Solution, sorted_custs_idx: np.ndarray)->
         new_solution, is_feasible_solution_found = try_inserting_to_vehicles(solution, sorted_custs_idx)
         if is_feasible_solution_found:
             return new_solution, True
-        
+        else:
+            return solution, False
         solution.filled_volumes -= problem.total_demand_volumes[new_cust_idx]
         solution.filled_weight_caps -= problem.total_demand_weights[new_cust_idx]
         solution.routes[vehicle_idx] = solution.routes[vehicle_idx][:-1]

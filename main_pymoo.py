@@ -1,22 +1,22 @@
+import argparse
 import multiprocessing as mp
 import pathlib
 import random
-import argparse
 import time
 
 import numpy as np
 from problem.hvrp3l import HVRP3L
 from pymoo.algorithms.soo.nonconvex.brkga import BRKGA
-from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.algorithms.soo.nonconvex.de import DE
+from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.algorithms.soo.nonconvex.pso import PSO
-
 from pymoo.core.problem import StarmapParallelization
 from pymoo.optimize import minimize
 from pymoo.termination.default import DefaultSingleObjectiveTermination
 from pymoo_interface.arr2 import ARR2
 from pymoo_interface.hvrp3l_opt import (HVRP3L_OPT, DuplicateElimination,
                                         RepairEncoding)
+
 
 def parse_args()->argparse.Namespace:
     parser = argparse.ArgumentParser(description="experiment arguments.")
@@ -66,30 +66,6 @@ def run():
     
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
-    for item in problem.customers[19].items:
-        print(problem.customers[19].idx)
-        print(item.volume, item.dim, item.weight)
-    print(problem.total_demand_volumes[19], problem.total_demand_weights[19])
-    exit()
-    # reefer_item_volume=0
-    # normal_item_volume=0
-    # total_weight = 0
-    # for cust in problem.customers:
-    #     for item in cust.items:
-    #         if item.is_reefer_required:
-    #             reefer_item_volume += item.volume
-    #         else:
-    #             normal_item_volume += item.volume
-    #         total_weight += item.weight
-    # item_bigger_than_vehicle = problem.item_dims[:, None, :] > problem.vehicle_container_dims[None, :, :]
-    
-    # print(item_bigger_than_vehicle.any())
-    # print(reefer_item_volume, normal_item_volume, total_weight)
-    # print(problem.vehicle_weight_capacities)
-    # print(problem.vehicle_volume_capacities)
-    # exit()
-    
-    
     start_time = time.time()
     pool = mp.Pool(8)
     runner = StarmapParallelization(pool.starmap)
