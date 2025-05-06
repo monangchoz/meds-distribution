@@ -16,6 +16,8 @@ from pymoo.termination.default import DefaultSingleObjectiveTermination
 from pymoo_interface.arr2 import ARR2
 from pymoo_interface.hvrp3l_opt import (HVRP3L_OPT, DuplicateElimination,
                                         RepairEncoding)
+from pymoo.core.termination import TerminateIfAny
+from pymoo.termination.max_time import TimeBasedTermination
 
 
 def parse_args()->argparse.Namespace:
@@ -71,7 +73,9 @@ def run():
     # runner = StarmapParallelization(pool.starmap)
     algo = setup_algorithm(args.algo_name, problem)
     problem_intf = HVRP3L_OPT(problem, ARR2(problem.num_customers, problem.num_vehicles))#, elementwise_runner=runner)
-    termination = DefaultSingleObjectiveTermination(n_max_gen=100, period=args.patience)
+    termination_max_gen_period = DefaultSingleObjectiveTermination(n_max_gen=100, period=args.patience)
+    termination_time = TimeBasedTermination("01:00:00")
+    termination = TerminateIfAny(termination_max_gen_period, termination_time)
     res = minimize(problem_intf, algo, termination=termination,
                    seed=1,
                    verbose=True)

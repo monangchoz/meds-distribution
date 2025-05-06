@@ -1,3 +1,4 @@
+import time
 from typing import Optional, Sequence
 
 from avns.diversification import Diversification
@@ -15,7 +16,8 @@ class AVNS:
                  max_iteration: int,
                  patience: int,
                  local_search_operators: Sequence[LocalSearchOperator],
-                 shake_operators: Sequence[ShakeOperator]):
+                 shake_operators: Sequence[ShakeOperator],
+                 max_time:int=3600):
         self.diversification: Diversification
         self.curr_solution: Solution
         self.best_solution: Solution
@@ -24,6 +26,7 @@ class AVNS:
         self.max_iteration = max_iteration
         self.patience = patience
         self.non_imp_iteration: int
+        self.max_time = max_time
 
     def reset(self, problem: HVRP3L):
         self.diversification = Diversification(problem.num_nodes)
@@ -34,6 +37,7 @@ class AVNS:
 
     @profile
     def solve(self, problem:HVRP3L)->Solution:
+        start_time = time.time()
         self.reset(problem)
         for iteration in range(self.max_iteration):
             print(f"Iteration {iteration}, Best Total Cost: {self.best_solution.total_cost}, total distance:{self.best_solution.total_distance}")
@@ -53,6 +57,9 @@ class AVNS:
             div_solution = self.best_solution.copy()
             div_solution = self.diversification(div_solution)
             self.curr_solution = div_solution
+            current_time = time.time()-start_time
+            if current_time > self.max_time:
+                break
         if self.best_solution.total_cost > self.curr_solution.total_cost:
             self.best_solution = self.curr_solution
         return self.best_solution
