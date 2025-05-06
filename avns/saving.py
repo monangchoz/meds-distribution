@@ -6,7 +6,7 @@ from problem.solution import Solution, NO_VEHICLE
 from problem.hvrp3l import HVRP3L
 from avns.utils import apply_new_route
 
-def combine_route(solution: Solution, vi: int, vj: int, vt:int)->Tuple[Solution: bool]:
+def combine_route(solution: Solution, vi: int, vj: int, vt:int)->Tuple[Solution, bool]:
     new_solution = solution.copy()
     problem = solution.problem
     new_route = solution.routes[vi] + solution.routes[vj]
