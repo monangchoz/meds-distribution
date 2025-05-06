@@ -21,7 +21,6 @@ if __name__ == "__main__":
     instance_file_names = os.listdir(instance_dir.absolute())
     algo_names = ["brkga","pso","ga","de"]
     patience = 30
-    args = []
     for instance_file_name in instance_file_names:
         for algo_name in algo_names:
             call_main_pymoo(algo_name, instance_file_name, patience)

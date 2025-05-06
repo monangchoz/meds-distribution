@@ -223,7 +223,7 @@ def repair_do(problem: HVRP3L_OPT, i:int, x: np.ndarray)->Tuple[int, np.ndarray]
     return i,x
 
 class RepairEncoding(Repair):
-    def __init__(self, name=None, vtype=None, repair=None, num_proc:int=10):
+    def __init__(self, name=None, vtype=None, repair=None, num_proc:int=16):
         super().__init__(name, vtype, repair)
         self.num_proc = num_proc
     
