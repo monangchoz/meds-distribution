@@ -116,7 +116,7 @@ def is_insertion_feasible_vectorized(feasibility_flags:np.ndarray,
     
     return feasibility_flags
 
-@nb.njit(nb.int64(nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:],nb.float64), cache=True, parallel=True)
+@nb.njit(nb.int64(nb.float64[:],nb.float64[:,:],nb.float64[:,:],nb.float64[:,:],nb.float64[:],nb.float64), cache=True)
 # @profile
 def find_ep(item_dim: np.ndarray,
             inserted_item_dims: np.ndarray,
@@ -131,7 +131,7 @@ def find_ep(item_dim: np.ndarray,
     feasibility_flags: np.ndarray = np.ones((total_size,), dtype=np.bool_)
     inserted_item_end_points: np.ndarray = filled_positions + inserted_item_dims
     # is_insertion_feasible_flags = np.empty((batch_size,), dtype=np.bool_)
-    for i in nb.prange(num_batch):
+    for i in range(num_batch):
         ej_a = i*batch_size
         ej_b = min((i+1)*batch_size, total_size)
         is_insertion_feasible_flags = is_insertion_feasible_vectorized(feasibility_flags[ej_a:ej_b], item_dim, ext_points[ej_a:ej_b], inserted_item_dims, filled_positions, inserted_item_end_points, container_dim, base_support_alpha)

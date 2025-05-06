@@ -79,7 +79,7 @@ def get_maximum_packable_items(items:List[Item])->List[Item]:
         _, _, is_packing_feasible = try_slpack(item_dims, item_priorities, sorted_idx, rotation_trial_idx, vehicle.container_dim, POSSIBLE_ROTATION_PERMUTATION_MATS, 0.8, 5)
         if not is_packing_feasible:
             packable_items.pop()
-    return items
+    return packable_items
 
 def get_customer_items_random_date(cust_id: str)->List[Item]:
     transaction_filepath = pathlib.Path()/"raw_json"/"Transaksi_v2.json"
