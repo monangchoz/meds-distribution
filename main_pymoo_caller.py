@@ -3,66 +3,25 @@ import subprocess
 from typing import Tuple, Optional
 import multiprocessing as mp
 
-def call_generate_instance(region: str,
-                           num_customers: int,
-                           demand_mode: str,
-                           num_clusters: int,
-                           num_normal_trucks: int = 10,
-                           num_reefer_trucks: int = 10,
-                           ratio:Optional[Tuple[float,float,float]]=None):
+
+def call_main_pymoo(algo_name, instance_file_name, patience):
     cmd_args = ["python",
-                "generate_instance.py",
-                "--region",
-                region,
-                "--num-customers",
-                str(num_customers),
-                "--demand-mode",
-                demand_mode,
-                "--num-clusters",
-                str(num_clusters),
-                "--num-normal-trucks",
-                str(num_normal_trucks),
-                "--num-reefer-trucks",
-                str(num_reefer_trucks)]
-    if demand_mode == "generated":
-        if ratio is None:
-            raise ValueError("demand mode generated must have ratio")
-        cmd_args += ["--small-items-ratio",
-                     str(ratio[0]),
-                     "--large-items-ratio",
-                     str(ratio[2])]
-    subprocess.call(cmd_args)
+                "main_pymoo.py",
+                "--instance-file-name",
+                instance_file_name,
+                "--algo-name",
+                algo_name,
+                "--patience",
+                str(patience)]
+    subprocess.run(cmd_args)
         
 if __name__ == "__main__":
     import pathlib
     instance_dir = pathlib.Path()/"instances" 
     instance_file_names = os.listdir(instance_dir.absolute())
-    algo_names = [
-        "brkga",
-        "ga",
-        "de",
-        "pso"]
-    # generate historical
-    # args = []
-    # for i in range(repetitions):
-    #     for region in regions:
-    #         for nc in num_customers_list:
-    #             for ncl in num_clusters_list:
-    #                 args += [(region, nc, "historical", ncl, 10, 10, None)]
-    #                 # call_generate_instance(region, nc, "historical", ncl)
-    # with mp.Pool(8) as p:
-    #     p.starmap(call_generate_instance, args)
-    
-    
-    # generate generated with ratio
-    ratio_list = [(1/3, 1/3, 1/3), (0.6, 0.2, 0.2), (0.2, 0.6, 0.2), (0.2, 0.2, 0.6)]
+    algo_names = ["brkga","pso","ga","de"]
+    patience = 30
     args = []
-    for i in range(repetitions):
-        for region in regions:
-            for nc in num_customers_list:
-                for ncl in num_clusters_list:
-                    for r in ratio_list:
-                        args += [(region, nc, "generated", ncl, 10, 10, r)]
-    with mp.Pool(8) as p:
-        p.starmap(call_generate_instance, args)
-                        # call_generate_instance(region, nc, "generated", ncl, ratio=r)
+    for instance_file_name in instance_file_names:
+        for algo_name in algo_names:
+            call_main_pymoo(algo_name, instance_file_name, patience)
