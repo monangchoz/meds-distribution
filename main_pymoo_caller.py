@@ -37,17 +37,21 @@ if __name__ == "__main__":
     import pathlib
     instance_dir = pathlib.Path()/"instances" 
     instance_file_names = os.listdir(instance_dir.absolute())
-    algo_names = ["brkga","ga","de","pso"]
+    algo_names = [
+        "brkga",
+        "ga",
+        "de",
+        "pso"]
     # generate historical
-    args = []
-    for i in range(repetitions):
-        for region in regions:
-            for nc in num_customers_list:
-                for ncl in num_clusters_list:
-                    args += [(region, nc, "historical", ncl, 10, 10, None)]
-                    # call_generate_instance(region, nc, "historical", ncl)
-    with mp.Pool(8) as p:
-        p.starmap(call_generate_instance, args)
+    # args = []
+    # for i in range(repetitions):
+    #     for region in regions:
+    #         for nc in num_customers_list:
+    #             for ncl in num_clusters_list:
+    #                 args += [(region, nc, "historical", ncl, 10, 10, None)]
+    #                 # call_generate_instance(region, nc, "historical", ncl)
+    # with mp.Pool(8) as p:
+    #     p.starmap(call_generate_instance, args)
     
     
     # generate generated with ratio
