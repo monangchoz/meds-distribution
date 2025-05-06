@@ -7,4 +7,4 @@
 
 source /home/mahasiswa1/miniconda3/bin/activate
 
-python main_avns --instance-file-name "$FILENAME"
+python main_avns.py --instance-file-name "$FILENAME" --max-iteration 100 --patience 10

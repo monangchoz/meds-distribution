@@ -32,6 +32,7 @@ def combine_route(solution: Solution, vi: int, vj: int, vt:int)->Tuple[Solution:
 
 def saving(problem: HVRP3L)->Solution:
     solution = Solution(problem)
+    
     for cust_idx in range(1, problem.num_nodes):
         for v_idx in range(problem.num_vehicles):
             if len(solution.routes[v_idx])>0:
@@ -45,6 +46,8 @@ def saving(problem: HVRP3L)->Solution:
             
             solution, is_feasible = apply_new_route(solution, v_idx, [cust_idx])
             if not is_feasible:
+                print(problem.total_demand_volumes[cust_idx], problem.total_demand_weights[cust_idx])
+                print(problem.vehicle_volume_capacities[v_idx], problem.vehicle_weight_capacities[v_idx])
                 raise ValueError()
             break
         
