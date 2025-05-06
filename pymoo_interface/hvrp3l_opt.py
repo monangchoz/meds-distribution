@@ -1,5 +1,7 @@
 import math
 from typing import List
+import multiprocessing as mp
+from typing import Tuple
 
 import numpy as np
 from ep_heuristic.random_slpack import random_slpack
@@ -196,8 +198,45 @@ class HVRP3L_OPT(ElementwiseProblem):
         out["F"] = total_cost
             
 
+def repair_do(problem: HVRP3L_OPT, i:int, x: np.ndarray)->Tuple[int, np.ndarray]:
+    solution = problem.decode(x)
+    hvrp3l_instance = problem.hvrp3l_instance
+    for vi, route in enumerate(solution.routes):
+        for cust_idx in route:
+            vxi = hvrp3l_instance.num_customers + cust_idx-1
+            if hvrp3l_instance.node_reefer_flags[cust_idx]:
+                vi_original = math.floor(x[vxi]*hvrp3l_instance.num_reefer_trucks)
+            else:
+                vi_original = math.floor(x[vxi]*hvrp3l_instance.num_vehicles)
+            if vi_original==vi:
+                continue
+            
+            if hvrp3l_instance.node_reefer_flags[cust_idx]:
+                new_x_vi = float(vi)/hvrp3l_instance.num_reefer_trucks + 1/(2*hvrp3l_instance.num_reefer_trucks)
+            else:
+                new_x_vi = float(vi)/hvrp3l_instance.num_vehicles + 1/(2*hvrp3l_instance.num_vehicles)
+            x[vxi] = new_x_vi
+        cis = [cust_idx-1 for cust_idx in route]
+        priorities = x[cis]
+        sorted_priorites = np.sort(priorities)
+        x[cis] = sorted_priorites
+    return i,x
+
 class RepairEncoding(Repair):
+    def __init__(self, name=None, vtype=None, repair=None, num_proc:int=4):
+        super().__init__(name, vtype, repair)
+        self.num_proc = num_proc
+    
     def _do(self, problem: HVRP3L_OPT, X:np.ndarray, **kwargs)->np.ndarray:
+        if self.num_proc>1:
+            with mp.Pool(self.num_proc) as pool:
+                do_args = []
+                for i, x in enumerate(X):
+                    do_args.append((problem, i, x))
+                do_results = pool.starmap(repair_do, do_args)
+                for (i, new_x) in do_results:
+                    X[i] = new_x
+            return X
         hvrp3l_instance = problem.hvrp3l_instance
         for i, x in enumerate(X):
             solution = problem.decode(x)

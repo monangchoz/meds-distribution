@@ -67,10 +67,10 @@ def run():
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
     start_time = time.time()
-    pool = mp.Pool(8)
-    runner = StarmapParallelization(pool.starmap)
+    # pool = mp.Pool(8)
+    # runner = StarmapParallelization(pool.starmap)
     algo = setup_algorithm(args.algo_name, problem)
-    problem_intf = HVRP3L_OPT(problem, ARR2(problem.num_customers, problem.num_vehicles), elementwise_runner=runner)
+    problem_intf = HVRP3L_OPT(problem, ARR2(problem.num_customers, problem.num_vehicles))#, elementwise_runner=runner)
     termination = DefaultSingleObjectiveTermination(n_max_gen=100, period=args.patience)
     res = minimize(problem_intf, algo, termination=termination,
                    seed=1,
