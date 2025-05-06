@@ -79,6 +79,8 @@ def get_maximum_packable_items(items:List[Item])->List[Item]:
         _, _, is_packing_feasible = try_slpack(item_dims, item_priorities, sorted_idx, rotation_trial_idx, vehicle.container_dim, POSSIBLE_ROTATION_PERMUTATION_MATS, 0.8, 5)
         if not is_packing_feasible:
             packable_items.pop()
+        if len(packable_items)>=50:
+            break
     return packable_items
 
 def get_customer_items_random_date(cust_id: str)->List[Item]:
@@ -279,13 +281,14 @@ def generate_customers(cabang:str,
         while len(items)==0:
             if demand_mode == "historical":
                 items = get_customer_items_random_date(str(cust_id))
-                print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
+                # print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
             else:
                 if ratio is None:
                     raise ValueError("if demand mode is not historical (generated), item size ratio must be provided")
                 items = generate_items_by_ratio(ratio)
-                print(f"[{ratio} Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
+                # print(f"[{ratio} Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
             items = get_maximum_packable_items(items)
+        print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
         new_cust = Customer(i+1, cust_id, coord, items)
         customers.append(new_cust)
 
