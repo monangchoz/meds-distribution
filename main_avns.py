@@ -47,24 +47,44 @@ def setup_avns(max_iteration:int, patience:int)->AVNS:
     avns = AVNS(max_iteration,patience,ls_operators,shake_operators)
     return avns
 
+def has_valid_result(filepath):
+    if not filepath.exists():
+        return False
+    with open(filepath, "r") as f:
+        for line in f:
+            parts = line.strip().split(",")
+            if len(parts) == 2:
+                try:
+                    print(float(parts[0]),float(parts[1]))
+                    return True
+                except ValueError:
+                    pass
+    return False
 
 def run():
     args = parse_args()
     filename = args.instance_file_name
     filename_without_extension = filename[:-5]
-    instance_filepath = pathlib.Path()/"instances"/filename
+    instance_filepath = pathlib.Path("instances") / filename
+    result_dir = pathlib.Path("results") / "avns"
+    result_filepath = result_dir / f"{filename_without_extension}.csv"
+
+    if has_valid_result(result_filepath):
+        print(f"Skipping {filename}: valid result already exists.")
+        return
+
     start_time = time.time()
     problem = HVRP3L.read_from_json(instance_filepath)
     avns = setup_avns(args.max_iteration, args.patience)
     solution = avns.solve(problem)
     end_time = time.time()
-    running_time = end_time-start_time
-    result_dir = pathlib.Path()/"results"/"avns"
-    result_filepath = result_dir/f"{filename_without_extension}.csv"
+    running_time = end_time - start_time
+
     result_dir.mkdir(parents=True, exist_ok=True)
-    with open(result_filepath.absolute(), "+a") as f:
+    with open(result_filepath.absolute(), "a") as f:
         result_str = f"{solution.total_cost},{running_time}\n"
         f.write(result_str)
+
 
         
 
