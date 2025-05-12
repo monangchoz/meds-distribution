@@ -45,20 +45,20 @@ def parse_args()->argparse.Namespace:
 
 def setup_algorithm(algo_name: str, problem:HVRP3L):
     if algo_name == "brkga":
-        algo = BRKGA(n_elites=20, 
-                    n_offsprings=10, 
+        algo = BRKGA(n_elites=30, 
+                    n_offsprings=15, 
                     n_mutants=5,
                     repair=RepairEncoding(), 
                     eliminate_duplicates=DuplicateElimination(problem))
     elif algo_name == "ga":
-        algo = GA(pop_size=30, 
+        algo = GA(pop_size=50, 
                   repair=RepairEncoding(), 
                   eliminate_duplicates=DuplicateElimination(problem))
     elif algo_name == "de":
-        algo = DE(pop_size=30, 
+        algo = DE(pop_size=50, 
                   repair=RepairEncoding())
     elif algo_name == "pso":
-        algo = PSO(pop_size=30, repair=RepairEncoding())
+        algo = PSO(pop_size=50, repair=RepairEncoding())
     return algo
 
 def run():
