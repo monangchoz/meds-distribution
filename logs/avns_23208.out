@@ -1,0 +1,964 @@
+Iteration 0, Best Total Cost: 4095368.399, total distance:141.20299999999997
+Local search iteration 0, new objective: 3974380.399
+Local search iteration 1, new objective: 3968841.999
+Local search iteration 2, new objective: 3934499.999
+Local search iteration 3, new objective: 3915241.599
+Local search iteration 4, new objective: 3907289.599
+Local search iteration 5, new objective: 3902577.199
+Local search iteration 6, new objective: 3899415.999
+Local search iteration 7, new objective: 3896543.199
+Local search iteration 8, new objective: 3895596.8
+Iteration 1, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5396486.0
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5393194.0
+Iteration 2, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5415765.199
+Local search iteration 3, new objective: 5396602.0
+Local search iteration 4, new objective: 5393774.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 3, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5393774.0
+Local search iteration 4, new objective: 5393194.0
+Iteration 4, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5475534.8
+Local search iteration 4, new objective: 5427046.8
+Local search iteration 5, new objective: 5419868.0
+Local search iteration 6, new objective: 5415668.0
+Local search iteration 7, new objective: 5411493.199
+Local search iteration 8, new objective: 5405965.199
+Local search iteration 9, new objective: 5403249.199
+Local search iteration 10, new objective: 5402608.0
+Local search iteration 11, new objective: 5402384.0
+Iteration 5, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5396490.0
+Local search iteration 4, new objective: 5395910.0
+Local search iteration 5, new objective: 5395789.6
+Local search iteration 6, new objective: 5394742.399
+Local search iteration 7, new objective: 5393194.0
+Iteration 6, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5464491.199
+Local search iteration 3, new objective: 5461632.399
+Local search iteration 4, new objective: 5455760.399
+Local search iteration 5, new objective: 5403226.399
+Local search iteration 6, new objective: 5399914.0
+Local search iteration 7, new objective: 5394024.0
+Local search iteration 8, new objective: 5392920.0
+Iteration 7, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5483550.8
+Local search iteration 3, new objective: 5464491.199
+Local search iteration 4, new objective: 5408031.199
+Local search iteration 5, new objective: 5404283.199
+Local search iteration 6, new objective: 5401424.399
+Local search iteration 7, new objective: 5398112.0
+Local search iteration 8, new objective: 5395998.0
+Local search iteration 9, new objective: 5392920.0
+Iteration 8, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5433008.8
+Local search iteration 4, new objective: 5415968.399
+Local search iteration 5, new objective: 5407972.399
+Local search iteration 6, new objective: 5401801.199
+Local search iteration 7, new objective: 5400839.199
+Local search iteration 8, new objective: 5396639.199
+Local search iteration 9, new objective: 5393561.199
+Local search iteration 10, new objective: 5392920.0
+Iteration 9, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5464491.199
+Local search iteration 3, new objective: 5456472.0
+Local search iteration 4, new objective: 5402807.6
+Local search iteration 5, new objective: 5396636.399
+Local search iteration 6, new objective: 5392888.399
+Iteration 10, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5455795.199
+Local search iteration 3, new objective: 5436321.199
+Local search iteration 4, new objective: 5419280.8
+Local search iteration 5, new objective: 5411127.199
+Local search iteration 6, new objective: 5403131.199
+Local search iteration 7, new objective: 5400272.399
+Local search iteration 8, new objective: 5396232.399
+Local search iteration 9, new objective: 5392920.0
+Iteration 11, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5396486.0
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5393194.0
+Iteration 12, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5483550.8
+Local search iteration 3, new objective: 5427090.8
+Local search iteration 4, new objective: 5408031.199
+Local search iteration 5, new objective: 5401860.0
+Local search iteration 6, new objective: 5398112.0
+Local search iteration 7, new objective: 5396342.0
+Local search iteration 8, new objective: 5392920.0
+Iteration 13, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5419004.8
+Local search iteration 3, new objective: 5399945.199
+Local search iteration 4, new objective: 5397086.399
+Local search iteration 5, new objective: 5396506.399
+Local search iteration 6, new objective: 5393194.0
+Iteration 14, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5397086.399
+Local search iteration 4, new objective: 5396033.6
+Local search iteration 5, new objective: 5395453.6
+Local search iteration 6, new objective: 5393194.0
+Iteration 15, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5419004.8
+Local search iteration 3, new objective: 5399945.199
+Local search iteration 4, new objective: 5393774.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 16, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5402087.199
+Local search iteration 3, new objective: 5399091.199
+Local search iteration 4, new objective: 5396232.399
+Local search iteration 5, new objective: 5395179.6
+Local search iteration 6, new objective: 5392920.0
+Iteration 17, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5419004.8
+Local search iteration 3, new objective: 5399945.199
+Local search iteration 4, new objective: 5393774.0
+Local search iteration 5, new objective: 5393276.0
+Local search iteration 6, new objective: 5392920.0
+Iteration 18, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5401222.0
+Local search iteration 4, new objective: 5398500.0
+Local search iteration 5, new objective: 5395789.6
+Local search iteration 6, new objective: 5394742.399
+Local search iteration 7, new objective: 5394140.399
+Local search iteration 8, new objective: 5393194.0
+Iteration 19, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5399829.199
+Local search iteration 4, new objective: 5396970.399
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5393194.0
+Iteration 20, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5401222.0
+Local search iteration 4, new objective: 5398500.0
+Local search iteration 5, new objective: 5395453.6
+Local search iteration 6, new objective: 5393194.0
+Iteration 21, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5415765.199
+Local search iteration 3, new objective: 5415185.199
+Local search iteration 4, new objective: 5396022.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 22, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5436321.199
+Local search iteration 4, new objective: 5419280.8
+Local search iteration 5, new objective: 5411127.199
+Local search iteration 6, new objective: 5403723.6
+Local search iteration 7, new objective: 5397552.399
+Local search iteration 8, new objective: 5395782.399
+Local search iteration 9, new objective: 5393112.399
+Local search iteration 10, new objective: 5392888.399
+Iteration 23, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5395748.0
+Local search iteration 5, new objective: 5392920.0
+Iteration 24, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5474632.399
+Local search iteration 4, new objective: 5433280.8
+Local search iteration 5, new objective: 5417294.8
+Local search iteration 6, new objective: 5411730.399
+Local search iteration 7, new objective: 5406889.199
+Local search iteration 8, new objective: 5404313.199
+Local search iteration 9, new objective: 5402384.0
+Iteration 25, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5453444.0
+Local search iteration 4, new objective: 5446160.8
+Local search iteration 5, new objective: 5393912.8
+Local search iteration 6, new objective: 5393174.8
+Local search iteration 7, new objective: 5392888.399
+Iteration 26, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5478674.8
+Local search iteration 3, new objective: 5418888.8
+Local search iteration 4, new objective: 5399829.199
+Local search iteration 5, new objective: 5396374.0
+Local search iteration 6, new objective: 5395910.0
+Local search iteration 7, new objective: 5395436.8
+Local search iteration 8, new objective: 5394490.399
+Local search iteration 9, new objective: 5393194.0
+Iteration 27, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5456756.399
+Local search iteration 4, new objective: 5449473.199
+Local search iteration 5, new objective: 5397225.199
+Local search iteration 6, new objective: 5393912.8
+Local search iteration 7, new objective: 5393448.8
+Local search iteration 8, new objective: 5393362.399
+Local search iteration 9, new objective: 5393042.399
+Iteration 28, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5421146.8
+Local search iteration 3, new objective: 5418888.8
+Local search iteration 4, new objective: 5399829.199
+Local search iteration 5, new objective: 5396374.0
+Local search iteration 6, new objective: 5395636.0
+Local search iteration 7, new objective: 5395162.8
+Local search iteration 8, new objective: 5394216.399
+Local search iteration 9, new objective: 5392920.0
+Iteration 29, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5467768.8
+Local search iteration 4, new objective: 5463384.0
+Local search iteration 5, new objective: 5456140.0
+Local search iteration 6, new objective: 5399283.6
+Local search iteration 7, new objective: 5393112.399
+Local search iteration 8, new objective: 5392888.399
+Iteration 30, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5434095.199
+Local search iteration 3, new objective: 5414932.0
+Local search iteration 4, new objective: 5401938.0
+Local search iteration 5, new objective: 5399110.0
+Local search iteration 6, new objective: 5395784.0
+Local search iteration 7, new objective: 5393668.0
+Local search iteration 8, new objective: 5392920.0
+Iteration 31, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5456756.399
+Local search iteration 4, new objective: 5455703.6
+Local search iteration 5, new objective: 5395917.6
+Local search iteration 6, new objective: 5393658.0
+Local search iteration 7, new objective: 5393194.0
+Iteration 32, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5419004.8
+Local search iteration 3, new objective: 5399945.199
+Local search iteration 4, new objective: 5397086.399
+Local search iteration 5, new objective: 5396506.399
+Local search iteration 6, new objective: 5395453.6
+Local search iteration 7, new objective: 5393194.0
+Iteration 33, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5464491.199
+Local search iteration 3, new objective: 5408031.199
+Local search iteration 4, new objective: 5404576.0
+Local search iteration 5, new objective: 5400828.0
+Local search iteration 6, new objective: 5399058.0
+Local search iteration 7, new objective: 5398937.6
+Local search iteration 8, new objective: 5397890.399
+Local search iteration 9, new objective: 5396342.0
+Local search iteration 10, new objective: 5392920.0
+Iteration 34, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5396490.0
+Local search iteration 4, new objective: 5395910.0
+Local search iteration 5, new objective: 5395436.8
+Local search iteration 6, new objective: 5394140.399
+Local search iteration 7, new objective: 5393194.0
+Iteration 35, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5475534.8
+Local search iteration 4, new objective: 5427046.8
+Local search iteration 5, new objective: 5424188.0
+Local search iteration 6, new objective: 5422154.0
+Local search iteration 7, new objective: 5405113.6
+Local search iteration 8, new objective: 5400913.6
+Local search iteration 9, new objective: 5396873.6
+Local search iteration 10, new objective: 5395820.8
+Local search iteration 11, new objective: 5393561.199
+Local search iteration 12, new objective: 5392920.0
+Iteration 36, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5455795.199
+Local search iteration 3, new objective: 5436321.199
+Local search iteration 4, new objective: 5428325.199
+Local search iteration 5, new objective: 5411284.8
+Local search iteration 6, new objective: 5403013.6
+Local search iteration 7, new objective: 5399558.399
+Local search iteration 8, new objective: 5397058.399
+Local search iteration 9, new objective: 5395828.399
+Local search iteration 10, new objective: 5395355.199
+Local search iteration 11, new objective: 5394058.8
+Local search iteration 12, new objective: 5393112.399
+Local search iteration 13, new objective: 5392888.399
+Iteration 37, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5395916.0
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5393194.0
+Iteration 38, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5464491.199
+Local search iteration 3, new objective: 5461632.399
+Local search iteration 4, new objective: 5453613.199
+Local search iteration 5, new objective: 5399948.8
+Local search iteration 6, new objective: 5396200.8
+Local search iteration 7, new objective: 5395148.0
+Local search iteration 8, new objective: 5393834.8
+Local search iteration 9, new objective: 5392888.399
+Iteration 39, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5419004.8
+Local search iteration 3, new objective: 5399945.199
+Local search iteration 4, new objective: 5397086.399
+Local search iteration 5, new objective: 5396506.399
+Local search iteration 6, new objective: 5393194.0
+Iteration 40, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5421146.8
+Local search iteration 3, new objective: 5402087.199
+Local search iteration 4, new objective: 5395916.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 41, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5452332.0
+Local search iteration 4, new objective: 5405842.0
+Local search iteration 5, new objective: 5402983.199
+Local search iteration 6, new objective: 5396487.199
+Local search iteration 7, new objective: 5395434.399
+Local search iteration 8, new objective: 5393174.8
+Local search iteration 9, new objective: 5393112.399
+Local search iteration 10, new objective: 5392888.399
+Iteration 42, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5467768.8
+Local search iteration 4, new objective: 5463384.0
+Local search iteration 5, new objective: 5459783.6
+Local search iteration 6, new objective: 5399997.6
+Local search iteration 7, new objective: 5393826.399
+Local search iteration 8, new objective: 5393362.399
+Local search iteration 9, new objective: 5393042.399
+Iteration 43, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5464491.199
+Local search iteration 3, new objective: 5408031.199
+Local search iteration 4, new objective: 5404576.0
+Local search iteration 5, new objective: 5400828.0
+Local search iteration 6, new objective: 5399058.0
+Local search iteration 7, new objective: 5398937.6
+Local search iteration 8, new objective: 5397288.399
+Local search iteration 9, new objective: 5396342.0
+Local search iteration 10, new objective: 5395782.399
+Local search iteration 11, new objective: 5394196.399
+Local search iteration 12, new objective: 5392888.399
+Iteration 44, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5395748.0
+Local search iteration 5, new objective: 5392920.0
+Iteration 45, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5455795.199
+Local search iteration 3, new objective: 5436321.199
+Local search iteration 4, new objective: 5428325.199
+Local search iteration 5, new objective: 5421661.199
+Local search iteration 6, new objective: 5418348.8
+Local search iteration 7, new objective: 5414148.8
+Local search iteration 8, new objective: 5411290.0
+Local search iteration 9, new objective: 5410237.2
+Local search iteration 10, new objective: 5408478.8
+Local search iteration 11, new objective: 5407165.6
+Local search iteration 12, new objective: 5393561.2
+Local search iteration 13, new objective: 5392920.0
+Iteration 46, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5434095.199
+Local search iteration 3, new objective: 5414932.0
+Local search iteration 4, new objective: 5398612.0
+Local search iteration 5, new objective: 5395784.0
+Local search iteration 6, new objective: 5392920.0
+Iteration 47, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5421146.8
+Local search iteration 3, new objective: 5402087.199
+Local search iteration 4, new objective: 5399365.199
+Local search iteration 5, new objective: 5396506.399
+Local search iteration 6, new objective: 5395453.6
+Local search iteration 7, new objective: 5394140.399
+Local search iteration 8, new objective: 5393194.0
+Iteration 48, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5453444.0
+Local search iteration 4, new objective: 5446160.8
+Local search iteration 5, new objective: 5393912.8
+Local search iteration 6, new objective: 5393448.8
+Local search iteration 7, new objective: 5393042.399
+Iteration 49, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5475534.8
+Local search iteration 4, new objective: 5427046.8
+Local search iteration 5, new objective: 5419868.0
+Local search iteration 6, new objective: 5415668.0
+Local search iteration 7, new objective: 5411493.199
+Local search iteration 8, new objective: 5407478.0
+Local search iteration 9, new objective: 5406038.8
+Local search iteration 10, new objective: 5405290.0
+Local search iteration 11, new objective: 5403249.199
+Local search iteration 12, new objective: 5402608.0
+Local search iteration 13, new objective: 5402384.0
+Iteration 50, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5419004.8
+Local search iteration 3, new objective: 5399945.199
+Local search iteration 4, new objective: 5393774.0
+Local search iteration 5, new objective: 5393276.0
+Local search iteration 6, new objective: 5392920.0
+Iteration 51, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5401222.0
+Local search iteration 4, new objective: 5398511.6
+Local search iteration 5, new objective: 5396253.6
+Local search iteration 6, new objective: 5393658.0
+Local search iteration 7, new objective: 5393194.0
+Iteration 52, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5401222.0
+Local search iteration 4, new objective: 5398500.0
+Local search iteration 5, new objective: 5395789.6
+Local search iteration 6, new objective: 5394742.399
+Local search iteration 7, new objective: 5393194.0
+Iteration 53, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5474632.399
+Local search iteration 4, new objective: 5433280.8
+Local search iteration 5, new objective: 5428972.8
+Local search iteration 6, new objective: 5422858.399
+Local search iteration 7, new objective: 5410562.399
+Local search iteration 8, new objective: 5407530.399
+Local search iteration 9, new objective: 5404954.399
+Local search iteration 10, new objective: 5403025.199
+Local search iteration 11, new objective: 5402384.0
+Iteration 54, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5436321.199
+Local search iteration 4, new objective: 5433008.8
+Local search iteration 5, new objective: 5415968.399
+Local search iteration 6, new objective: 5408564.8
+Local search iteration 7, new objective: 5402393.6
+Local search iteration 8, new objective: 5400623.6
+Local search iteration 9, new objective: 5395782.399
+Local search iteration 10, new objective: 5393112.399
+Local search iteration 11, new objective: 5392888.399
+Iteration 55, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5421146.8
+Local search iteration 3, new objective: 5418888.8
+Local search iteration 4, new objective: 5399829.199
+Local search iteration 5, new objective: 5399365.199
+Local search iteration 6, new objective: 5393194.0
+Iteration 56, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5402087.199
+Local search iteration 3, new objective: 5399365.199
+Local search iteration 4, new objective: 5395910.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 57, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5395916.0
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5393194.0
+Iteration 58, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5467768.8
+Local search iteration 4, new objective: 5463384.0
+Local search iteration 5, new objective: 5456140.0
+Local search iteration 6, new objective: 5403598.0
+Local search iteration 7, new objective: 5400142.8
+Local search iteration 8, new objective: 5396374.0
+Local search iteration 9, new objective: 5393658.0
+Local search iteration 10, new objective: 5393194.0
+Iteration 59, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5393774.0
+Local search iteration 4, new objective: 5393194.0
+Iteration 60, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5401222.0
+Local search iteration 4, new objective: 5398511.6
+Local search iteration 5, new objective: 5395789.6
+Local search iteration 6, new objective: 5393194.0
+Iteration 61, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5421146.8
+Local search iteration 3, new objective: 5402087.199
+Local search iteration 4, new objective: 5399365.199
+Local search iteration 5, new objective: 5395910.0
+Local search iteration 6, new objective: 5395436.8
+Local search iteration 7, new objective: 5394490.399
+Local search iteration 8, new objective: 5393194.0
+Iteration 62, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5397086.399
+Local search iteration 4, new objective: 5396033.6
+Local search iteration 5, new objective: 5393774.0
+Local search iteration 6, new objective: 5393194.0
+Iteration 63, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5402087.199
+Local search iteration 3, new objective: 5398632.0
+Local search iteration 4, new objective: 5395910.0
+Local search iteration 5, new objective: 5395436.8
+Local search iteration 6, new objective: 5394490.399
+Local search iteration 7, new objective: 5393194.0
+Iteration 64, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5401222.0
+Local search iteration 4, new objective: 5398500.0
+Local search iteration 5, new objective: 5395789.6
+Local search iteration 6, new objective: 5394742.399
+Local search iteration 7, new objective: 5394140.399
+Local search iteration 8, new objective: 5393194.0
+Iteration 65, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5396486.0
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5392920.0
+Iteration 66, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5475534.8
+Local search iteration 4, new objective: 5433908.8
+Local search iteration 5, new objective: 5428813.6
+Local search iteration 6, new objective: 5422760.0
+Local search iteration 7, new objective: 5399309.6
+Local search iteration 8, new objective: 5394468.399
+Local search iteration 9, new objective: 5393866.399
+Local search iteration 10, new objective: 5392920.0
+Iteration 67, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5478674.8
+Local search iteration 3, new objective: 5459615.199
+Local search iteration 4, new objective: 5399829.199
+Local search iteration 5, new objective: 5396374.0
+Local search iteration 6, new objective: 5395900.8
+Local search iteration 7, new objective: 5395436.8
+Local search iteration 8, new objective: 5394490.399
+Local search iteration 9, new objective: 5393194.0
+Iteration 68, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5483550.8
+Local search iteration 3, new objective: 5464491.199
+Local search iteration 4, new objective: 5408031.199
+Local search iteration 5, new objective: 5404576.0
+Local search iteration 6, new objective: 5400828.0
+Local search iteration 7, new objective: 5399058.0
+Local search iteration 8, new objective: 5398937.6
+Local search iteration 9, new objective: 5397288.399
+Local search iteration 10, new objective: 5393866.399
+Local search iteration 11, new objective: 5392920.0
+Iteration 69, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5419004.8
+Local search iteration 3, new objective: 5399945.199
+Local search iteration 4, new objective: 5399365.199
+Local search iteration 5, new objective: 5393194.0
+Iteration 70, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5453444.0
+Local search iteration 4, new objective: 5393658.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 71, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5455795.199
+Local search iteration 3, new objective: 5433008.8
+Local search iteration 4, new objective: 5425012.8
+Local search iteration 5, new objective: 5407972.399
+Local search iteration 6, new objective: 5403932.399
+Local search iteration 7, new objective: 5399732.399
+Local search iteration 8, new objective: 5393561.199
+Local search iteration 9, new objective: 5392920.0
+Iteration 72, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5483550.8
+Local search iteration 3, new objective: 5464491.199
+Local search iteration 4, new objective: 5456472.0
+Local search iteration 5, new objective: 5402807.6
+Local search iteration 6, new objective: 5399059.6
+Local search iteration 7, new objective: 5395604.399
+Local search iteration 8, new objective: 5392888.399
+Iteration 73, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5396022.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 74, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5464491.199
+Local search iteration 3, new objective: 5461632.399
+Local search iteration 4, new objective: 5455760.399
+Local search iteration 5, new objective: 5403226.399
+Local search iteration 6, new objective: 5397336.399
+Local search iteration 7, new objective: 5396283.6
+Local search iteration 8, new objective: 5394970.399
+Local search iteration 9, new objective: 5393866.399
+Local search iteration 10, new objective: 5392920.0
+Iteration 75, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5421146.8
+Local search iteration 3, new objective: 5402087.199
+Local search iteration 4, new objective: 5399091.199
+Local search iteration 5, new objective: 5392920.0
+Iteration 76, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5478674.8
+Local search iteration 3, new objective: 5459615.199
+Local search iteration 4, new objective: 5399829.199
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5393194.0
+Iteration 77, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5402087.199
+Local search iteration 3, new objective: 5395916.0
+Local search iteration 4, new objective: 5393658.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 78, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5433008.8
+Local search iteration 4, new objective: 5425012.8
+Local search iteration 5, new objective: 5422154.0
+Local search iteration 6, new objective: 5415490.0
+Local search iteration 7, new objective: 5410338.0
+Local search iteration 8, new objective: 5406138.0
+Local search iteration 9, new objective: 5395109.6
+Local search iteration 10, new objective: 5394468.399
+Local search iteration 11, new objective: 5393866.399
+Local search iteration 12, new objective: 5392920.0
+Iteration 79, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5396486.0
+Local search iteration 5, new objective: 5393658.0
+Local search iteration 6, new objective: 5392920.0
+Iteration 80, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5393774.0
+Local search iteration 4, new objective: 5393194.0
+Iteration 81, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5397086.399
+Local search iteration 4, new objective: 5393774.0
+Local search iteration 5, new objective: 5393276.0
+Local search iteration 6, new objective: 5392920.0
+Iteration 82, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5436321.199
+Local search iteration 4, new objective: 5433008.8
+Local search iteration 5, new objective: 5425012.8
+Local search iteration 6, new objective: 5422154.0
+Local search iteration 7, new objective: 5415490.0
+Local search iteration 8, new objective: 5410338.0
+Local search iteration 9, new objective: 5406138.0
+Local search iteration 10, new objective: 5395109.6
+Local search iteration 11, new objective: 5394468.399
+Local search iteration 12, new objective: 5393866.399
+Local search iteration 13, new objective: 5392920.0
+Iteration 83, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5397086.399
+Local search iteration 4, new objective: 5393774.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 84, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5467768.8
+Local search iteration 4, new objective: 5463384.0
+Local search iteration 5, new objective: 5459783.6
+Local search iteration 6, new objective: 5399059.6
+Local search iteration 7, new objective: 5392888.399
+Iteration 85, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5461828.0
+Local search iteration 2, new objective: 5399945.199
+Local search iteration 3, new objective: 5396490.0
+Local search iteration 4, new objective: 5395910.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 86, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5483550.8
+Local search iteration 3, new objective: 5464491.199
+Local search iteration 4, new objective: 5408031.199
+Local search iteration 5, new objective: 5404576.0
+Local search iteration 6, new objective: 5400828.0
+Local search iteration 7, new objective: 5399058.0
+Local search iteration 8, new objective: 5396342.0
+Local search iteration 9, new objective: 5395782.399
+Local search iteration 10, new objective: 5393112.399
+Local search iteration 11, new objective: 5392888.399
+Iteration 87, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5464491.199
+Local search iteration 3, new objective: 5456472.0
+Local search iteration 4, new objective: 5404224.0
+Local search iteration 5, new objective: 5400084.0
+Local search iteration 6, new objective: 5393912.8
+Local search iteration 7, new objective: 5393448.8
+Local search iteration 8, new objective: 5393042.399
+Iteration 88, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5483550.8
+Local search iteration 3, new objective: 5464491.199
+Local search iteration 4, new objective: 5408031.199
+Local search iteration 5, new objective: 5401860.0
+Local search iteration 6, new objective: 5398112.0
+Local search iteration 7, new objective: 5396342.0
+Local search iteration 8, new objective: 5395782.399
+Local search iteration 9, new objective: 5393112.399
+Local search iteration 10, new objective: 5392888.399
+Iteration 89, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5484809.199
+Local search iteration 3, new objective: 5467768.8
+Local search iteration 4, new objective: 5459615.199
+Local search iteration 5, new objective: 5452332.0
+Local search iteration 6, new objective: 5399059.6
+Local search iteration 7, new objective: 5396200.8
+Local search iteration 8, new objective: 5395148.0
+Local search iteration 9, new objective: 5393834.8
+Local search iteration 10, new objective: 5392888.399
+Iteration 90, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5421146.8
+Local search iteration 3, new objective: 5402087.199
+Local search iteration 4, new objective: 5399091.199
+Local search iteration 5, new objective: 5396232.399
+Local search iteration 6, new objective: 5392920.0
+Iteration 91, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5483550.8
+Local search iteration 3, new objective: 5464491.199
+Local search iteration 4, new objective: 5408031.199
+Local search iteration 5, new objective: 5401860.0
+Local search iteration 6, new objective: 5398112.0
+Local search iteration 7, new objective: 5396342.0
+Local search iteration 8, new objective: 5392920.0
+Iteration 92, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5481496.8
+Local search iteration 3, new objective: 5475534.8
+Local search iteration 4, new objective: 5427046.8
+Local search iteration 5, new objective: 5424188.0
+Local search iteration 6, new objective: 5417009.199
+Local search iteration 7, new objective: 5412809.199
+Local search iteration 8, new objective: 5407771.199
+Local search iteration 9, new objective: 5403056.8
+Local search iteration 10, new objective: 5402415.6
+Iteration 93, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5504283.199
+Local search iteration 2, new objective: 5455795.199
+Local search iteration 3, new objective: 5436321.199
+Local search iteration 4, new objective: 5419280.8
+Local search iteration 5, new objective: 5411284.8
+Local search iteration 6, new objective: 5407972.399
+Local search iteration 7, new objective: 5401801.199
+Local search iteration 8, new objective: 5397601.199
+Local search iteration 9, new objective: 5396200.0
+Local search iteration 10, new objective: 5393816.0
+Local search iteration 11, new objective: 5393174.8
+Local search iteration 12, new objective: 5392888.399
+Iteration 94, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5453444.0
+Local search iteration 4, new objective: 5393658.0
+Local search iteration 5, new objective: 5392920.0
+Iteration 95, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5395916.0
+Local search iteration 5, new objective: 5393194.0
+Iteration 96, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5508134.8
+Local search iteration 2, new objective: 5478674.8
+Local search iteration 3, new objective: 5459615.199
+Local search iteration 4, new objective: 5452332.0
+Local search iteration 5, new objective: 5400084.0
+Local search iteration 6, new objective: 5397225.199
+Local search iteration 7, new objective: 5396172.399
+Local search iteration 8, new objective: 5395708.399
+Local search iteration 9, new objective: 5393448.8
+Local search iteration 10, new objective: 5393042.399
+Iteration 97, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5550958.0
+Local search iteration 1, new objective: 5489075.199
+Local search iteration 2, new objective: 5459615.199
+Local search iteration 3, new objective: 5453444.0
+Local search iteration 4, new objective: 5446160.8
+Local search iteration 5, new objective: 5393912.8
+Local search iteration 6, new objective: 5393448.8
+Local search iteration 7, new objective: 5393042.399
+Iteration 98, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5482073.199
+Local search iteration 2, new objective: 5417907.199
+Local search iteration 3, new objective: 5398744.0
+Local search iteration 4, new objective: 5395748.0
+Local search iteration 5, new objective: 5392920.0
+Iteration 99, Best Total Cost: 3895596.8, total distance:69.856
+Local search iteration 0, new objective: 5528136.0
+Local search iteration 1, new objective: 5463970.0
+Local search iteration 2, new objective: 5402087.199
+Local search iteration 3, new objective: 5399091.199
+Local search iteration 4, new objective: 5395636.0
+Local search iteration 5, new objective: 5395162.8
+Local search iteration 6, new objective: 5393866.399
+Local search iteration 7, new objective: 5392920.0
