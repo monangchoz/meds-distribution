@@ -2,6 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
+def has_valid_result(filepath):
+    if not filepath.exists():
+        return False
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            parts = line.strip().split(",")
+            if len(parts) == 2:
+                try:
+                    print(float(parts[0]),float(parts[1]))
+                    return True
+                except ValueError:
+                    pass
+    return False
+
+
 def draw_box(ax, start, dim, color='b', alpha=0.3):
     """Draws a 3D rectangular box given start position and dimensions."""
     x, y, z = start

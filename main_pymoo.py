@@ -18,6 +18,7 @@ from pymoo_interface.hvrp3l_opt import (HVRP3L_OPT, DuplicateElimination,
                                         RepairEncoding)
 from pymoo.core.termination import TerminateIfAny
 from pymoo.termination.max_time import TimeBasedTermination
+from utils import has_valid_result
 
 
 def parse_args()->argparse.Namespace:
@@ -65,13 +66,19 @@ def run():
     args = parse_args()
     filename = args.instance_file_name
     filename_without_extension = filename[:-5]
+    result_dir = pathlib.Path()/"results"/args.algo_name
+    result_filepath = result_dir/f"{filename_without_extension}.csv"
+    result_dir.mkdir(parents=True, exist_ok=True)
+    
+    if has_valid_result(result_filepath):
+        print(f"Skipping {filename}: valid result already exists.")
+        return
     
     instance_filepath = pathlib.Path()/"instances"/filename
     problem = HVRP3L.read_from_json(instance_filepath)
     start_time = time.time()
-    # pool = mp.Pool(8)
-    # runner = StarmapParallelization(pool.starmap)
     algo = setup_algorithm(args.algo_name, problem)
+    
     problem_intf = HVRP3L_OPT(problem, ARR2(problem.num_customers, problem.num_vehicles))#, elementwise_runner=runner)
     termination_max_gen_period = DefaultSingleObjectiveTermination(n_max_gen=100, period=args.patience)
     termination_time = TimeBasedTermination("01:00:00")
@@ -82,9 +89,7 @@ def run():
     solution = problem_intf.decode(res.X)
     end_time = time.time()
     running_time = end_time-start_time
-    result_dir = pathlib.Path()/"results"/args.algo_name
-    result_filepath = result_dir/f"{filename_without_extension}.csv"
-    result_dir.mkdir(parents=True, exist_ok=True)
+    
     with open(result_filepath.absolute(), "+a") as f:
         result_str = f"{solution.total_cost},{running_time}\n"
         f.write(result_str)

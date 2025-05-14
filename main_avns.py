@@ -13,6 +13,7 @@ from avns.local_search_operator import (CustomerShift, RouteInterchange,
 from avns.shake_operators import SE
 from problem.hvrp3l import HVRP3L
 from problem.solution import Solution
+from utils import has_valid_result
 
 
 def parse_args()->argparse.Namespace:
@@ -46,20 +47,6 @@ def setup_avns(max_iteration:int, patience:int)->AVNS:
     shake_operators = [sse21,sse31,sse22,sse32,vse1,vse2]
     avns = AVNS(max_iteration,patience,ls_operators,shake_operators)
     return avns
-
-def has_valid_result(filepath):
-    if not filepath.exists():
-        return False
-    with open(filepath, "r") as f:
-        for line in f:
-            parts = line.strip().split(",")
-            if len(parts) == 2:
-                try:
-                    print(float(parts[0]),float(parts[1]))
-                    return True
-                except ValueError:
-                    pass
-    return False
 
 def run():
     args = parse_args()
