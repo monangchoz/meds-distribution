@@ -1,9 +1,9 @@
 import math
-from typing import List
 import multiprocessing as mp
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
+from avns.saving import saving
 from ep_heuristic.random_slpack import random_slpack
 from line_profiler import profile
 from problem.hvrp3l import HVRP3L
@@ -13,7 +13,6 @@ from pymoo.core.individual import Individual
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.repair import Repair
 from pymoo_interface.arr2 import RepairMechanism
-from avns.saving import saving
 
 
 def get_routes_from_x(x: np.ndarray, problem: HVRP3L)->List[List[int]]:
@@ -223,7 +222,7 @@ def repair_do(problem: HVRP3L_OPT, i:int, x: np.ndarray)->Tuple[int, np.ndarray]
     return i,x
 
 class RepairEncoding(Repair):
-    def __init__(self, name=None, vtype=None, repair=None, num_proc:int=16):
+    def __init__(self, name=None, vtype=None, repair=None, num_proc:int=8):
         super().__init__(name, vtype, repair)
         self.num_proc = num_proc
     
