@@ -55,7 +55,7 @@ def run():
     instance_filepath = pathlib.Path("instances") / filename
     result_dir = pathlib.Path("results") / "avns"
     result_filepath = result_dir / f"{filename_without_extension}.csv"
-    print(args.filename)
+    print(filename)
     if has_valid_result(result_filepath):
         print(f"Skipping {filename}: valid result already exists.")
         return
