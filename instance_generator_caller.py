@@ -35,10 +35,16 @@ def call_generate_instance(region: str,
     subprocess.call(cmd_args)
         
 if __name__ == "__main__":
-    regions = ["JK2","SBY","MKS"]
-    num_clusters_list = [1, 3, 5]
-    num_customers_list = [15,30,50]
-    repetitions = 3
+    regions = [#"JK2","SBY",
+               "MKS"]
+    num_clusters_list = [#1, 
+                         3, 
+                         #5
+                         ]
+    num_customers_list = [15,30,
+                          #50
+                          ]
+    repetitions = 10
     # generate historical
     args = []
     for i in range(repetitions):
@@ -54,17 +60,17 @@ if __name__ == "__main__":
         p.starmap(call_generate_instance, args)
     
     
-    # generate generated with ratio
-    ratio_list = [(1/3, 1/3, 1/3), (0.6, 0.2, 0.2), (0.2, 0.6, 0.2), (0.2, 0.2, 0.6)]
-    args = []
-    for i in range(repetitions):
-        for region in regions:
-            for nc in num_customers_list:
-                for ncl in num_clusters_list:
-                    for r in ratio_list:
-                        args += [(region, nc, "generated", ncl, 10, 10, r)]
-    with mp.Pool(8) as p:
-        p.starmap(call_generate_instance, args)
+    # # generate generated with ratio
+    # ratio_list = [(1/3, 1/3, 1/3), (0.6, 0.2, 0.2), (0.2, 0.6, 0.2), (0.2, 0.2, 0.6)]
+    # args = []
+    # for i in range(repetitions):
+    #     for region in regions:
+    #         for nc in num_customers_list:
+    #             for ncl in num_clusters_list:
+    #                 for r in ratio_list:
+    #                     args += [(region, nc, "generated", ncl, 10, 10, r)]
+    # with mp.Pool(8) as p:
+    #     p.starmap(call_generate_instance, args)
                         # call_generate_instance(region, nc, "generated", ncl, ratio=r)
     # for arg in args:
     #     call_generate_instance(*arg)
