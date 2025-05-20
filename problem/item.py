@@ -2,8 +2,7 @@ from typing import List
 
 import numpy as np
 
-POSSIBLE_ROTATION_PERMUTATION_MATS: List[np.ndarray] =\
-    [np.asanyarray([0,1,2], dtype=int), np.asanyarray([1,0,2], dtype=int)]
+POSSIBLE_ROTATION_PERMUTATION_MATS: np.ndarray = np.asanyarray([[0,1,2],[1,0,2]], dtype=np.int64)
 
 class Item:
     """

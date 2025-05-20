@@ -9,7 +9,7 @@ def run():
     item_dims = np.random.randint(1, 5, size=(num_items, 3)).astype(float)
     item_weights = np.random.randint(1,5, size=(num_items,))
     item_volumes = np.prod(item_dims, axis=1)
-    item_priorities = np.arange(num_items)
+    item_priorities = np.arange(num_items, dtype=int)
     
     container_dim = np.asanyarray([8,6,6], dtype=float)
     container_weight_cap = 1000
