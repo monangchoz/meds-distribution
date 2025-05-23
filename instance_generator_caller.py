@@ -41,10 +41,12 @@ if __name__ == "__main__":
                          3, 
                          #5
                          ]
-    num_customers_list = [15,30,
-                          #50
+    num_customers_list = [
+                        #   15,
+                        #   30,
+                          50
                           ]
-    repetitions = 10
+    repetitions = 2
     # generate historical
     args = []
     for i in range(repetitions):
