@@ -13,3 +13,4 @@ for f in instances/*.json; do
         sbatch --export=FILENAME=$filename,ALGONAME=$algo pymoo.slurm
     done
 done
+
