@@ -15,6 +15,11 @@ class Customer(Node):
         self.cust_id: str = cust_id
         self.items: List[Item] = items
         self.num_items: int = len(items)
+        self.need_refer_truck: bool = False
+        for item in self.items:
+            if item.is_reefer_required:
+                self.need_refer_truck = True
+                break
         
     def to_dict(self):
         d = {"idx": self.idx, "cust_id":self.cust_id, "coord":self.coord.tolist(), "items":[]}
