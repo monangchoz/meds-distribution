@@ -1,0 +1,99 @@
+Summary of Wilcoxon Rank Sum Test Results:
+
+Results for JK2:
+==================================================
+
+COST ANALYSIS:
+--------------------------------------------------
+
+Descriptive Statistics:
+-------------------------
+Algorithm     Count          Min          Max         Mean       Median          Std       CV
+AVNS              1   4175918.80   4175918.80   4175918.80   4175918.80         0.00     0.00
+GA                1  45986561.60  45986561.60  45986561.60  45986561.60         0.00     0.00
+DE                1  94278064.40  94278064.40  94278064.40  94278064.40         0.00     0.00
+PSO               1 107072656.80 107072656.80 107072656.80 107072656.80         0.00     0.00
+
+Statistical Test Results:
+-------------------------
+No test results available
+
+
+TIME ANALYSIS:
+--------------------------------------------------
+
+Descriptive Statistics:
+-------------------------
+Algorithm     Count          Min          Max         Mean       Median          Std       CV
+AVNS              1       686.21       686.21       686.21       686.21         0.00     0.00
+GA                1        51.09        51.09        51.09        51.09         0.00     0.00
+DE                1      4215.67      4215.67      4215.67      4215.67         0.00     0.00
+PSO               1      3050.88      3050.88      3050.88      3050.88         0.00     0.00
+
+Statistical Test Results:
+-------------------------
+No test results available
+
+
+Results for MKS:
+==================================================
+
+COST ANALYSIS:
+--------------------------------------------------
+
+Descriptive Statistics:
+-------------------------
+Algorithm     Count          Min          Max         Mean       Median          Std       CV
+AVNS              1   7434124.80   7434124.80   7434124.80   7434124.80         0.00     0.00
+GA                1  59287371.20  59287371.20  59287371.20  59287371.20         0.00     0.00
+
+Statistical Test Results:
+-------------------------
+No test results available
+
+
+TIME ANALYSIS:
+--------------------------------------------------
+
+Descriptive Statistics:
+-------------------------
+Algorithm     Count          Min          Max         Mean       Median          Std       CV
+AVNS              1      3625.33      3625.33      3625.33      3625.33         0.00     0.00
+GA                1        99.47        99.47        99.47        99.47         0.00     0.00
+
+Statistical Test Results:
+-------------------------
+No test results available
+
+
+Results for SBY:
+==================================================
+
+COST ANALYSIS:
+--------------------------------------------------
+
+Descriptive Statistics:
+-------------------------
+Algorithm     Count          Min          Max         Mean       Median          Std       CV
+AVNS              1   8627412.00   8627412.00   8627412.00   8627412.00         0.00     0.00
+GA                1  49545218.40  49545218.40  49545218.40  49545218.40         0.00     0.00
+
+Statistical Test Results:
+-------------------------
+No test results available
+
+
+TIME ANALYSIS:
+--------------------------------------------------
+
+Descriptive Statistics:
+-------------------------
+Algorithm     Count          Min          Max         Mean       Median          Std       CV
+AVNS              1       672.82       672.82       672.82       672.82         0.00     0.00
+GA                1       127.78       127.78       127.78       127.78         0.00     0.00
+
+Statistical Test Results:
+-------------------------
+No test results available
+
+
