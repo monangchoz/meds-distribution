@@ -1,0 +1,126 @@
+Summary of Paired Statistical Tests
+================================
+
+This analysis compares the performance of different algorithms using two types of paired statistical tests:
+1. Wilcoxon Signed-Rank Test: A non-parametric test for paired samples
+2. Paired Permutation Test: A randomization-based test for paired samples
+
+Available Data Overview:
+----------------------
+JK2:
+  Cost: avns, de, ga, pso
+  Time: avns, de, ga, pso
+
+MKS:
+  Cost: avns, ga
+  Time: avns, ga
+
+SBY:
+  Cost: avns, ga
+  Time: avns, ga
+
+Results for JK2:
+==============
+
+Cost Analysis:
+--------------
+
+Found 5 significant differences out of 6 comparisons.
+
+ Comparison Wilcoxon p-value  Wilcoxon Significant Wilcoxon Better Permutation p-value  Permutation Significant
+ avns vs ga           0.0000                  True            avns              0.0002                     True
+avns vs pso           0.0000                  True            avns              0.0002                     True
+ avns vs de           0.0000                  True            avns              0.0002                     True
+   ga vs de           0.0011                  True              ga              0.0002                     True
+  ga vs pso           0.0056                  True              ga              0.0050                     True
+  de vs pso           0.1543                 False             pso              0.0630                    False
+
+Algorithm Performance Ranking:
+1. avns: Better in 3 comparisons
+2. ga: Better in 2 comparisons
+3. pso: Better in 1 comparisons
+
+
+Time Analysis:
+--------------
+
+Found 6 significant differences out of 6 comparisons.
+
+ Comparison Wilcoxon p-value  Wilcoxon Significant Wilcoxon Better Permutation p-value  Permutation Significant
+avns vs pso           0.0000                  True             pso              0.0002                     True
+ avns vs de           0.0000                  True              de              0.0002                     True
+  ga vs pso           0.0000                  True             pso              0.0002                     True
+ avns vs ga           0.0000                  True              ga              0.0002                     True
+   ga vs de           0.0000                  True              de              0.0002                     True
+  de vs pso           0.0024                  True             pso              0.0016                     True
+
+Algorithm Performance Ranking:
+1. pso: Better in 3 comparisons
+2. de: Better in 2 comparisons
+3. ga: Better in 1 comparisons
+
+
+Results for MKS:
+==============
+
+Cost Analysis:
+--------------
+
+Found 1 significant differences out of 1 comparisons.
+
+Comparison Wilcoxon p-value  Wilcoxon Significant Wilcoxon Better Permutation p-value  Permutation Significant
+avns vs ga           0.0000                  True            avns              0.0002                     True
+
+Algorithm Performance Ranking:
+1. avns: Better in 1 comparisons
+
+
+Time Analysis:
+--------------
+
+Found 1 significant differences out of 1 comparisons.
+
+Comparison Wilcoxon p-value  Wilcoxon Significant Wilcoxon Better Permutation p-value  Permutation Significant
+avns vs ga           0.0000                  True              ga              0.0002                     True
+
+Algorithm Performance Ranking:
+1. ga: Better in 1 comparisons
+
+
+Results for SBY:
+==============
+
+Cost Analysis:
+--------------
+
+Found 1 significant differences out of 1 comparisons.
+
+Comparison Wilcoxon p-value  Wilcoxon Significant Wilcoxon Better Permutation p-value  Permutation Significant
+avns vs ga           0.0000                  True            avns              0.0002                     True
+
+Algorithm Performance Ranking:
+1. avns: Better in 1 comparisons
+
+
+Time Analysis:
+--------------
+
+Found 1 significant differences out of 1 comparisons.
+
+Comparison Wilcoxon p-value  Wilcoxon Significant Wilcoxon Better Permutation p-value  Permutation Significant
+avns vs ga           0.0000                  True              ga              0.0002                     True
+
+Algorithm Performance Ranking:
+1. ga: Better in 1 comparisons
+
+
+Overall Conclusions:
+------------------
+The Wilcoxon Signed-Rank Test and Paired Permutation Test agreed on:
+- Statistical significance in 100.0% of comparisons
+- Which algorithm performed better in 100.0% of comparisons
+
+Best performing algorithms by location:
+- JK2: Best for cost: avns, Best for time: pso
+- MKS: Best for cost: avns, Best for time: ga
+- SBY: Best for cost: avns, Best for time: ga

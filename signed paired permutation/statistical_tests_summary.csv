@@ -1,0 +1,17 @@
+Place,Metric,Comparison,Wilcoxon p-value,Wilcoxon Significant,Wilcoxon Better,Permutation p-value,Permutation Significant,Permutation Better,Agree on Significance,Agree on Better Algorithm
+JK2,Cost,avns vs ga,3.148719442428699e-24,True,avns,0.00019998000199980003,True,avns,True,True
+JK2,Cost,avns vs pso,4.096357955947718e-20,True,avns,0.00019998000199980003,True,avns,True,True
+JK2,Cost,avns vs de,2.6651409486700556e-18,True,avns,0.00019998000199980003,True,avns,True,True
+JK2,Cost,ga vs de,0.0011117662942322255,True,ga,0.00019998000199980003,True,ga,True,True
+JK2,Cost,ga vs pso,0.005612797113479777,True,ga,0.004999500049995001,True,ga,True,True
+JK2,Cost,de vs pso,0.15430142862145865,False,pso,0.062993700629937,False,pso,True,True
+JK2,Time,avns vs pso,4.659994395244797e-16,True,pso,0.00019998000199980003,True,pso,True,True
+JK2,Time,avns vs de,2.4361707842882177e-13,True,de,0.00019998000199980003,True,de,True,True
+JK2,Time,ga vs pso,2.7877792877777456e-13,True,pso,0.00019998000199980003,True,pso,True,True
+JK2,Time,avns vs ga,9.970763735857584e-08,True,ga,0.00019998000199980003,True,ga,True,True
+JK2,Time,ga vs de,1.0614466800553867e-06,True,de,0.00019998000199980003,True,de,True,True
+JK2,Time,de vs pso,0.0023626104568788336,True,pso,0.0015998400159984002,True,pso,True,True
+MKS,Cost,avns vs ga,2.2259158724964484e-25,True,avns,0.00019998000199980003,True,avns,True,True
+MKS,Time,avns vs ga,5.023858615804197e-25,True,ga,0.00019998000199980003,True,ga,True,True
+SBY,Cost,avns vs ga,3.148719442428699e-24,True,avns,0.00019998000199980003,True,avns,True,True
+SBY,Time,avns vs ga,5.574049037775391e-24,True,ga,0.00019998000199980003,True,ga,True,True
