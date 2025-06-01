@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of algorithm names
-declare -a algos=("ga")  # <-- edit this list as needed
+declare -a algos=("brkga")  # <-- edit this list as needed
 
 # Loop over each instance
 for f in instances/*.json; do
