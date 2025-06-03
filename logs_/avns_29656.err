@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/mahasiswa1/meds-distribution/main_pymoo.py", line 100, in <module>
+    run()
+    ~~~^^
+  File "/home/mahasiswa1/meds-distribution/main_pymoo.py", line 82, in run
+    problem_intf = HVRP3L_OPT(problem, ARR2(problem.num_customers, problem.num_vehicles))#, elementwise_runner=runner)
+  File "/home/mahasiswa1/meds-distribution/pymoo_interface/hvrp3l_opt.py", line 90, in __init__
+    self.fallback_solution: Solution = saving(hvrp3l_instance)
+                                       ~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/mahasiswa1/meds-distribution/avns/saving.py", line 51, in saving
+    raise ValueError()
+ValueError

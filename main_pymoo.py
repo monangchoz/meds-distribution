@@ -69,7 +69,7 @@ def run():
     result_dir = pathlib.Path()/"results"/args.algo_name
     result_filepath = result_dir/f"{filename_without_extension}.csv"
     result_dir.mkdir(parents=True, exist_ok=True)
-    
+    print(args.algo_name, filename)
     if has_valid_result(result_filepath):
         print(f"Skipping {filename}: valid result already exists.")
         return
