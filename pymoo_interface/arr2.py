@@ -71,7 +71,6 @@ def get_sorted_possible_insertion_positions(vehicle_idxs:np.ndarray,
     return vehicle_idxs[sorted_idx], positions[sorted_idx], insertion_costs[sorted_idx]
 
 class ARR2(RepairMechanism):
-    
     def get_possible_insertions(self, cust_idx:int, solution:Solution)->Tuple[np.ndarray, np.ndarray, np.ndarray]:
         for vehicle_idx, route in enumerate(solution.routes):
             self.tmp_routes[vehicle_idx, :len(route)] = route

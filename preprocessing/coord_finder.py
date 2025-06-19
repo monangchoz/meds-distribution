@@ -10,9 +10,6 @@ df = pd.read_excel(excel_file, sheet_name=sheet_name)
 
 # Step 2: Function to get coordinates using Geoapify
 def get_coordinates(location, api_key):
-    """
-    Fetch latitude and longitude for a given location using Geoapify Geocoding API.
-    """
     base_url = "https://api.geoapify.com/v1/geocode/search"
     params = {
         "text": location,
@@ -22,11 +19,10 @@ def get_coordinates(location, api_key):
     if response.status_code == 200:
         data = response.json()
         if data["features"]:
-            # Return the first result's latitude and longitude
             lat = data["features"][0]["properties"]["lat"]
             lon = data["features"][0]["properties"]["lon"]
             return lat, lon
-    return None, None  # Return None if no coordinates are found
+    return None, None  
 
 # Step 3: Add columns for latitude and longitude in the DataFrame
 df["Latitude"] = None

@@ -48,7 +48,7 @@ class HVRP3L:
         vehicles = reefer_trucks + normal_trucks
         self.vehicles: List[Vehicle] = vehicles
 
-        # okay from this on is information that are essential for solver
+        
         self.total_demand_volumes: np.ndarray = np.zeros([self.num_nodes,], dtype=float)
         self.total_demand_weights: np.ndarray = np.zeros([self.num_nodes,], dtype=float)
         self.node_reefer_flags: np.ndarray = np.zeros([self.num_nodes,], dtype=bool)

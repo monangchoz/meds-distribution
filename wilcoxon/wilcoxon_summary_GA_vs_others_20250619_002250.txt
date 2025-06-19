@@ -1,0 +1,100 @@
+WILCOXON SIGNED-RANK TEST RESULTS
+Baseline Algorithm: GA
+Generated on: 2025-06-19 00:22:50
+================================================================================
+
+METRIC: Total Cost
+------------------------------------------------------------
+
+GA vs DE:
+   Instances: 136 common instances
+   Sample size: 408 paired runs
+   GA mean: 55,688,640.23
+   DE mean: 59,538,191.58
+   Effect size: +6.91%
+   Wilcoxon statistic: 25497.0
+   P-value: 0.000000
+   Significant (α=0.05): YES
+   Winner: GA
+   Conclusion: ✅ GA is SIGNIFICANTLY BETTER than DE (lower cost)
+
+GA vs BRKGA:
+   Instances: 136 common instances
+   Sample size: 423 paired runs
+   GA mean: 56,373,774.64
+   BRKGA mean: 58,796,389.07
+   Effect size: +4.30%
+   Wilcoxon statistic: 30578.0
+   P-value: 0.000000
+   Significant (α=0.05): YES
+   Winner: GA
+   Conclusion: ✅ GA is SIGNIFICANTLY BETTER than BRKGA (lower cost)
+
+GA vs PSO:
+   Instances: 136 common instances
+   Sample size: 423 paired runs
+   GA mean: 56,373,774.64
+   PSO mean: 58,920,764.07
+   Effect size: +4.52%
+   Wilcoxon statistic: 33120.0
+   P-value: 0.000003
+   Significant (α=0.05): YES
+   Winner: GA
+   Conclusion: ✅ GA is SIGNIFICANTLY BETTER than PSO (lower cost)
+
+============================================================
+METRIC: Running Time
+------------------------------------------------------------
+
+GA vs DE:
+   Instances: 136 common instances
+   Sample size: 408 paired runs
+   GA mean: 1,307.62
+   DE mean: 1,077.53
+   Effect size: -17.60%
+   Wilcoxon statistic: 26446.0
+   P-value: 0.000000
+   Significant (α=0.05): YES
+   Winner: DE
+   Conclusion: ✅ DE is SIGNIFICANTLY BETTER than GA (faster)
+
+GA vs BRKGA:
+   Instances: 136 common instances
+   Sample size: 423 paired runs
+   GA mean: 1,292.04
+   BRKGA mean: 628.31
+   Effect size: -51.37%
+   Wilcoxon statistic: 2499.0
+   P-value: 0.000000
+   Significant (α=0.05): YES
+   Winner: BRKGA
+   Conclusion: ✅ BRKGA is SIGNIFICANTLY BETTER than GA (faster)
+
+GA vs PSO:
+   Instances: 136 common instances
+   Sample size: 423 paired runs
+   GA mean: 1,292.04
+   PSO mean: 921.35
+   Effect size: -28.69%
+   Wilcoxon statistic: 16050.0
+   P-value: 0.000000
+   Significant (α=0.05): YES
+   Winner: PSO
+   Conclusion: ✅ PSO is SIGNIFICANTLY BETTER than GA (faster)
+
+============================================================
+
+SUMMARY BY METRIC:
+========================================
+
+Total Cost:
+   ✅ GA SIGNIFICANTLY BETTER than:
+      • DE (p=0.0000)
+      • BRKGA (p=0.0000)
+      • PSO (p=0.0000)
+
+Running Time:
+   ✅ Algorithms SIGNIFICANTLY BETTER than GA:
+      • DE (p=0.0000)
+      • BRKGA (p=0.0000)
+      • PSO (p=0.0000)

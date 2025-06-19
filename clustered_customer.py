@@ -65,7 +65,7 @@ def get_far_centers(data, num_clusters, min_distance_km):
 
 #3 Build Cluster
 
-def build_clusters(all_data, centers, points_per_cluster=20, max_radius_km=5):
+def build_clusters(all_data, centers, points_per_cluster=10, max_radius_km=5):
     clusters = []
     remaining_data = all_data.copy()
 

@@ -76,7 +76,11 @@ def get_maximum_packable_items(items:List[Item])->List[Item]:
         rotation_trial_idx = np.zeros((total_num_items, 2), dtype=int)
         rotation_trial_idx[:, 1] = 1
 
-        _, _, is_packing_feasible = try_slpack(item_dims, item_priorities, sorted_idx, rotation_trial_idx, vehicle.container_dim, POSSIBLE_ROTATION_PERMUTATION_MATS, 0.8, 5)
+        _, _, is_packing_feasible = try_slpack(item_dims, 
+                                               item_priorities, sorted_idx, 
+                                               rotation_trial_idx, 
+                                               vehicle.container_dim, 
+                                               POSSIBLE_ROTATION_PERMUTATION_MATS, 0.8, 5)
         if not is_packing_feasible:
             packable_items.pop()
         if len(packable_items)>=50:
@@ -351,8 +355,6 @@ def generate_vehicles(num_normal_trucks, num_reefer_trucks)->List[Vehicle]:
                           normal_truck_dict["VARIABLE_RATE"])
         vehicles.append(new_vec)
         i+=1
-    
-    
     return vehicles
 
 if __name__=="__main__":
