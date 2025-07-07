@@ -292,7 +292,8 @@ def generate_customers(cabang:str,
                 items = generate_items_by_ratio(ratio)
                 # print(f"[{ratio} Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
             items = get_maximum_packable_items(items)
-        print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | Total volume: {sum(item.volume for item in items)}")
+        print(f"[Customer {cust_id}] Items generated: {len(items)} | Total weight: {sum(item.weight for item in items):.1f}g | \
+              Total volume: {sum(item.volume for item in items)}")
         new_cust = Customer(i+1, cust_id, coord, items)
         customers.append(new_cust)
 

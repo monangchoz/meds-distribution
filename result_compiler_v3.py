@@ -154,13 +154,13 @@ def load_enhanced_data(base_path):
             
             # Match the actual ratio patterns you mentioned
             if (small_r, medium_r, large_r) == (0.2, 0.2, 0.6):
-                return 'Mostly Large'
+                return '(0.2, 0.2, 0.6)'
             elif (small_r, medium_r, large_r) == (0.2, 0.6, 0.2):
-                return 'Mostly Medium'
+                return '(0.2, 0.6, 0.2)'
             elif (small_r, medium_r, large_r) == (0.6, 0.2, 0.2):
-                return 'Mostly Small'
+                return '(0.2, 0.2, 0.6)'
             elif abs(small_r - 0.33) < 0.02 and abs(medium_r - 0.33) < 0.02 and abs(large_r - 0.33) < 0.02:
-                return 'Balanced'
+                return '(1/3, 1/3, 1/3)'
             else:
                 return f'Other ({small_r}-{medium_r}-{large_r})'
         
@@ -211,14 +211,16 @@ def create_running_time_scalability(df):
                    label=alg, marker='o', color=colors[i], linewidth=3, markersize=8)
     
     ax.set_title('Algorithm Scalability: Running Time vs Number of Customers', 
-                fontweight='bold', fontsize=16)
-    ax.set_xlabel('Number of Customers', fontsize=14)
-    ax.set_ylabel('Running Time (seconds)', fontsize=14)
-    ax.legend(fontsize=12, loc='upper left')
+                fontweight='bold', fontsize=18)
+    ax.set_xlabel('Number of Customers', fontsize=16)
+    ax.set_ylabel('Running Time (seconds)', fontsize=16)
+    ax.legend(fontsize=14, loc='upper left')
     ax.grid(True, alpha=0.3)
     
     # Set x-axis to show only research values
     ax.set_xticks([15, 30, 50])
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
     
     plt.tight_layout()
     return fig
@@ -256,6 +258,8 @@ def create_total_cost_scalability(df):
     
     # Set x-axis to show only research values
     ax.set_xticks([15, 30, 50])
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
     
     plt.tight_layout()
     return fig
@@ -301,6 +305,8 @@ def create_cost_efficiency_scalability(df):
     
     # Set x-axis to show only research values
     ax.set_xticks([15, 30, 50])
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
     
     plt.tight_layout()
     return fig
@@ -337,6 +343,8 @@ def create_time_efficiency_scalability(df):
     
     # Set x-axis to show only research values
     ax.set_xticks([15, 30, 50])
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
     
     plt.tight_layout()
     return fig
@@ -384,9 +392,9 @@ def create_cargo_cost_distribution(df):
             sns.boxplot(data=alg_data, x='cargo_mix', y='total_cost', ax=ax, palette='Set3')
             
             ax.set_title(f'{alg} Algorithm', fontweight='bold', fontsize=14)
-            ax.set_xlabel('Item Ratio (Small-Medium-Large)', fontsize=12)
+            ax.set_xlabel('', fontsize=12)
             ax.set_ylabel('Total Cost', fontsize=12)
-            ax.tick_params(axis='x', rotation=45, labelsize=10)
+            ax.tick_params(axis='x', rotation=0, labelsize=10)
             ax.grid(True, alpha=0.3)
             ax.yaxis.set_major_formatter(FuncFormatter(format_large_number))
             
@@ -404,7 +412,7 @@ def create_cargo_cost_distribution(df):
     
     plt.suptitle('Total Cost Distribution by Item Ratio Configuration', 
                 fontweight='bold', fontsize=16, y=0.98)
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.tight_layout(rect=[0, 0, 1, 0.95], h_pad=2.0)
     return fig
 
 def create_cargo_time_distribution(df):
@@ -448,9 +456,9 @@ def create_cargo_time_distribution(df):
             sns.boxplot(data=alg_data, x='cargo_mix', y='running_time', ax=ax, palette='Set2')
             
             ax.set_title(f'{alg} Algorithm', fontweight='bold', fontsize=14)
-            ax.set_xlabel('Item Ratio (Small-Medium-Large)', fontsize=12)
+            ax.set_xlabel('', fontsize=12)
             ax.set_ylabel('Running Time (seconds)', fontsize=12)
-            ax.tick_params(axis='x', rotation=45, labelsize=10)
+            ax.tick_params(axis='x', rotation=0, labelsize=10)
             ax.grid(True, alpha=0.3)
             
             # Crop y-axis if needed
@@ -467,7 +475,7 @@ def create_cargo_time_distribution(df):
     
     plt.suptitle('Running Time Distribution by Item Ratio Configuration', 
                 fontweight='bold', fontsize=16, y=0.98)
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.tight_layout(rect=[0, 0, 1, 0.95], h_pad=2.0)
     return fig
 
 def create_cargo_algorithm_comparison(df):
@@ -520,10 +528,10 @@ def create_cargo_algorithm_comparison(df):
     
     ax.set_title('Cost Efficiency Comparison by Item Ratio Configuration', 
                 fontweight='bold', fontsize=16)
-    ax.set_xlabel('Item Ratio (Small-Medium-Large)', fontsize=14)
+    ax.set_xlabel('', fontsize=14)
     ax.set_ylabel('Cost per Customer', fontsize=14)
     ax.set_xticks(x)
-    ax.set_xticklabels(cargo_types_sorted, rotation=45, fontsize=11, ha='right')
+    ax.set_xticklabels(cargo_types_sorted, rotation=0, fontsize=11, ha='right')
     ax.legend(fontsize=12, loc='upper left')
     ax.grid(True, alpha=0.3)
     ax.yaxis.set_major_formatter(FuncFormatter(format_large_number))
@@ -767,79 +775,6 @@ def create_data_type_comparison(df):
     plt.tight_layout()
     return fig
 
-# ============= PERFORMANCE SUMMARY TABLE =============
-
-def create_performance_summary_table(df):
-    """Create comprehensive performance summary table"""
-    if df.empty:
-        print("No data available for summary table")
-        return None
-    
-    # Calculate summary statistics using rounded customer counts
-    summary_stats = df.groupby(['algorithm']).agg({
-        'total_cost': ['mean', 'std', 'min', 'max'],
-        'running_time': ['mean', 'std', 'min', 'max'],
-        'cost_per_customer': ['mean', 'std'],
-        'time_per_customer': ['mean', 'std'],
-        'num_customers_rounded': ['min', 'max'],
-        'num_vehicles': ['min', 'max']
-    }).round(2)
-    
-    # Flatten column names
-    summary_stats.columns = [
-        'cost_mean', 'cost_std', 'cost_min', 'cost_max',
-        'time_mean', 'time_std', 'time_min', 'time_max',
-        'cost_per_cust_mean', 'cost_per_cust_std',
-        'time_per_cust_mean', 'time_per_cust_std',
-        'customers_min', 'customers_max',
-        'vehicles_min', 'vehicles_max'
-    ]
-    
-    # Create figure for table
-    fig, ax = plt.subplots(figsize=(18, 8))
-    ax.axis('tight')
-    ax.axis('off')
-    
-    # Prepare table data
-    table_data = []
-    headers = ['Algorithm', 'Avg Cost', 'Avg Time (s)', 'Cost/Customer', 
-               'Time/Customer', 'Customer Range', 'Vehicle Range']
-    
-    for alg in summary_stats.index:
-        row = [
-            alg,
-            f"{summary_stats.loc[alg, 'cost_mean']:,.0f} ±{summary_stats.loc[alg, 'cost_std']:,.0f}",
-            f"{summary_stats.loc[alg, 'time_mean']:.2f} ±{summary_stats.loc[alg, 'time_std']:.2f}",
-            f"{summary_stats.loc[alg, 'cost_per_cust_mean']:,.0f} ±{summary_stats.loc[alg, 'cost_per_cust_std']:,.0f}",
-            f"{summary_stats.loc[alg, 'time_per_cust_mean']:.3f} ±{summary_stats.loc[alg, 'time_per_cust_std']:.3f}",
-            f"{summary_stats.loc[alg, 'customers_min']:.0f}-{summary_stats.loc[alg, 'customers_max']:.0f}",
-            f"{summary_stats.loc[alg, 'vehicles_min']:.0f}-{summary_stats.loc[alg, 'vehicles_max']:.0f}"
-        ]
-        table_data.append(row)
-    
-    # Create table
-    table = ax.table(cellText=table_data, colLabels=headers, 
-                    cellLoc='center', loc='center',
-                    colWidths=[0.1, 0.18, 0.15, 0.18, 0.15, 0.12, 0.12])
-    
-    table.auto_set_font_size(False)
-    table.set_fontsize(12)
-    table.scale(1.2, 3)
-    
-    # Style the table
-    for i in range(len(headers)):
-        table[(0, i)].set_facecolor('#4CAF50')
-        table[(0, i)].set_text_props(weight='bold', color='white')
-    
-    # Color alternate rows
-    for i in range(1, len(table_data) + 1):
-        for j in range(len(headers)):
-            if i % 2 == 0:
-                table[(i, j)].set_facecolor('#f0f0f0')
-    
-    plt.title('Algorithm Performance Summary Table', fontsize=18, fontweight='bold', pad=30)
-    return fig
-
 def main():
     """Main function to run the enhanced analysis"""
     base_path = os.getcwd()
@@ -951,14 +886,6 @@ def main():
         all_figures.append((fig13, "13_data_type_comparison"))
         plt.show()
     
-    # ===== PERFORMANCE SUMMARY TABLE =====
-    print("\n📊 PERFORMANCE SUMMARY")
-    print("14. Performance summary table...")
-    fig14 = create_performance_summary_table(df)
-    if fig14:
-        all_figures.append((fig14, "14_performance_summary_table"))
-        plt.show()
-    
     # Print key insights
     print("\n" + "=" * 80)
     print("📊 KEY INSIGHTS SUMMARY")
@@ -1026,7 +953,6 @@ def main():
         print("    12_location_efficiency_comparison.png")
         print("  📊 DATA TYPE & SUMMARY:")
         print("    13_data_type_comparison.png")
-        print("    14_performance_summary_table.png")
 
 if __name__ == "__main__":
     main()

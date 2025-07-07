@@ -127,8 +127,8 @@ if __name__=="__main__":
 
     combined_data = [(item["coord"], item["id"]) for item in all_coordinates_codes]
 
-    cluster_centers = get_far_centers(combined_data, num_clusters=4, min_distance_km=15)
-    clusters = build_clusters(combined_data, cluster_centers, points_per_cluster=10, max_radius_km=5)
+    cluster_centers = get_far_centers(combined_data, num_clusters=1, min_distance_km=15)
+    clusters = build_clusters(combined_data, cluster_centers, points_per_cluster=30, max_radius_km=5)
 
     # for idx, cluster in enumerate(clusters):
     #     print(f"Cluster {idx+1}:")
